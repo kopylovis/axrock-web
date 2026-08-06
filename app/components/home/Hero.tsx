@@ -41,12 +41,14 @@ export function Hero({ settings, nextConcert }: HeroProps) {
         <h1 id="hero-title" className={settings.logo ? styles.titleWithLogo : styles.title}>
           {settings.logo ? (
             <span className={styles.logoWrap}>
-              {/* Изображение задаёт размер и несёт alt, свечение рисует слой поверх. */}
+              {/* Изображение задаёт размер и несёт alt, свечение рисует слой поверх.
+                  crossOrigin нужен, чтобы блик по маске получил CORS-чистый кеш. */}
               <img
                 src={settings.logo}
                 alt={settings.heroTitle}
                 className={styles.titleLogo}
                 fetchPriority="high"
+                crossOrigin="anonymous"
               />
               <span
                 className={styles.logoSheen}

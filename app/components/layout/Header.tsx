@@ -67,8 +67,15 @@ export function Header({ bandName, logo }: { bandName: string; logo: string | nu
           <NavLink to="/" className={styles.logo} aria-label={`${bandName} — на главную`}>
             {logo ? (
               <span className={styles.logoBox}>
-                {/* Изображение задаёт размер и несёт alt, цвет даёт слой по маске. */}
-                <img src={logo} alt={bandName} className={styles.logoImage} />
+                {/* Изображение задаёт размер и несёт alt, цвет даёт слой по маске.
+                    crossOrigin обязателен: без него картинка грузится в режиме no-cors
+                    и оседает в кеше без CORS-заголовков, после чего маска её отвергает. */}
+                <img
+                  src={logo}
+                  alt={bandName}
+                  className={styles.logoImage}
+                  crossOrigin="anonymous"
+                />
                 <span
                   className={styles.logoTint}
                   style={{
