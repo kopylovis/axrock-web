@@ -4,6 +4,11 @@ import { join, relative } from "node:path";
 const OUT_DIR = "build/client";
 const PLACEHOLDER = "__empty";
 const SITE_URL = (process.env.VITE_PUBLIC_SITE_URL ?? "https://axrock.band").replace(/\/$/, "");
+// Свой домен подключается переменной окружения: пока её нет, Pages отдаёт сайт
+// на github.io и CNAME писать нельзя — иначе Pages уведёт домен в никуда.
+const SITE_CNAME = process.env.SITE_CNAME?.trim();
+// Черновой деплой не должен попасть в поиск раньше боевого домена.
+const NOINDEX = process.env.SITE_NOINDEX?.trim().toLowerCase() === "true";
 
 const PRIORITIES = [
   [/^\/$/, "1.0", "daily"],
@@ -82,10 +87,35 @@ await writeFile(
   "utf8",
 );
 
+await writeFile(
+  join(OUT_DIR, "robots.txt"),
+  NOINDEX
+    ? ["User-agent: *", "Disallow: /", ""].join("\n")
+    : [
+        "User-agent: *",
+        "Allow: /",
+        "Disallow: /admin",
+        "Disallow: /admin/",
+        "",
+        `Sitemap: ${SITE_URL}/sitemap.xml`,
+        `Host: ${SITE_URL.replace(/^https?:\/\//, "")}`,
+        "",
+      ].join("\n"),
+  "utf8",
+);
+
+if (SITE_CNAME) {
+  await writeFile(join(OUT_DIR, "CNAME"), `${SITE_CNAME}\n`, "utf8");
+}
+
 // GitHub Pages отдаёт 404.html с настоящим статусом 404 — используем SPA-оболочку,
 // чтобы клиентский роутер показал свежий материал, ещё не попавший в пререндер.
 const fallback = await readFile(join(OUT_DIR, "__spa-fallback.html"), "utf8");
 await writeFile(join(OUT_DIR, "404.html"), fallback, "utf8");
 
 const removed = placeholders.length > 0 ? `, удалено заглушек: ${placeholders.length}` : "";
-console.log(`[postbuild] sitemap.xml: ${routes.length} URL, 404.html готов${removed}`);
+const domain = SITE_CNAME ? `, CNAME: ${SITE_CNAME}` : "";
+const indexing = NOINDEX ? ", индексация запрещена" : "";
+console.log(
+  `[postbuild] ${SITE_URL} — sitemap.xml: ${routes.length} URL, robots.txt и 404.html готовы${removed}${domain}${indexing}`,
+);
