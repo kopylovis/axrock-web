@@ -19,8 +19,8 @@
   inset: 0;
   z-index: -2;
   background: rgba(11, 10, 9, 0.4);
-  backdrop-filter: saturate(140%) blur(var(--blur-medium));
   -webkit-backdrop-filter: saturate(140%) blur(var(--blur-medium));
+  backdrop-filter: saturate(140%) blur(var(--blur-medium));
 }
 
 /* Уплотнение после прокрутки — только прозрачность, она идёт на композиторе. */
@@ -189,8 +189,8 @@
   padding: var(--space-6) var(--space-5);
   overflow-y: auto;
   background: var(--bg-overlay);
-  backdrop-filter: blur(var(--blur-large));
   -webkit-backdrop-filter: blur(var(--blur-large));
+  backdrop-filter: blur(var(--blur-large));
 }
 
 .drawerNav {

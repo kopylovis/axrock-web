@@ -156,8 +156,8 @@
   border-radius: 50%;
   border: 1px solid var(--line-strong);
   background: rgba(11, 10, 9, 0.6);
-  backdrop-filter: blur(var(--blur-small));
   -webkit-backdrop-filter: blur(var(--blur-small));
+  backdrop-filter: blur(var(--blur-small));
 }
 
 .videoTitle {
