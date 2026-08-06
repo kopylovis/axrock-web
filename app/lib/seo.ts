@@ -56,9 +56,12 @@ export function buildMeta(input: SeoInput): MetaDescriptor[] {
     tags.push({ property: "article:modified_time", content: input.modifiedTime });
   }
 
+  // Черновой адрес закрывается целиком: robots.txt лежит в подпапке,
+  // а её поисковики не читают — остаётся только мета-тег.
+  const draft = import.meta.env.VITE_SITE_NOINDEX === "true";
   tags.push({
     name: "robots",
-    content: input.noindex ? "noindex, nofollow" : "index, follow",
+    content: input.noindex || draft ? "noindex, nofollow" : "index, follow",
   });
 
   return tags;

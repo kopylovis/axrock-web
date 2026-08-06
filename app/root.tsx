@@ -21,6 +21,10 @@ export const meta: Route.MetaFunction = () => [
   },
 ];
 
+// В подпапке GitHub Pages статика лежит по базовому пути. В CSS Vite подставляет
+// его сам, а ссылки в разметке нужно собирать вручную. Всегда с завершающим слэшем.
+const BASE = import.meta.env.BASE_URL;
+
 export function Layout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="ru">
@@ -28,17 +32,17 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         <meta name="theme-color" content="#0b0d14" />
-        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+        <link rel="icon" href={`${BASE}favicon.svg`} type="image/svg+xml" />
         <link
           rel="preload"
-          href="/fonts/roboto-cyrillic.woff2"
+          href={`${BASE}fonts/roboto-cyrillic.woff2`}
           as="font"
           type="font/woff2"
           crossOrigin="anonymous"
         />
         <link
           rel="preload"
-          href="/fonts/roboto-mono-cyrillic.woff2"
+          href={`${BASE}fonts/roboto-mono-cyrillic.woff2`}
           as="font"
           type="font/woff2"
           crossOrigin="anonymous"

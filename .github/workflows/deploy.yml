@@ -32,14 +32,20 @@ jobs:
 
       - run: npm ci
 
+      # Слева — имена, которые ждёт сборка; справа — переменные репозитория.
+      # Префикс AXROCK_ отделяет их от настроек других проектов в этом аккаунте.
       - run: npm run build
         env:
-          VITE_PUBLIC_SITE_URL: ${{ vars.SITE_URL || 'https://axrock.band' }}
-          VITE_API_BASE_URL: ${{ vars.API_BASE_URL || 'https://api.monoroh.com/api/axrock' }}
+          VITE_PUBLIC_SITE_URL: ${{ vars.AXROCK_SITE_URL || 'https://axrock.band' }}
+          VITE_API_BASE_URL: ${{ vars.AXROCK_API_BASE_URL || 'https://api.monoroh.com/api/axrock' }}
+          # Подпапка project-page, например /axrock-web/. Пусто — сайт отдаётся из корня.
+          VITE_BASE_PATH: ${{ vars.AXROCK_BASE_PATH || '/' }}
           # Пока переменная пуста, файл CNAME не пишется и Pages отдаёт сайт на github.io.
-          SITE_CNAME: ${{ vars.SITE_CNAME }}
+          SITE_CNAME: ${{ vars.AXROCK_SITE_CNAME }}
           # Черновой адрес закрываем от поисковиков, чтобы он не конкурировал с боевым.
-          SITE_NOINDEX: ${{ vars.SITE_NOINDEX }}
+          # Одна переменная питает и robots.txt, и мета-тег в разметке.
+          SITE_NOINDEX: ${{ vars.AXROCK_SITE_NOINDEX }}
+          VITE_SITE_NOINDEX: ${{ vars.AXROCK_SITE_NOINDEX }}
 
       - uses: actions/upload-pages-artifact@v3
         with:

@@ -1,4 +1,4 @@
-import { readdir, readFile, writeFile, stat, rm } from "node:fs/promises";
+import { readdir, readFile, rename, writeFile, stat, rm } from "node:fs/promises";
 import { join, relative } from "node:path";
 
 const OUT_DIR = "build/client";
@@ -9,6 +9,8 @@ const SITE_URL = (process.env.VITE_PUBLIC_SITE_URL ?? "https://axrock.band").rep
 const SITE_CNAME = process.env.SITE_CNAME?.trim();
 // Черновой деплой не должен попасть в поиск раньше боевого домена.
 const NOINDEX = process.env.SITE_NOINDEX?.trim().toLowerCase() === "true";
+// Имя подпапки на project-page GitHub Pages, например "axrock". Пусто — сайт в корне.
+const BASE_SEGMENT = (process.env.VITE_BASE_PATH ?? "/").replace(/^\/+|\/+$/g, "");
 
 const PRIORITIES = [
   [/^\/$/, "1.0", "daily"],
@@ -44,6 +46,24 @@ function describe(path) {
 
 function escapeXml(value) {
   return value.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+}
+
+// В режиме подпапки пререндер складывает страницы в build/client/<base>/, а статику
+// оставляет уровнем выше. Артефакт Pages разворачивается уже по адресу /<base>/,
+// поэтому вложенность нужно убрать — иначе получилось бы /<base>/<base>/.
+// SPA-оболочка при этом пишется в index.html, и её надо сохранить до переноса.
+if (BASE_SEGMENT) {
+  const baseDir = join(OUT_DIR, BASE_SEGMENT);
+  await writeFile(
+    join(OUT_DIR, "404.html"),
+    await readFile(join(OUT_DIR, "index.html"), "utf8"),
+    "utf8",
+  );
+
+  for (const entry of await readdir(baseDir)) {
+    await rename(join(baseDir, entry), join(OUT_DIR, entry));
+  }
+  await rm(baseDir, { recursive: true, force: true });
 }
 
 // Пути-заглушки нужны только чтобы пройти проверку пререндера — в готовой сборке их быть не должно.
@@ -98,7 +118,7 @@ await writeFile(
         "Disallow: /admin/",
         "",
         `Sitemap: ${SITE_URL}/sitemap.xml`,
-        `Host: ${SITE_URL.replace(/^https?:\/\//, "")}`,
+        `Host: ${SITE_URL.replace(/^https?:\/\//, "").split("/")[0]}`,
         "",
       ].join("\n"),
   "utf8",
@@ -110,12 +130,15 @@ if (SITE_CNAME) {
 
 // GitHub Pages отдаёт 404.html с настоящим статусом 404 — используем SPA-оболочку,
 // чтобы клиентский роутер показал свежий материал, ещё не попавший в пререндер.
-const fallback = await readFile(join(OUT_DIR, "__spa-fallback.html"), "utf8");
-await writeFile(join(OUT_DIR, "404.html"), fallback, "utf8");
+if (!BASE_SEGMENT) {
+  const fallback = await readFile(join(OUT_DIR, "__spa-fallback.html"), "utf8");
+  await writeFile(join(OUT_DIR, "404.html"), fallback, "utf8");
+}
 
 const removed = placeholders.length > 0 ? `, удалено заглушек: ${placeholders.length}` : "";
 const domain = SITE_CNAME ? `, CNAME: ${SITE_CNAME}` : "";
 const indexing = NOINDEX ? ", индексация запрещена" : "";
+const base = BASE_SEGMENT ? `, подпапка /${BASE_SEGMENT}/` : "";
 console.log(
-  `[postbuild] ${SITE_URL} — sitemap.xml: ${routes.length} URL, robots.txt и 404.html готовы${removed}${domain}${indexing}`,
+  `[postbuild] ${SITE_URL} — sitemap.xml: ${routes.length} URL, robots.txt и 404.html готовы${removed}${domain}${indexing}${base}`,
 );
