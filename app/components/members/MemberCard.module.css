@@ -1,0 +1,84 @@
+.grid {
+  display: grid;
+  gap: var(--space-6) var(--space-5);
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr));
+}
+
+.card {
+  position: relative;
+  display: grid;
+  gap: var(--space-4);
+  height: 100%;
+  align-content: start;
+}
+
+.photoWrap {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: var(--bg-elev);
+}
+
+.photo {
+  width: 100%;
+  object-fit: cover;
+  filter: grayscale(1) contrast(1.1);
+  transition:
+    transform var(--t-slow),
+    filter var(--t-slow);
+}
+
+.card:hover .photo {
+  transform: scale(1.04);
+  filter: grayscale(0) contrast(1);
+}
+
+/* Роль поверх нижнего края портрета — читается сразу, не отнимает высоту. */
+.roleOverlay {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  padding: var(--space-2) var(--space-3);
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-family: var(--font-accent);
+  font-size: var(--fs-xs);
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+}
+
+.body {
+  display: grid;
+  gap: var(--space-2);
+  align-content: start;
+}
+
+.name {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--fs-h3);
+  text-transform: uppercase;
+  line-height: var(--lh-snug);
+}
+
+.stageName {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  letter-spacing: 0.06em;
+  color: var(--accent-bright);
+}
+
+.instrument {
+  color: var(--ink-mute);
+  font-size: var(--fs-sm);
+}
+
+.biography {
+  color: var(--ink-mute);
+  font-size: var(--fs-sm);
+  margin-top: var(--space-1);
+}
+
+.links {
+  margin-top: var(--space-2);
+}

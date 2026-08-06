@@ -1,0 +1,71 @@
+import type { ReleaseLink, SocialLink } from "~/types/content";
+import { isSafeExternalUrl } from "~/utils/url";
+import styles from "./LinkLists.module.css";
+
+function ArrowIcon() {
+  return (
+    <svg
+      className={styles.icon}
+      width="13"
+      height="13"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2.4"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden="true"
+    >
+      <path d="M7 17 17 7M8 7h9v9" />
+    </svg>
+  );
+}
+
+interface ExternalListProps {
+  items: Array<{ id: number; title: string; url: string }>;
+  label: string;
+  accent?: boolean;
+}
+
+function ExternalList({ items, label, accent }: ExternalListProps) {
+  const safe = items.filter((item) => isSafeExternalUrl(item.url));
+  if (safe.length === 0) return null;
+
+  return (
+    <ul className={styles.list} aria-label={label}>
+      {safe.map((item) => (
+        <li key={item.id}>
+          <a
+            href={item.url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className={[styles.item, accent ? styles.itemAccent : null].filter(Boolean).join(" ")}
+          >
+            {item.title}
+            <ArrowIcon />
+            <span className="visually-hidden">— откроется на стороннем сайте</span>
+          </a>
+        </li>
+      ))}
+    </ul>
+  );
+}
+
+export function SocialLinks({ links }: { links: SocialLink[] }) {
+  return (
+    <ExternalList
+      label="Социальные сети"
+      items={links.map((link) => ({ id: link.id, title: link.title || link.platform, url: link.url }))}
+    />
+  );
+}
+
+export function MusicPlatformLinks({ links }: { links: ReleaseLink[] }) {
+  return (
+    <ExternalList
+      accent
+      label="Музыкальные площадки"
+      items={links.map((link) => ({ id: link.id, title: link.platform, url: link.url }))}
+    />
+  );
+}

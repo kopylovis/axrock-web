@@ -1,0 +1,177 @@
+/* Карточка плоская: без рамки и заливки, изображение и текст разделяет только отступ.
+   position нужен для растянутой на всю карточку ссылки в заголовке. */
+.card {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  gap: var(--space-4);
+  height: 100%;
+}
+
+.cover {
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: var(--bg-elev);
+}
+
+.coverImage {
+  width: 100%;
+  object-fit: cover;
+  transition:
+    transform var(--t-slow),
+    filter var(--t-slow);
+}
+
+.card:hover .coverImage {
+  transform: scale(1.04);
+}
+
+.body {
+  display: grid;
+  gap: var(--space-3);
+  align-content: start;
+}
+
+.meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  letter-spacing: 0.06em;
+  color: var(--ink-faint);
+}
+
+.category {
+  color: var(--accent-bright);
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+}
+
+.featured {
+  display: inline-flex;
+  align-items: center;
+  min-height: 20px;
+  padding-inline: var(--space-2);
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-size: 0.6875rem;
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+}
+
+.title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--fs-h3);
+  line-height: var(--lh-snug);
+  text-transform: uppercase;
+  text-wrap: balance;
+  transition: color var(--t-fast);
+}
+
+.titleLink::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.card:hover .title {
+  color: var(--accent-bright);
+}
+
+.excerpt {
+  color: var(--ink-mute);
+  font-size: var(--fs-sm);
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.grid {
+  display: grid;
+  gap: var(--space-7) var(--space-6);
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+  /* Карточки разной высоты не растягиваются под самую высокую в строке. */
+  align-items: start;
+}
+
+/* Первая публикация занимает строку целиком: изображение слева, текст справа.
+   Спан на все колонки, иначе соседняя карточка попадает в ту же строку. */
+@media (min-width: 900px) {
+  .gridFeatured > .card:first-child {
+    grid-column: 1 / -1;
+    grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+    grid-template-rows: auto;
+    align-items: center;
+    gap: var(--space-7);
+    padding-bottom: var(--space-7);
+    border-bottom: 1px solid var(--line);
+  }
+
+  .gridFeatured > .card:first-child .title {
+    font-size: var(--fs-h2);
+    letter-spacing: var(--track-display);
+  }
+
+  .gridFeatured > .card:first-child .excerpt {
+    font-size: var(--fs-lg);
+    -webkit-line-clamp: 4;
+    line-clamp: 4;
+  }
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  margin-bottom: var(--space-7);
+}
+
+.filter {
+  display: inline-flex;
+  align-items: center;
+  min-height: 38px;
+  padding-inline: var(--space-4);
+  border: 1px solid var(--line-strong);
+  color: var(--ink-mute);
+  font-family: var(--font-accent);
+  font-size: var(--fs-xs);
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  transition:
+    color var(--t-fast),
+    border-color var(--t-fast),
+    background var(--t-fast);
+}
+
+.filter:hover {
+  color: var(--ink);
+  border-color: var(--ink-faint);
+}
+
+.filterActive {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  margin-top: var(--space-8);
+  padding-top: var(--space-6);
+  border-top: 1px solid var(--line);
+}
+
+.pageInfo {
+  font-family: var(--font-accent);
+  font-size: var(--fs-xs);
+  letter-spacing: var(--track-caps);
+  color: var(--ink-faint);
+}

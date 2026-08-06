@@ -1,0 +1,124 @@
+:root {
+  color-scheme: dark;
+
+  /* Палитра макета: тёплый чёрный, сусальное золото, кровяной второй акцент. */
+  --accent: #c8a24a;
+  --accent-bright: #ddb865;
+  --accent-soft: rgba(200, 162, 74, 0.12);
+  --accent-line: rgba(200, 162, 74, 0.28);
+  --accent-ink: #0b0a09;
+
+  --blood: #8f2b2b;
+  --blood-bright: #b23a3a;
+
+  --bg: #0b0a09;
+  --bg-deep: #100e0b;
+  --bg-elev: #141210;
+  --bg-card: #141210;
+  --bg-card-solid: #1a1714;
+  --bg-overlay: rgba(11, 10, 9, 0.94);
+
+  --ink: #e7e3da;
+  --ink-bright: #efe9dd;
+  --ink-mute: rgba(231, 227, 218, 0.7);
+  --ink-faint: rgba(231, 227, 218, 0.5);
+  --ink-ghost: rgba(231, 227, 218, 0.3);
+
+  --line: rgba(255, 255, 255, 0.08);
+  --line-strong: rgba(255, 255, 255, 0.18);
+
+  --ok: #7fa05a;
+  --warn: #c8a24a;
+  --danger: #b23a3a;
+
+  --shadow-soft: 0 8px 30px rgba(0, 0, 0, 0.5);
+  --shadow-lift: 0 24px 70px rgba(0, 0, 0, 0.6);
+  --text-shadow: 0 2px 10px #000;
+
+  /* Ruslan Display — заголовки, Oswald — даты и числа, Roboto — текст. */
+  --font-display: "Ruslan Display", "Oswald", Georgia, serif;
+  --font-accent: "Oswald", "Roboto", -apple-system, sans-serif;
+  --font-serif: "Cormorant Garamond", Georgia, serif;
+  --font-sans: "Roboto", -apple-system, BlinkMacSystemFont, system-ui, "Segoe UI",
+    "Helvetica Neue", Arial, sans-serif;
+  --font-mono: "Roboto Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --fs-display: clamp(2.75rem, 1rem + 9vw, 8rem);
+  --fs-h1: clamp(2.25rem, 1.3rem + 4vw, 4rem);
+  --fs-h2: clamp(1.75rem, 1.2rem + 2.4vw, 2.875rem);
+  --fs-h3: clamp(1.25rem, 1rem + 1vw, 1.625rem);
+  --fs-lg: clamp(1.0625rem, 1rem + 0.4vw, 1.1875rem);
+  --fs-base: 1rem;
+  --fs-sm: 0.875rem;
+  --fs-xs: 0.75rem;
+
+  /* Заголовки макета набраны с line-height .9 — строки почти касаются. */
+  --lh-tight: 0.9;
+  --lh-snug: 1.12;
+  --lh-body: 1.65;
+
+  --track-display: 0.02em;
+  --track-caps: 0.2em;
+  --track-label: 0.14em;
+
+  --r-xs: 2px;
+  --r-sm: 3px;
+  --r-md: 4px;
+  --r-lg: 6px;
+  --r-xl: 8px;
+  --r-full: 999px;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+  --space-9: 96px;
+  --space-10: 128px;
+
+  --container: 1240px;
+  --container-narrow: 720px;
+  --header-height: 76px;
+
+  --blur-small: 8px;
+  --blur-medium: 16px;
+  --blur-large: 40px;
+
+  --ease: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+  --t-fast: 140ms var(--ease);
+  --t-base: 260ms var(--ease);
+  --t-slow: 520ms var(--ease-out);
+}
+
+/* Широкие мониторы. Колонка в 1240px посреди 2К-экрана читается как узкая
+   полоса с пустыми полями по 600px, поэтому контейнер расширяется ступенями,
+   а не одним рывком — иначе на 1440p макет резко «разъезжается». */
+@media (min-width: 1600px) {
+  :root {
+    --container: 1400px;
+  }
+}
+
+@media (min-width: 2000px) {
+  :root {
+    --container: 1560px;
+    --space-9: 112px;
+    --space-10: 144px;
+  }
+}
+
+@media (min-width: 2400px) {
+  :root {
+    --container: 1720px;
+  }
+}
+
+@media (min-width: 3000px) {
+  :root {
+    --container: 1920px;
+  }
+}

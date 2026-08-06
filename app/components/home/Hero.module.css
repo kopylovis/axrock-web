@@ -1,0 +1,288 @@
+.hero {
+  position: relative;
+  /* Высота ограничена не только экраном, но и пропорцией кадра: если рамка выше,
+     чем 16:9 при её ширине, object-fit: cover срезает бока — вместе с крайними
+     участниками. При такой формуле обрезка всегда идёт по верху и низу. */
+  min-height: min(
+    calc(100svh - var(--header-height)),
+    calc((min(100vw, var(--container)) - 2 * var(--hero-gutter)) * 9 / 16)
+  );
+  display: grid;
+  grid-template-rows: 1fr;
+  overflow: hidden;
+  isolation: isolate;
+  /* На телефоне кадр во всю ширину: отбивка там съедает и без того узкий экран.
+     С 768px отбивка повторяет padding у .container, и фото встаёт по колонке текста. */
+  --hero-gutter: 0px;
+}
+
+@media (min-width: 768px) {
+  .hero {
+    --hero-gutter: var(--space-6);
+  }
+}
+
+/* Кадр живёт в границах контента, а не во всю ширину экрана: на широких
+   мониторах растянутая фотография отрывается от колонки с текстом. */
+.media {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  width: min(100%, var(--container));
+  margin-inline: auto;
+  padding-inline: var(--hero-gutter);
+}
+
+/* Края растворяются маской, а не заливкой поверх: сквозь них видно зерно фона,
+   поэтому кадр уходит в пустоту, а не упирается в прямоугольник. */
+.mediaImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  filter: grayscale(0.55) contrast(1.15) brightness(0.75);
+  mask-image:
+    linear-gradient(to right, transparent, #000 64px, #000 calc(100% - 64px), transparent),
+    linear-gradient(to bottom, transparent, #000 64px);
+  mask-composite: intersect;
+  -webkit-mask-image:
+    linear-gradient(to right, transparent, #000 64px, #000 calc(100% - 64px), transparent),
+    linear-gradient(to bottom, transparent, #000 64px);
+  -webkit-mask-composite: source-in;
+}
+
+.mediaPlaceholder {
+  width: 100%;
+  height: 100%;
+  border: 0;
+  border-radius: 0;
+}
+
+/* Затемнение снизу и слева — чтобы крупный текст читался на любом кадре.
+   По горизонтали повторяет отбивку, иначе тень вылезает за края фотографии. */
+.scrim {
+  position: absolute;
+  inset-block: 0;
+  inset-inline: var(--hero-gutter);
+  background:
+    linear-gradient(to top, var(--bg) 4%, rgba(11, 10, 9, 0.4) 55%, transparent 85%),
+    linear-gradient(to right, rgba(11, 10, 9, 0.8) 0%, transparent 65%);
+}
+
+/* Портретный экран не вмещает горизонтальный кадр: при object-fit: cover он
+   обрезается по бокам, и крайние участники уходят за край. Поэтому на телефоне
+   фотография вписывается по ширине целиком и встаёт сверху, а текст — под ней.
+   Гасить бока здесь незачем: там край экрана, а не пустое поле. */
+@media (max-width: 767px) {
+  /* Экран целиком не растягиваем: под кадром оставался пустой провал
+     высотой в треть экрана, а текст уезжал к нижней кромке. */
+  .hero {
+    min-height: 0;
+    grid-template-rows: auto auto;
+  }
+
+  .media {
+    position: relative;
+    inset: auto;
+    z-index: auto;
+    grid-row: 1;
+  }
+
+  .mediaImage,
+  .mediaPlaceholder {
+    height: auto;
+  }
+
+  .mediaImage {
+    mask-image: linear-gradient(to bottom, transparent, #000 48px);
+    -webkit-mask-image: linear-gradient(to bottom, transparent, #000 48px);
+  }
+
+  /* Боковое затемнение не нужно — оно съедало крайнего участника. Низ гасим
+     сильнее прежнего: на него наезжает логотип, и белое по светлому не читается. */
+  .scrim {
+    background: linear-gradient(to top, var(--bg) 6%, rgba(11, 10, 9, 0.72) 42%, transparent 88%);
+  }
+
+  /* Контент наезжает на нижнюю часть кадра — как на десктопе, где он лежит
+     поверх фотографии. Наложить целиком нельзя: кадр 16:9 на телефоне ниже,
+     чем блок с датой, логотипом и кнопками. Сдвиг ограничен 88px, иначе на
+     узких экранах логотип уезжает музыкантам на лица. */
+  .inner {
+    /* .media здесь позиционированная, а позиционированное рисуется поверх
+       обычного потока — без явного слоя фотография закрывала бы дату. */
+    position: relative;
+    z-index: 1;
+    grid-row: 2;
+    justify-content: flex-start;
+    margin-top: max(-20vw, -88px);
+    padding-block: 0 var(--space-8);
+  }
+}
+
+.inner {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: var(--space-5);
+  padding-block: var(--space-8);
+}
+
+.announce {
+  display: inline-flex;
+  align-self: flex-start;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-2) var(--space-4);
+  border: 1px solid var(--accent);
+  background: var(--accent-soft);
+  color: var(--ink);
+  font-family: var(--font-accent);
+  font-size: var(--fs-xs);
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+}
+
+.announceDot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent-bright);
+  animation: pulse 2.4s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 3px rgba(200, 162, 74, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 0 8px rgba(200, 162, 74, 0);
+  }
+}
+
+.title {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--fs-display);
+  line-height: var(--lh-tight);
+  text-transform: uppercase;
+  text-wrap: balance;
+  max-width: 18ch;
+}
+
+/* Когда загружен логотип, он заменяет крупный текстовый заголовок.
+   Текст остаётся в alt — заголовок первого уровня не теряет содержимого. */
+.titleWithLogo {
+  margin: 0;
+  line-height: 0;
+}
+
+.logoWrap {
+  position: relative;
+  display: inline-block;
+  width: min(560px, 72vw);
+  /* Мягкое «дыхание» яркости — плавное, без ступеней. */
+  animation: logo-breathe 9s ease-in-out infinite;
+}
+
+.titleLogo {
+  width: 100%;
+  height: auto;
+  filter: brightness(0) invert(1) drop-shadow(0 8px 32px rgba(0, 0, 0, 0.6));
+}
+
+/* Форма берётся из логотипа маской, а под ней проходит градиентная волна:
+   светится не весь знак разом, а блик идёт по нему слева направо. */
+/* Солнечный блик: форма снимается маской с логотипа, а под ней проходит
+   тёплая световая полоса. Режим наложения не нужен — screen поверх белого
+   знака не даёт ничего, потому что белое уже предельно яркое. */
+.logoSheen {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  -webkit-mask-size: contain;
+  background-image: linear-gradient(
+    105deg,
+    transparent 0%,
+    transparent 28%,
+    rgba(200, 162, 74, 0.5) 36%,
+    var(--accent) 43%,
+    var(--accent-bright) 48%,
+    #fff6e2 51%,
+    var(--accent-bright) 54%,
+    var(--accent) 59%,
+    rgba(200, 162, 74, 0.5) 66%,
+    transparent 74%,
+    transparent 100%
+  );
+  background-size: 280% 100%;
+  background-repeat: no-repeat;
+  animation: logo-shimmer 5.5s ease-in-out infinite;
+}
+
+/* Сам проход занимает большую часть цикла — блик идёт медленнее,
+   а пауза между проходами короче, поэтому повторяется чаще. */
+@keyframes logo-shimmer {
+  0%,
+  5% {
+    background-position: 170% 0;
+  }
+  82%,
+  100% {
+    background-position: -70% 0;
+  }
+}
+
+@keyframes logo-breathe {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.93;
+  }
+}
+
+@media (max-width: 640px) {
+  .logoWrap {
+    width: 82vw;
+  }
+}
+
+@supports not ((mask-size: contain) or (-webkit-mask-size: contain)) {
+  .logoSheen {
+    display: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logoWrap,
+  .logoSheen {
+    animation: none;
+  }
+
+  .logoSheen {
+    display: none;
+  }
+}
+
+
+.subtitle {
+  font-size: var(--fs-lg);
+  color: var(--ink-mute);
+  max-width: 50ch;
+}
+
+.actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  align-items: center;
+  margin-top: var(--space-2);
+}
+

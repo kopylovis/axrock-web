@@ -1,0 +1,228 @@
+/* Сам липкий блок держим «пустым»: без фильтров, теней и трансформаций.
+   Chrome пересоздаёт слой backdrop-filter при каждом смещении sticky-элемента,
+   и кадр пропадает. Размытие и подложки вынесены в псевдоэлементы. */
+.header {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  height: var(--header-height);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  isolation: isolate;
+  transition: border-color var(--t-base);
+}
+
+/* Слой размытия проявляется прозрачностью: сам фильтр не трогается,
+   поэтому браузер не пересобирает фоновый слой и кадр не пропадает. */
+.header::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background: rgba(11, 10, 9, 0.4);
+  backdrop-filter: saturate(140%) blur(var(--blur-medium));
+  -webkit-backdrop-filter: saturate(140%) blur(var(--blur-medium));
+}
+
+/* Уплотнение после прокрутки — только прозрачность, она идёт на композиторе. */
+.header::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: rgba(11, 10, 9, 0.55);
+  opacity: 0;
+  transition: opacity var(--t-base);
+}
+
+.headerSolid {
+  border-bottom-color: var(--line);
+}
+
+.headerSolid::after {
+  opacity: 1;
+}
+
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .header::before {
+    background: rgba(11, 10, 9, 0.94);
+  }
+}
+
+.inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-4);
+  height: 100%;
+}
+
+.logo {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-weight: 900;
+  font-size: var(--fs-sm);
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* Логотип без собственной заливки рисуется чёрным — на тёмном фоне приводим к белому.
+   На главной он проявляется только после того, как крупный знак уехал из героя. */
+/* Логотип в шапке — цвета кнопок. Красим слоем по маске: у файла нет
+   собственной заливки, а filter точный оттенок дать не может. */
+.logoBox {
+  position: relative;
+  display: inline-flex;
+}
+
+.logoImage {
+  height: 34px;
+  width: auto;
+  max-width: 220px;
+  object-fit: contain;
+  opacity: 0;
+}
+
+.logoTint {
+  position: absolute;
+  inset: 0;
+  background: var(--accent);
+  mask-repeat: no-repeat;
+  mask-position: center;
+  mask-size: contain;
+  -webkit-mask-repeat: no-repeat;
+  -webkit-mask-position: center;
+  -webkit-mask-size: contain;
+  transition: background var(--t-fast);
+}
+
+.logo:hover .logoTint {
+  background: var(--accent-bright);
+}
+
+@supports not ((mask-size: contain) or (-webkit-mask-size: contain)) {
+  .logoTint {
+    display: none;
+  }
+
+  .logoImage {
+    opacity: 1;
+    filter: brightness(0) invert(1);
+  }
+}
+
+.logoMark {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.nav {
+  display: none;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.link {
+  position: relative;
+  padding: var(--space-2) var(--space-3);
+  color: var(--ink-mute);
+  font-family: var(--font-accent);
+  font-size: var(--fs-xs);
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  transition: color var(--t-fast);
+}
+
+.link::after {
+  content: "";
+  position: absolute;
+  left: var(--space-3);
+  right: var(--space-3);
+  bottom: 2px;
+  height: 1px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--t-base);
+}
+
+.link:hover {
+  color: var(--ink);
+}
+
+.link:hover::after,
+.linkActive::after {
+  transform: scaleX(1);
+}
+
+.linkActive {
+  color: var(--ink);
+}
+
+.toggle {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border: 1px solid var(--line-strong);
+  color: var(--ink);
+  transition: border-color var(--t-fast);
+}
+
+.toggle:hover {
+  border-color: var(--ink);
+}
+
+.drawer {
+  position: fixed;
+  inset: var(--header-height) 0 0;
+  z-index: 45;
+  padding: var(--space-6) var(--space-5);
+  overflow-y: auto;
+  background: var(--bg-overlay);
+  backdrop-filter: blur(var(--blur-large));
+  -webkit-backdrop-filter: blur(var(--blur-large));
+}
+
+.drawerNav {
+  display: grid;
+  max-width: var(--container);
+  margin-inline: auto;
+  border-top: 1px solid var(--line);
+}
+
+.drawerLink {
+  display: flex;
+  align-items: center;
+  padding: var(--space-5) var(--space-2);
+  border-bottom: 1px solid var(--line);
+  color: var(--ink);
+  font-size: var(--fs-h3);
+  font-weight: 800;
+  letter-spacing: -0.01em;
+  text-transform: uppercase;
+}
+
+.drawerLinkActive {
+  color: var(--accent-bright);
+}
+
+@media (min-width: 980px) {
+  .nav {
+    display: flex;
+  }
+
+  .toggle,
+  .drawer {
+    display: none;
+  }
+}

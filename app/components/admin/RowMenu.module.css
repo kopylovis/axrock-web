@@ -1,0 +1,63 @@
+.trigger {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--line-strong);
+  color: var(--ink-mute);
+  transition:
+    color var(--t-fast),
+    border-color var(--t-fast),
+    background var(--t-fast);
+}
+
+.trigger:hover,
+.trigger[aria-expanded="true"] {
+  color: var(--ink);
+  border-color: var(--ink-faint);
+  background: var(--bg-elev);
+}
+
+.menu {
+  /* Рендерится порталом в body — координаты приходят из позиции кнопки. */
+  position: fixed;
+  z-index: 80;
+  min-width: 190px;
+  display: grid;
+  padding: var(--space-1);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-sm);
+  background: var(--bg-card-solid);
+  box-shadow: var(--shadow-lift);
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-height: 36px;
+  padding-inline: var(--space-3);
+  border-radius: var(--r-xs);
+  color: var(--ink);
+  font-size: var(--fs-sm);
+  text-align: left;
+  white-space: nowrap;
+  transition:
+    background var(--t-fast),
+    color var(--t-fast);
+}
+
+.item:hover,
+.item:focus-visible {
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.itemDanger {
+  color: #c96a6a;
+}
+
+.itemDanger:hover,
+.itemDanger:focus-visible {
+  background: rgba(178, 58, 58, 0.14);
+}

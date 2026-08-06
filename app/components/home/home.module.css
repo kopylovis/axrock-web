@@ -1,0 +1,250 @@
+.intro {
+  display: grid;
+  gap: var(--space-6);
+  align-items: start;
+}
+
+@media (min-width: 900px) {
+  .intro {
+    grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr);
+    gap: var(--space-8);
+  }
+}
+
+.introText {
+  display: grid;
+  gap: var(--space-5);
+}
+
+.introLead {
+  font-size: var(--fs-lg);
+  color: var(--ink-mute);
+  max-width: 58ch;
+}
+
+.facts {
+  display: grid;
+  gap: 0;
+  border-top: 1px solid var(--line);
+}
+
+.fact {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding-block: var(--space-4);
+  border-bottom: 1px solid var(--line);
+}
+
+.factLabel {
+  font-family: var(--font-accent);
+  font-size: var(--fs-xs);
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.factValue {
+  font-family: var(--font-accent);
+  font-size: var(--fs-h2);
+  font-weight: 400;
+  color: var(--accent);
+}
+
+/* ------------------------------------------------------------- Релизы -- */
+
+.releaseGrid {
+  display: grid;
+  gap: var(--space-5);
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 210px), 1fr));
+}
+
+.releaseTile {
+  display: grid;
+  gap: var(--space-3);
+  align-content: start;
+}
+
+.releaseCoverWrap {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: var(--bg-elev);
+}
+
+.releaseCover {
+  width: 100%;
+  object-fit: cover;
+  transition:
+    transform var(--t-slow),
+    filter var(--t-slow);
+}
+
+.releaseTile:hover .releaseCover {
+  transform: scale(1.04);
+}
+
+.releaseTitle {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--fs-base);
+  text-transform: uppercase;
+  line-height: var(--lh-snug);
+}
+
+.releaseMeta {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+/* -------------------------------------------------------------- Видео -- */
+
+.videoGrid {
+  display: grid;
+  gap: var(--space-5);
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+}
+
+.videoTile {
+  display: grid;
+  gap: var(--space-3);
+  align-content: start;
+  text-align: left;
+  width: 100%;
+}
+
+.videoThumbWrap {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--line);
+  background: var(--bg-elev);
+}
+
+.videoThumb {
+  width: 100%;
+  object-fit: cover;
+  transition: transform var(--t-slow);
+}
+
+.videoTile:hover .videoThumb {
+  transform: scale(1.03);
+}
+
+.videoPlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  color: var(--ink);
+  background: rgba(11, 10, 9, 0.25);
+  transition: background var(--t-base);
+}
+
+.videoTile:hover .videoPlay {
+  background: rgba(11, 10, 9, 0.1);
+}
+
+.videoPlayIcon {
+  display: grid;
+  place-items: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  border: 1px solid var(--line-strong);
+  background: rgba(11, 10, 9, 0.6);
+  backdrop-filter: blur(var(--blur-small));
+  -webkit-backdrop-filter: blur(var(--blur-small));
+}
+
+.videoTitle {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--fs-base);
+  text-transform: uppercase;
+}
+
+/* ------------------------------------------------------------ Новости -- */
+
+.newsGrid {
+  display: grid;
+  gap: var(--space-6);
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr));
+}
+
+/* ------------------------------------------------------- Ссылки, связь -- */
+
+.linksBand {
+  display: grid;
+  gap: var(--space-6);
+  padding-block: var(--space-7);
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+}
+
+@media (min-width: 860px) {
+  .linksBand {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: var(--space-8);
+  }
+}
+
+.linksGroup {
+  display: grid;
+  gap: var(--space-4);
+  align-content: start;
+}
+
+.linksTitle {
+  font-family: var(--font-accent);
+  font-size: var(--fs-xs);
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.contacts {
+  display: grid;
+  gap: var(--space-4);
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
+}
+
+.contactCard {
+  display: grid;
+  gap: var(--space-2);
+  align-content: start;
+  padding: var(--space-5);
+  border: 1px solid var(--line);
+  transition: border-color var(--t-fast);
+}
+
+.contactCard:hover {
+  border-color: var(--line-strong);
+}
+
+.contactLabel {
+  font-family: var(--font-accent);
+  font-size: var(--fs-xs);
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.contactValue {
+  font-size: var(--fs-lg);
+  font-weight: 700;
+}
+
+.contactValue:hover {
+  color: var(--accent-bright);
+}
+
+.sectionFooter {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+}
