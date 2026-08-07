@@ -120,9 +120,9 @@ export default function AdminNewsList({ loaderData }: Route.ComponentProps) {
             </thead>
             <tbody>
               {data.items.map((item) => (
-                <tr key={item.id}>
+                <tr key={item.id} className={styles.rowLinked}>
                   <td>
-                    <Link to={`/admin/news/${item.id}`} className={styles.rowTitle}>
+                    <Link to={`/admin/news/${item.id}`} className={styles.rowLink}>
                       {item.title}
                     </Link>
                     {item.featured ? " ★" : ""}
@@ -134,13 +134,6 @@ export default function AdminNewsList({ loaderData }: Route.ComponentProps) {
                   <td>{item.publishedAt ? formatDateTime(parseUtcSafe(item.publishedAt)) : "—"}</td>
                   <td>
                     <div className={styles.rowActions}>
-                      <button
-                        type="button"
-                        className={`${styles.btn} ${styles.btnSecondary} ${styles.btnSm}`}
-                        onClick={() => navigate(`/admin/news/${item.id}`)}
-                      >
-                        Изменить
-                      </button>
                       <RowMenu
                         label={`Действия: ${item.title}`}
                         items={[

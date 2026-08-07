@@ -106,9 +106,9 @@ export default function AdminConcertsList({ loaderData }: Route.ComponentProps) 
             </thead>
             <tbody>
               {data.items.map((item) => (
-                <tr key={item.id}>
+                <tr key={item.id} className={styles.rowLinked}>
                   <td>
-                    <Link to={`/admin/concerts/${item.id}`} className={styles.rowTitle}>
+                    <Link to={`/admin/concerts/${item.id}`} className={styles.rowLink}>
                       {item.title}
                     </Link>
                     <div className={styles.hint}>{item.venueName}</div>
@@ -121,13 +121,6 @@ export default function AdminConcertsList({ loaderData }: Route.ComponentProps) 
                   <td>{CONCERT_STATUS_LABELS[item.eventStatus]}</td>
                   <td>
                     <div className={styles.rowActions}>
-                      <button
-                        type="button"
-                        className={`${styles.btn} ${styles.btnSecondary} ${styles.btnSm}`}
-                        onClick={() => navigate(`/admin/concerts/${item.id}`)}
-                      >
-                        Изменить
-                      </button>
                       <RowMenu
                         label={`Действия: ${item.title}`}
                         items={[

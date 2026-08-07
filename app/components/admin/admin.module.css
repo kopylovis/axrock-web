@@ -440,7 +440,10 @@
   white-space: nowrap;
 }
 
+/* Над растянутой ссылкой строки: иначе клик по меню открывал бы редактор. */
 .rowActions {
+  position: relative;
+  z-index: 1;
   display: flex;
   /* Перенос запрещён: иначе меню уезжает под кнопку «Изменить». */
   flex-wrap: nowrap;
