@@ -5,6 +5,22 @@ import { ImageCropper } from "./ImageCropper";
 import { MediaPicker } from "./MediaPicker";
 import styles from "./admin.module.css";
 
+/**
+ * После неудачной проверки уводит к первому проблемному полю: в длинной форме
+ * ошибка часто оказывается далеко за экраном, и кажется, что кнопка не сработала.
+ * Ищем по aria-invalid — его проставляют все поля, отдельная разметка не нужна.
+ */
+export function focusFirstInvalidField() {
+  requestAnimationFrame(() => {
+    const target = document.querySelector<HTMLElement>('[aria-invalid="true"]');
+    if (!target) return;
+
+    const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    target.scrollIntoView({ block: "center", behavior: reduced ? "auto" : "smooth" });
+    target.focus({ preventScroll: true });
+  });
+}
+
 interface BaseFieldProps {
   label: string;
   hint?: string;

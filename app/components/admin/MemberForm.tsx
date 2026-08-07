@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router";
 import type { MemberInput } from "~/api/admin-api";
 import { createMember, updateMember } from "~/api/admin-api";
 import type { BandMemberDto } from "~/api/dto";
-import { CheckboxField, ImageField, TextAreaField, TextField } from "./fields";
+import { CheckboxField, ImageField, TextAreaField, TextField, focusFirstInvalidField } from "./fields";
 import styles from "./admin.module.css";
 
 export function MemberForm({ member }: { member: BandMemberDto | null }) {
@@ -28,7 +28,10 @@ export function MemberForm({ member }: { member: BandMemberDto | null }) {
     if (name.trim().length < 2) next.name = "Укажите имя";
     if (role.trim().length < 2) next.role = "Укажите роль в группе";
     setErrors(next);
-    if (Object.keys(next).length > 0) return;
+    if (Object.keys(next).length > 0) {
+      focusFirstInvalidField();
+      return;
+    }
 
     setSaving(true);
     setServerError(null);

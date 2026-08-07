@@ -6,7 +6,7 @@ import { createRelease, updateRelease } from "~/api/admin-api";
 import type { ReleaseDetailDto } from "~/api/dto";
 import type { ReleaseType } from "~/types/content";
 import { fromDateInputValue, slugify, toDateInputValue } from "~/utils/admin-format";
-import { CheckboxField, ImageField, SelectField, TextAreaField, TextField } from "./fields";
+import { CheckboxField, ImageField, SelectField, TextAreaField, TextField, focusFirstInvalidField } from "./fields";
 import styles from "./admin.module.css";
 
 const schema = z.object({
@@ -63,6 +63,7 @@ export function ReleaseForm({ release }: { release: ReleaseDetailDto | null }) {
         if (typeof key === "string") next[key] = issue.message;
       }
       setErrors(next);
+      focusFirstInvalidField();
       return;
     }
 

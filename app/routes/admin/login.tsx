@@ -5,10 +5,20 @@ import { ApiError } from "~/api/errors";
 import { GlassPanel } from "~/components/common/GlassPanel";
 import styles from "~/components/admin/admin.module.css";
 
-export async function clientLoader() {
+/**
+ * Куда вернуть после входа. Принимаем только внутренние адреса админки:
+ * иначе параметр в ссылке превратился бы в открытый редирект на чужой сайт.
+ */
+function safeReturnPath(raw: string | null): string {
+  if (!raw || !raw.startsWith("/admin") || raw.startsWith("//")) return "/admin";
+  return raw.startsWith("/admin/login") ? "/admin" : raw;
+}
+
+export async function clientLoader({ request }: Route.ClientLoaderArgs) {
+  const from = safeReturnPath(new URL(request.url).searchParams.get("from"));
   try {
     await me();
-    throw redirect("/admin");
+    throw redirect(from);
   } catch (error) {
     if (error instanceof Response) throw error;
     return null;
@@ -51,7 +61,7 @@ export async function clientAction({ request }: Route.ClientActionArgs) {
     return { error: describeLoginError(error) };
   }
 
-  throw redirect("/admin");
+  throw redirect(safeReturnPath(new URL(request.url).searchParams.get("from")));
 }
 
 export const meta: Route.MetaFunction = () => [

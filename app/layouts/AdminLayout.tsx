@@ -19,11 +19,14 @@ const NAV = [
   { to: "/admin/users", label: "Пользователи", requiresUserManager: true },
 ];
 
-export async function clientLoader() {
+export async function clientLoader({ request }: Route.ClientLoaderArgs) {
   try {
     return { admin: await me() };
   } catch {
-    throw redirect("/admin/login");
+    // Запоминаем, куда шли: после входа вернём туда же, а не на обзор.
+    const { pathname, search } = new URL(request.url);
+    const from = `${pathname}${search}`;
+    throw redirect(from === "/admin" ? "/admin/login" : `/admin/login?from=${encodeURIComponent(from)}`);
   }
 }
 

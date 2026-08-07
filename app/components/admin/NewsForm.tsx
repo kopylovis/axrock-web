@@ -6,7 +6,7 @@ import { createNews, updateNews } from "~/api/admin-api";
 import type { NewsCategoryDto, NewsDetailDto } from "~/api/dto";
 import type { PublicationStatus, RichTextDoc } from "~/types/content";
 import { fromDateTimeLocalValue, slugify, toDateTimeLocalValue } from "~/utils/admin-format";
-import { CheckboxField, ImageField, SelectField, StatusChip, TextAreaField, TextField } from "./fields";
+import { CheckboxField, ImageField, SelectField, StatusChip, TextAreaField, TextField, focusFirstInvalidField } from "./fields";
 import { RichTextEditor } from "./RichTextEditor";
 import styles from "./admin.module.css";
 
@@ -62,6 +62,7 @@ export function NewsForm({ article, categories }: NewsFormProps) {
         if (typeof key === "string") next[key] = issue.message;
       }
       setErrors(next);
+      focusFirstInvalidField();
       return;
     }
 
