@@ -3,6 +3,7 @@ import { useState } from "react";
 import type { Route } from "./+types/AdminLayout";
 import { logout, me } from "~/api/admin-api";
 import { PageSkeleton } from "~/components/common/PageSkeleton";
+import { RebuildButton } from "~/components/admin/RebuildButton";
 import { canManageUsers, roleLabel } from "~/utils/roles";
 import styles from "~/components/admin/admin.module.css";
 
@@ -86,6 +87,7 @@ export default function AdminLayout({ loaderData }: Route.ComponentProps) {
             <span className={styles.sidebarUserName}>{admin.username}</span>
             <span className={styles.sidebarUserRole}>{roleLabel(admin.role)}</span>
           </NavLink>
+          <RebuildButton compact />
           <a href="/" target="_blank" rel="noreferrer" className={styles.navLink}>
             Открыть сайт ↗
           </a>

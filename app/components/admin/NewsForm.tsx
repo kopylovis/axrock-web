@@ -44,6 +44,7 @@ export function NewsForm({ article, categories }: NewsFormProps) {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
+  const [savedMessage, setSavedMessage] = useState<string | null>(null);
 
   function handleTitle(value: string) {
     setTitle(value);
@@ -67,6 +68,7 @@ export function NewsForm({ article, categories }: NewsFormProps) {
     setErrors({});
     setSaving(true);
     setServerError(null);
+    setSavedMessage(null);
 
     const payload: NewsInput = {
       title: title.trim(),
@@ -84,8 +86,13 @@ export function NewsForm({ article, categories }: NewsFormProps) {
 
     try {
       const saved = article ? await updateNews(article.id, payload) : await createNews(payload);
-      navigate(`/admin/news/${saved.id}`, { replace: true });
       setStatus(effectiveStatus);
+      setSavedMessage(
+        effectiveStatus === "PUBLISHED"
+          ? "Опубликовано. Чтобы изменения попали на сайт, нажмите «Обновить сайт»."
+          : "Сохранено как черновик — на сайте не отображается.",
+      );
+      navigate(`/admin/news/${saved.id}`, { replace: true });
     } catch (cause) {
       setServerError(cause instanceof Error ? cause.message : "Не удалось сохранить новость");
     } finally {
@@ -117,6 +124,11 @@ export function NewsForm({ article, categories }: NewsFormProps) {
       {serverError ? (
         <p className={styles.alert} role="alert">
           {serverError}
+        </p>
+      ) : null}
+      {savedMessage ? (
+        <p className={styles.success} role="status">
+          {savedMessage}
         </p>
       ) : null}
 

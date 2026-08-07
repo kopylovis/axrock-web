@@ -4,7 +4,11 @@
   display: block;
 }
 
+/* Кликабельна вся строка: ссылка города растягивается на неё псевдоэлементом.
+   Вкладывать одну ссылку в другую нельзя, поэтому кнопка билетов поднимается
+   над этим слоем — иначе перекрытие съело бы переход на сайт организатора. */
 .row {
+  position: relative;
   display: grid;
   gap: var(--space-3) var(--space-5);
   grid-template-columns: 1fr;
@@ -70,6 +74,12 @@
   line-height: var(--lh-snug);
 }
 
+.cityLink::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
 .cityLink:hover {
   color: var(--accent-bright);
 }
@@ -81,7 +91,10 @@
 
 
 
+/* Над растянутой ссылкой строки, иначе клик по билетам её не достигнет. */
 .actions {
+  position: relative;
+  z-index: 1;
   display: flex;
   flex-wrap: wrap;
   gap: var(--space-3);

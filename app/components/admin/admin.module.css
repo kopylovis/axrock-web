@@ -918,3 +918,21 @@
   border-color: var(--accent);
   color: var(--accent-ink);
 }
+
+/* Кнопка пересборки: на дашборде рядом с действиями, в сайдбаре — колонкой. */
+.rebuildNote {
+  font-size: var(--fs-xs);
+  color: var(--ink-faint);
+  align-self: center;
+}
+
+.rebuildCompact {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.rebuildCompact .rebuildNote {
+  padding-inline: var(--space-4);
+  align-self: start;
+  line-height: 1.4;
+}

@@ -78,6 +78,7 @@ export function ConcertForm({ concert }: ConcertFormProps) {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
+  const [savedMessage, setSavedMessage] = useState<string | null>(null);
 
   const update = (key: keyof typeof form) => (value: string) =>
     setForm((previous) => ({ ...previous, [key]: value }));
@@ -108,6 +109,7 @@ export function ConcertForm({ concert }: ConcertFormProps) {
     setErrors({});
     setSaving(true);
     setServerError(null);
+    setSavedMessage(null);
 
     const payload: ConcertInput = {
       title: form.title.trim(),
@@ -147,6 +149,11 @@ export function ConcertForm({ concert }: ConcertFormProps) {
     try {
       const saved = concert ? await updateConcert(concert.id, payload) : await createConcert(payload);
       setPublicationStatus(effective);
+      setSavedMessage(
+        effective === "PUBLISHED"
+          ? "Опубликовано. Чтобы изменения попали на сайт, нажмите «Обновить сайт»."
+          : "Сохранено как черновик — на сайте не отображается.",
+      );
       navigate(`/admin/concerts/${saved.id}`, { replace: true });
     } catch (cause) {
       setServerError(cause instanceof Error ? cause.message : "Не удалось сохранить концерт");
@@ -181,6 +188,11 @@ export function ConcertForm({ concert }: ConcertFormProps) {
       {serverError ? (
         <p className={styles.alert} role="alert">
           {serverError}
+        </p>
+      ) : null}
+      {savedMessage ? (
+        <p className={styles.success} role="status">
+          {savedMessage}
         </p>
       ) : null}
 

@@ -245,6 +245,20 @@ export async function dashboard(): Promise<AdminDashboard> {
   return apiFetch<AdminDashboard>(`${PREFIX}/dashboard`, { auth: true });
 }
 
+export interface RebuildStatus {
+  /** Настроены ли доступы к GitHub на стороне backend. */
+  configured: boolean;
+  running: boolean;
+  status: string | null;
+  conclusion: string | null;
+  startedAt: string | null;
+  url: string | null;
+}
+
+export async function rebuildStatus(): Promise<RebuildStatus> {
+  return apiFetch<RebuildStatus>(`${PREFIX}/rebuild/status`, { auth: true });
+}
+
 export async function requestSiteRebuild(): Promise<void> {
   await apiFetch<void>(`${PREFIX}/rebuild`, { method: "POST", auth: true });
 }

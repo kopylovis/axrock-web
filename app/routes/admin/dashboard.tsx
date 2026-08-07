@@ -1,7 +1,8 @@
-import { Link, useFetcher } from "react-router";
+import { Link } from "react-router";
 import type { Route } from "./+types/dashboard";
-import { dashboard, requestSiteRebuild } from "~/api/admin-api";
+import { dashboard } from "~/api/admin-api";
 import { GlassPanel } from "~/components/common/GlassPanel";
+import { RebuildButton } from "~/components/admin/RebuildButton";
 import { PageSkeleton } from "~/components/common/PageSkeleton";
 import { ErrorState } from "~/components/common/States";
 import { formatDateTime, parseUtcSafe } from "~/utils/admin-format";
@@ -22,25 +23,12 @@ export async function clientLoader() {
   }
 }
 
-export async function clientAction() {
-  try {
-    await requestSiteRebuild();
-    return { rebuilt: true, error: null };
-  } catch (error) {
-    return {
-      rebuilt: false,
-      error: error instanceof Error ? error.message : "Не удалось запустить пересборку",
-    };
-  }
-}
-
 export function HydrateFallback() {
   return <PageSkeleton label="Загрузка обзора" />;
 }
 
 export default function AdminDashboard({ loaderData }: Route.ComponentProps) {
   const { data, failed } = loaderData;
-  const rebuild = useFetcher<typeof clientAction>();
   const recentlyUpdated = data?.recentlyUpdated ?? [];
 
   if (failed || !data) {
@@ -68,24 +56,9 @@ export default function AdminDashboard({ loaderData }: Route.ComponentProps) {
           <Link to="/admin/concerts/new" className={`${styles.btn} ${styles.btnPrimary}`}>
             + Концерт
           </Link>
-          <rebuild.Form method="post">
-            <button type="submit" className={`${styles.btn} ${styles.btnSecondary}`} disabled={rebuild.state !== "idle"}>
-              {rebuild.state !== "idle" ? "Запускаю…" : "Обновить сайт"}
-            </button>
-          </rebuild.Form>
+          <RebuildButton />
         </div>
       </div>
-
-      {rebuild.data?.rebuilt ? (
-        <p className={styles.success}>
-          Пересборка запущена. Изменения появятся на сайте через несколько минут.
-        </p>
-      ) : null}
-      {rebuild.data?.error ? (
-        <p className={styles.alert} role="alert">
-          {rebuild.data.error}
-        </p>
-      ) : null}
 
       <div className={styles.stats}>
         <GlassPanel className={styles.statCard}>
