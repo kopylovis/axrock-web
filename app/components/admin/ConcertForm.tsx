@@ -171,14 +171,14 @@ export function ConcertForm({ concert }: ConcertFormProps) {
             {concert ? "Редактирование концерта" : "Новый концерт"}
           </h1>
           {concert ? (
-            <>
+            <div className={styles.pageHeadChips}>
               <StatusChip status={publicationStatus} />
               {eventStatus !== "ANNOUNCED" ? (
                 <span className={`${styles.chip} ${styles.chipArchived}`}>
                   {CONCERT_STATUS_LABELS[eventStatus]}
                 </span>
               ) : null}
-            </>
+            </div>
           ) : null}
         </div>
         <div className={styles.pageActions}>
