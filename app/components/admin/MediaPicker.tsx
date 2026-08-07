@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { listUploads, type UploadItem } from "~/api/admin-api";
+import { deleteUpload, listUploads, type UploadItem } from "~/api/admin-api";
+import { ApiError } from "~/api/errors";
 import styles from "./admin.module.css";
 
 interface MediaPickerProps {
@@ -28,6 +29,31 @@ export function MediaPicker({ accept, selected, onSelect, onUploadNew, onClose }
   // Разрешение берём у самой картинки после загрузки: сервер его не хранит,
   // а читать каждый файл на диске ради этого дорого.
   const [sizes, setSizes] = useState<Record<string, string>>({});
+  const [removing, setRemoving] = useState<string | null>(null);
+
+  async function remove(item: UploadItem) {
+    const question = item.inUse
+      ? "Это изображение сейчас используется на сайте — в новости, концерте, участнике, релизе, " +
+        "медиа или настройках. Пока оно оттуда не убрано, удалить его нельзя. Всё равно попробовать?"
+      : "Удалить файл безвозвратно? Восстановить его будет нельзя.";
+
+    if (!window.confirm(question)) return;
+
+    setRemoving(item.url);
+    setError(null);
+    try {
+      await deleteUpload(item.url);
+      setItems((prev) => (prev ?? []).filter((candidate) => candidate.url !== item.url));
+    } catch (cause) {
+      setError(
+        cause instanceof ApiError && cause.code === "UPLOAD_IN_USE"
+          ? "Файл используется в новости, концерте, участнике, релизе, медиа или настройках. Сначала уберите его оттуда."
+          : "Не удалось удалить файл",
+      );
+    } finally {
+      setRemoving(null);
+    }
+  }
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
@@ -84,29 +110,43 @@ export function MediaPicker({ accept, selected, onSelect, onUploadNew, onClose }
         {items && items.length > 0 ? (
           <div className={styles.mediaGrid}>
             {items.map((item) => (
-              <button
-                key={item.url}
-                type="button"
-                className={`${styles.mediaTile} ${item.url === selected ? styles.mediaTileActive : ""}`}
-                onClick={() => onSelect(item.url)}
-                title={`${item.fileName} · ${formatSize(item.size)}`}
-              >
-                <img
-                  src={item.url}
-                  alt=""
-                  loading="lazy"
-                  onLoad={(event) => {
-                    const { naturalWidth, naturalHeight } = event.currentTarget;
-                    if (!naturalWidth) return;
-                    setSizes((prev) =>
-                      prev[item.url] ? prev : { ...prev, [item.url]: `${naturalWidth}×${naturalHeight}` },
-                    );
-                  }}
-                />
-                <span className={styles.mediaTileMeta}>
-                  {sizes[item.url] ?? formatSize(item.size)}
-                </span>
-              </button>
+              <div key={item.url} className={styles.mediaCell}>
+                <button
+                  type="button"
+                  className={styles.mediaRemove}
+                  onClick={() => remove(item)}
+                  disabled={removing === item.url}
+                  aria-label="Удалить файл"
+                  title="Удалить файл"
+                >
+                  ×
+                </button>
+                <button
+                  type="button"
+                  className={`${styles.mediaTile} ${item.url === selected ? styles.mediaTileActive : ""}`}
+                  onClick={() => onSelect(item.url)}
+                  title={`${item.fileName} · ${formatSize(item.size)}${item.inUse ? " · используется" : ""}`}
+                >
+                  {item.inUse ? <span className={styles.mediaBadge}>используется</span> : null}
+                  <img
+                    src={item.url}
+                    alt=""
+                    loading="lazy"
+                    onLoad={(event) => {
+                      const { naturalWidth, naturalHeight } = event.currentTarget;
+                      if (!naturalWidth) return;
+                      setSizes((prev) =>
+                        prev[item.url]
+                          ? prev
+                          : { ...prev, [item.url]: `${naturalWidth}×${naturalHeight}` },
+                      );
+                    }}
+                  />
+                  <span className={styles.mediaTileMeta}>
+                    {sizes[item.url] ?? formatSize(item.size)}
+                  </span>
+                </button>
+              </div>
             ))}
           </div>
         ) : null}

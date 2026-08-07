@@ -545,11 +545,23 @@ export interface UploadItem {
   mimeType: string;
   size: number;
   uploadedAt: string;
+  /** Адрес уже используется в контенте или настройках — файл удалять нельзя. */
+  inUse: boolean;
 }
 
 /** Ранее загруженные файлы — библиотека для повторного использования. */
 export async function listUploads(limit = 200): Promise<UploadItem[]> {
   return apiFetch<UploadItem[]>(`${PREFIX}/uploads?limit=${limit}`, { auth: true });
+}
+
+/**
+ * Удаляет файл вместе с уменьшенными копиями. Backend отказывает, если адрес
+ * где-то используется, — поэтому битых картинок на сайте не появится.
+ */
+export async function deleteUpload(url: string): Promise<void> {
+  const path = new URL(url).pathname.split("/uploads/").pop();
+  if (!path) throw new Error("Не удалось разобрать адрес файла");
+  await apiFetch<void>(`${PREFIX}/uploads/${path}`, { method: "DELETE", auth: true });
 }
 
 export async function uploadImage(file: File): Promise<UploadResult> {

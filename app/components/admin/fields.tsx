@@ -199,7 +199,7 @@ export function ImageField({ label, value, onChange, spec, hint }: ImageFieldPro
           {value ? (
             <button
               type="button"
-              className={`${styles.btn} ${styles.btnDanger} ${styles.btnSm}`}
+              className={`${styles.btn} ${styles.btnDanger}`}
               onClick={() => onChange(null)}
             >
               Удалить
@@ -314,7 +314,7 @@ export function VectorField({ label, value, onChange, hint }: VectorFieldProps) 
           {value ? (
             <button
               type="button"
-              className={`${styles.btn} ${styles.btnDanger} ${styles.btnSm}`}
+              className={`${styles.btn} ${styles.btnDanger}`}
               onClick={() => onChange(null)}
             >
               Удалить
