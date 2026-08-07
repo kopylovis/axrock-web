@@ -202,7 +202,7 @@ export function ImageField({ label, value, onChange, spec, hint }: ImageFieldPro
               className={`${styles.btn} ${styles.btnDanger}`}
               onClick={() => onChange(null)}
             >
-              Удалить
+              Убрать
             </button>
           ) : null}
         </div>
@@ -317,7 +317,7 @@ export function VectorField({ label, value, onChange, hint }: VectorFieldProps) 
               className={`${styles.btn} ${styles.btnDanger}`}
               onClick={() => onChange(null)}
             >
-              Удалить
+              Убрать
             </button>
           ) : null}
         </div>
