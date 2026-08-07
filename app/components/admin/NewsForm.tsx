@@ -6,7 +6,7 @@ import { createNews, updateNews } from "~/api/admin-api";
 import type { NewsCategoryDto, NewsDetailDto } from "~/api/dto";
 import type { PublicationStatus, RichTextDoc } from "~/types/content";
 import { fromDateTimeLocalValue, slugify, toDateTimeLocalValue } from "~/utils/admin-format";
-import { CheckboxField, ImageField, SelectField, TextAreaField, TextField } from "./fields";
+import { CheckboxField, ImageField, SelectField, StatusChip, TextAreaField, TextField } from "./fields";
 import { RichTextEditor } from "./RichTextEditor";
 import styles from "./admin.module.css";
 
@@ -102,8 +102,11 @@ export function NewsForm({ article, categories }: NewsFormProps) {
 
   return (
     <>
-      <div className={styles.pageHead}>
-        <h1 className={styles.pageTitle}>{article ? "Редактирование новости" : "Новая новость"}</h1>
+      <div className={`${styles.pageHead} ${styles.pageHeadSticky}`}>
+        <div className={styles.pageHeadStatus}>
+          <h1 className={styles.pageTitle}>{article ? "Редактирование новости" : "Новая новость"}</h1>
+          {article ? <StatusChip status={status} /> : null}
+        </div>
         <div className={styles.pageActions}>
           <Link to="/admin/news" className={`${styles.btn} ${styles.btnSecondary} ${styles.btnSm}`}>
             К списку

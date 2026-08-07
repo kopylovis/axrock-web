@@ -167,6 +167,36 @@
   }
 }
 
+/* Шапка редактора остаётся на виду: в длинных формах иначе не понять,
+   что правишь и в каком оно статусе. Отрицательные отступы компенсируют
+   padding контента, чтобы подложка шла от края до края колонки. */
+.pageHeadSticky {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  margin-inline: calc(var(--space-5) * -1);
+  padding-inline: var(--space-5);
+  padding-block: var(--space-4);
+  background: rgba(11, 10, 9, 0.72);
+  -webkit-backdrop-filter: blur(var(--blur-medium));
+  backdrop-filter: blur(var(--blur-medium));
+  border-bottom: 1px solid var(--line);
+}
+
+@media (min-width: 960px) {
+  .pageHeadSticky {
+    margin-inline: calc(var(--space-7) * -1);
+    padding-inline: var(--space-7);
+  }
+}
+
+.pageHeadStatus {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  align-items: center;
+}
+
 .pageHead {
   display: flex;
   flex-wrap: wrap;
@@ -596,7 +626,9 @@
   z-index: 5;
   padding: var(--space-4) 0;
   border-top: 1px solid var(--line);
-  background: linear-gradient(to top, var(--bg) 60%, transparent);
+  background: rgba(11, 10, 9, 0.72);
+  -webkit-backdrop-filter: blur(var(--blur-medium));
+  backdrop-filter: blur(var(--blur-medium));
 }
 
 .spacer {
@@ -923,7 +955,7 @@
 /* Занимает всю ширину ряда действий: иначе подпись меняет длину и толкает кнопки. */
 .rebuildNote {
   flex-basis: 100%;
-  text-align: left;
+  text-align: right;
   font-size: var(--fs-xs);
   color: var(--ink-faint);
 }

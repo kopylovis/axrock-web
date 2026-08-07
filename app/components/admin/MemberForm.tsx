@@ -57,7 +57,7 @@ export function MemberForm({ member }: { member: BandMemberDto | null }) {
 
   return (
     <>
-      <div className={styles.pageHead}>
+      <div className={`${styles.pageHead} ${styles.pageHeadSticky}`}>
         <h1 className={styles.pageTitle}>{member ? "Редактирование участника" : "Новый участник"}</h1>
         <div className={styles.pageActions}>
           <Link to="/admin/members" className={`${styles.btn} ${styles.btnSecondary} ${styles.btnSm}`}>

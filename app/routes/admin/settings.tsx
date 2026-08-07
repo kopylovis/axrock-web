@@ -87,7 +87,7 @@ function SettingsForm({ initial }: { initial: SiteSettingsDto }) {
 
   return (
     <>
-      <div className={styles.pageHead}>
+      <div className={`${styles.pageHead} ${styles.pageHeadSticky}`}>
         <h1 className={styles.pageTitle}>Настройки сайта</h1>
       </div>
 

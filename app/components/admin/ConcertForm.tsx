@@ -6,7 +6,8 @@ import { createConcert, updateConcert } from "~/api/admin-api";
 import type { ConcertDetailDto } from "~/api/dto";
 import type { ConcertEventStatus, PublicationStatus, RichTextDoc } from "~/types/content";
 import { fromDateTimeLocalValue, slugify, toDateTimeLocalValue } from "~/utils/admin-format";
-import { CheckboxField, ImageField, SelectField, TextAreaField, TextField } from "./fields";
+import { CheckboxField, ImageField, SelectField, StatusChip, TextAreaField, TextField } from "./fields";
+import { CONCERT_STATUS_LABELS } from "~/utils/format";
 import { RichTextEditor } from "./RichTextEditor";
 import styles from "./admin.module.css";
 
@@ -164,10 +165,22 @@ export function ConcertForm({ concert }: ConcertFormProps) {
 
   return (
     <>
-      <div className={styles.pageHead}>
-        <h1 className={styles.pageTitle}>
-          {concert ? "Редактирование концерта" : "Новый концерт"}
-        </h1>
+      <div className={`${styles.pageHead} ${styles.pageHeadSticky}`}>
+        <div className={styles.pageHeadStatus}>
+          <h1 className={styles.pageTitle}>
+            {concert ? "Редактирование концерта" : "Новый концерт"}
+          </h1>
+          {concert ? (
+            <>
+              <StatusChip status={publicationStatus} />
+              {eventStatus !== "ANNOUNCED" ? (
+                <span className={`${styles.chip} ${styles.chipArchived}`}>
+                  {CONCERT_STATUS_LABELS[eventStatus]}
+                </span>
+              ) : null}
+            </>
+          ) : null}
+        </div>
         <div className={styles.pageActions}>
           <Link to="/admin/concerts" className={`${styles.btn} ${styles.btnSecondary} ${styles.btnSm}`}>
             К списку

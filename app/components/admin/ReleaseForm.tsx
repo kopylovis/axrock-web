@@ -115,7 +115,7 @@ export function ReleaseForm({ release }: { release: ReleaseDetailDto | null }) {
 
   return (
     <>
-      <div className={styles.pageHead}>
+      <div className={`${styles.pageHead} ${styles.pageHeadSticky}`}>
         <h1 className={styles.pageTitle}>{release ? "Редактирование релиза" : "Новый релиз"}</h1>
         <div className={styles.pageActions}>
           <Link to="/admin/releases" className={`${styles.btn} ${styles.btnSecondary} ${styles.btnSm}`}>
