@@ -923,7 +923,7 @@
 /* Занимает всю ширину ряда действий: иначе подпись меняет длину и толкает кнопки. */
 .rebuildNote {
   flex-basis: 100%;
-  text-align: right;
+  text-align: left;
   font-size: var(--fs-xs);
   color: var(--ink-faint);
 }
@@ -938,4 +938,40 @@
   padding-inline: var(--space-4);
   text-align: left;
   line-height: 1.4;
+}
+
+/* Ближайший концерт — ссылка целиком, а не только заголовок. */
+.nextConcert {
+  display: grid;
+  gap: var(--space-1);
+  color: var(--ink-mute);
+}
+
+.nextConcert:hover .rowTitle {
+  color: var(--accent);
+}
+
+/* Строка таблицы ведёт в редактор: ссылка в ячейке растягивается на всю строку. */
+.rowLinked {
+  position: relative;
+  transition: background var(--t-fast);
+}
+
+.rowLinked:hover {
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.rowLink {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.rowLink::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.rowLinked:hover .rowLink {
+  color: var(--accent);
 }

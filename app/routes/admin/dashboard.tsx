@@ -15,6 +15,13 @@ const KIND_LABELS: Record<string, string> = {
   MEMBER: "Участник",
 };
 
+const KIND_PATHS: Record<string, string> = {
+  NEWS: "news",
+  CONCERT: "concerts",
+  RELEASE: "releases",
+  MEMBER: "members",
+};
+
 export async function clientLoader() {
   try {
     return { data: await dashboard(), failed: false as const };
@@ -82,14 +89,13 @@ export default function AdminDashboard({ loaderData }: Route.ComponentProps) {
       <GlassPanel className={styles.panel}>
         <h2 className={styles.panelTitle}>Ближайший концерт</h2>
         {data.nextConcert ? (
-          <p>
-            <Link to={`/admin/concerts/${data.nextConcert.id}`} className={styles.rowTitle}>
-              {data.nextConcert.title}
-            </Link>
-            {" — "}
-            {formatDateTime(parseUtcSafe(data.nextConcert.startsAt), data.nextConcert.timezone)},{" "}
-            {data.nextConcert.city}
-          </p>
+          <Link to={`/admin/concerts/${data.nextConcert.id}`} className={styles.nextConcert}>
+            <span className={styles.rowTitle}>{data.nextConcert.title}</span>
+            <span>
+              {formatDateTime(parseUtcSafe(data.nextConcert.startsAt), data.nextConcert.timezone)},{" "}
+              {data.nextConcert.city}
+            </span>
+          </Link>
         ) : (
           <p className={styles.hint}>Предстоящих концертов нет.</p>
         )}
@@ -110,13 +116,24 @@ export default function AdminDashboard({ loaderData }: Route.ComponentProps) {
                 </tr>
               </thead>
               <tbody>
-                {recentlyUpdated.map((item) => (
-                  <tr key={`${item.kind}-${item.id}`}>
-                    <td>{KIND_LABELS[item.kind] ?? item.kind}</td>
-                    <td className={styles.rowTitle}>{item.title}</td>
-                    <td>{formatDateTime(parseUtcSafe(item.updatedAt))}</td>
-                  </tr>
-                ))}
+                {recentlyUpdated.map((item) => {
+                  const section = KIND_PATHS[item.kind];
+                  return (
+                    <tr key={`${item.kind}-${item.id}`} className={section ? styles.rowLinked : undefined}>
+                      <td>{KIND_LABELS[item.kind] ?? item.kind}</td>
+                      <td>
+                        {section ? (
+                          <Link to={`/admin/${section}/${item.id}`} className={styles.rowLink}>
+                            {item.title}
+                          </Link>
+                        ) : (
+                          <span className={styles.rowTitle}>{item.title}</span>
+                        )}
+                      </td>
+                      <td>{formatDateTime(parseUtcSafe(item.updatedAt))}</td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
