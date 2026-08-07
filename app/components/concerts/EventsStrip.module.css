@@ -110,3 +110,13 @@
   text-transform: uppercase;
   color: var(--ink-faint);
 }
+
+/* Отметка главной даты тура — её ставит галочка «Выделенный концерт» в админке. */
+.headline {
+  margin-top: var(--space-2);
+  font-family: var(--font-accent);
+  font-size: var(--fs-xs);
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--accent);
+}

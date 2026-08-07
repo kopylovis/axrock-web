@@ -188,6 +188,7 @@ export function NewsForm({ article, categories }: NewsFormProps) {
           />
           <CheckboxField
             label="Выделенная новость"
+            hint="Помечается значком «Важное» и занимает всю ширину в списке новостей."
             checked={featured}
             onChange={(event) => setFeatured(event.target.checked)}
           />
@@ -196,11 +197,13 @@ export function NewsForm({ article, categories }: NewsFormProps) {
         <div className={`${styles.formGrid} ${styles.formGridTwo}`}>
           <TextField
             label="SEO-заголовок"
+            hint="Заголовок вкладки браузера и синяя ссылка в результатах поиска. Пусто — берётся обычный заголовок. До 60 символов."
             value={seoTitle}
             onChange={(event) => setSeoTitle(event.target.value)}
           />
           <TextField
             label="SEO-описание"
+            hint="Серый текст под ссылкой в выдаче Яндекса и Google. Пусто — берётся описание из настроек сайта. 120–160 символов."
             value={seoDescription}
             onChange={(event) => setSeoDescription(event.target.value)}
           />

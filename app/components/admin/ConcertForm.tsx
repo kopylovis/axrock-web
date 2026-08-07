@@ -408,6 +408,7 @@ export function ConcertForm({ concert }: ConcertFormProps) {
 
         <CheckboxField
           label="Выделенный концерт"
+          hint="Главная дата тура. В афише получает пометку «Главный концерт» — обычно это большая площадка или премьера программы."
           checked={featured}
           onChange={(event) => setFeatured(event.target.checked)}
         />
@@ -415,11 +416,13 @@ export function ConcertForm({ concert }: ConcertFormProps) {
         <div className={`${styles.formGrid} ${styles.formGridTwo}`}>
           <TextField
             label="SEO-заголовок"
+            hint="Заголовок вкладки браузера и синяя ссылка в результатах поиска. Пусто — берётся обычный заголовок. До 60 символов."
             value={form.seoTitle}
             onChange={(event) => update("seoTitle")(event.target.value)}
           />
           <TextField
             label="SEO-описание"
+            hint="Серый текст под ссылкой в выдаче Яндекса и Google. Пусто — берётся описание из настроек сайта. 120–160 символов."
             value={form.seoDescription}
             onChange={(event) => update("seoDescription")(event.target.value)}
           />

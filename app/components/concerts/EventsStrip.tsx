@@ -39,6 +39,7 @@ export function EventsStrip({ concerts }: { concerts: ConcertSummary[] }) {
                 {concert.venueName}
                 {concert.ageRestriction ? ` · ${concert.ageRestriction}` : ""}
               </p>
+              {concert.featured ? <p className={styles.headline}>Главный концерт</p> : null}
             </div>
 
             <div className={styles.actions}>
