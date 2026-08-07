@@ -453,32 +453,50 @@ export function ConcertForm({ concert }: ConcertFormProps) {
           />
         </div>
 
+        {/* Набор действий зависит от статуса: у опубликованной записи «Опубликовать»
+            и «Сохранить» делали бы одно и то же, а «Сохранить черновик» на самом
+            деле снимал бы её с сайта — из названий это не следовало. */}
         <div className={`${styles.formActions} ${styles.formActionsSticky}`}>
-          <button
-            type="button"
-            className={`${styles.btn} ${styles.btnSecondary}`}
-            disabled={saving}
-            onClick={() => submit("DRAFT")}
-          >
-            Сохранить черновик
-          </button>
-          <button
-            type="button"
-            className={`${styles.btn} ${styles.btnPrimary}`}
-            disabled={saving}
-            onClick={() => submit("PUBLISHED")}
-          >
-            {saving ? "Сохраняю…" : "Опубликовать"}
-          </button>
-          <span className={styles.spacer} />
-          <button
-            type="button"
-            className={`${styles.btn} ${styles.btnSecondary}`}
-            disabled={saving}
-            onClick={() => submit()}
-          >
-            Сохранить
-          </button>
+          {publicationStatus === "PUBLISHED" ? (
+            <>
+              <button
+                type="button"
+                className={`${styles.btn} ${styles.btnPrimary}`}
+                disabled={saving}
+                onClick={() => submit()}
+              >
+                {saving ? "Сохраняю…" : "Сохранить"}
+              </button>
+              <span className={styles.spacer} />
+              <button
+                type="button"
+                className={`${styles.btn} ${styles.btnSecondary}`}
+                disabled={saving}
+                onClick={() => submit("DRAFT")}
+              >
+                Снять с публикации
+              </button>
+            </>
+          ) : (
+            <>
+              <button
+                type="button"
+                className={`${styles.btn} ${styles.btnSecondary}`}
+                disabled={saving}
+                onClick={() => submit("DRAFT")}
+              >
+                Сохранить черновик
+              </button>
+              <button
+                type="button"
+                className={`${styles.btn} ${styles.btnPrimary}`}
+                disabled={saving}
+                onClick={() => submit("PUBLISHED")}
+              >
+                {saving ? "Сохраняю…" : "Опубликовать"}
+              </button>
+            </>
+          )}
         </div>
       </div>
     </>

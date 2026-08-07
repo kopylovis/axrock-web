@@ -34,10 +34,11 @@ export function MediaPicker({ accept, selected, onSelect, onUploadNew, onClose }
   async function remove(item: UploadItem) {
     // Когда backend не присылает inUse, обещать «файл свободен» нельзя —
     // остаётся предупредить, что занятость проверится на сервере.
+    const places = item.usedIn?.length ? `\n\n${item.usedIn.join("\n")}` : "";
     const question =
       item.inUse === true
-        ? "Это изображение сейчас используется на сайте — в новости, концерте, участнике, релизе, " +
-          "медиа или настройках. Пока оно оттуда не убрано, удалить его нельзя. Всё равно попробовать?"
+        ? "Это изображение сейчас используется на сайте. Пока оно не убрано оттуда, " +
+          `удалить его нельзя.${places}`
         : item.inUse === false
           ? "Удалить файл безвозвратно? Восстановить его будет нельзя."
           : "Удалить файл безвозвратно? Если он где-то используется, сервер отклонит удаление.";
@@ -130,7 +131,11 @@ export function MediaPicker({ accept, selected, onSelect, onUploadNew, onClose }
                   type="button"
                   className={`${styles.mediaTile} ${item.url === selected ? styles.mediaTileActive : ""}`}
                   onClick={() => onSelect(item.url)}
-                  title={`${item.fileName} · ${formatSize(item.size)}${item.inUse ? " · используется" : ""}`}
+                  title={[
+                    item.fileName,
+                    formatSize(item.size),
+                    ...(item.usedIn ?? []),
+                  ].join(" · ")}
                 >
                   {item.inUse ? <span className={styles.mediaBadge}>используется</span> : null}
                   <img
