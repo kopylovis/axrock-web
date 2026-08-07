@@ -920,10 +920,12 @@
 }
 
 /* Кнопка пересборки: на дашборде рядом с действиями, в сайдбаре — колонкой. */
+/* Занимает всю ширину ряда действий: иначе подпись меняет длину и толкает кнопки. */
 .rebuildNote {
+  flex-basis: 100%;
+  text-align: right;
   font-size: var(--fs-xs);
   color: var(--ink-faint);
-  align-self: center;
 }
 
 .rebuildCompact {
@@ -932,7 +934,8 @@
 }
 
 .rebuildCompact .rebuildNote {
+  flex-basis: auto;
   padding-inline: var(--space-4);
-  align-self: start;
+  text-align: left;
   line-height: 1.4;
 }

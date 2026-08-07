@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useRef, useState } from "react";
-import { rebuildStatus, requestSiteRebuild, type RebuildStatus } from "~/api/admin-api";
+import { useState, useSyncExternalStore } from "react";
+import { useRouteLoaderData } from "react-router";
+import { requestSiteRebuild, type RebuildStatus } from "~/api/admin-api";
 import { ApiError } from "~/api/errors";
+import { getRebuildSnapshot, refreshRebuild, subscribeRebuild } from "./rebuild-store";
 import styles from "./admin.module.css";
-
-const POLL_MS = 10_000;
 
 function describe(status: RebuildStatus | null, starting: boolean): string {
   if (starting) return "Запускаю…";
@@ -22,52 +22,27 @@ function lastResult(status: RebuildStatus | null): string | null {
 }
 
 export function RebuildButton({ compact = false }: { compact?: boolean }) {
-  const [status, setStatus] = useState<RebuildStatus | null>(null);
+  // Ссылка на журнал ведёт в приватный репозиторий и полезна только владельцу.
+  const layout = useRouteLoaderData("layouts/AdminLayout") as { admin?: { role?: string } } | undefined;
+  const isOwner = layout?.admin?.role === "OWNER";
+  // Состояние общее для всех кнопок панели, поэтому они не расходятся.
+  const status = useSyncExternalStore(subscribeRebuild, getRebuildSnapshot, () => null);
   const [starting, setStarting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const refresh = useCallback(async () => {
-    try {
-      const next = await rebuildStatus();
-      setStatus(next);
-      return next;
-    } catch {
-      return null;
-    }
-  }, []);
-
-  // Пока сборка идёт, состояние перечитывается; в покое опроса нет.
-  useEffect(() => {
-    let cancelled = false;
-
-    const tick = async () => {
-      const next = await refresh();
-      if (cancelled) return;
-      if (next?.running) timer.current = setTimeout(tick, POLL_MS);
-    };
-
-    void tick();
-    return () => {
-      cancelled = true;
-      if (timer.current) clearTimeout(timer.current);
-    };
-  }, [refresh]);
 
   async function start() {
     setStarting(true);
     setError(null);
     try {
       await requestSiteRebuild();
-      const next = await refresh();
-      if (next && !next.running) {
-        // GitHub заводит запуск не мгновенно — подхватим его следующим опросом.
-        timer.current = setTimeout(() => void refresh(), 4000);
-      }
+      const next = await refreshRebuild();
+      // GitHub заводит запуск не мгновенно: если сразу после запроса он ещё
+      // не виден, перечитываем через несколько секунд.
+      if (next && !next.running) setTimeout(() => void refreshRebuild(), 4000);
     } catch (cause) {
       if (cause instanceof ApiError && cause.code === "REBUILD_ALREADY_RUNNING") {
         setError("Сборка уже идёт — дождитесь её завершения.");
-        void refresh();
+        void refreshRebuild();
       } else if (cause instanceof ApiError && cause.code === "REBUILD_NOT_CONFIGURED") {
         setError("На сервере не заданы AXROCK_GITHUB_REPOSITORY и AXROCK_GITHUB_TOKEN.");
       } else {
@@ -106,7 +81,7 @@ export function RebuildButton({ compact = false }: { compact?: boolean }) {
       {(error || result || status?.running) && (
         <span className={styles.rebuildNote}>
           {error ?? (status?.running ? "Обычно занимает 2–3 минуты" : result)}
-          {status?.url ? (
+          {isOwner && status?.url ? (
             <>
               {" "}
               <a href={status.url} target="_blank" rel="noreferrer">

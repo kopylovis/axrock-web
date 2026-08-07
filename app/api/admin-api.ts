@@ -311,6 +311,70 @@ export async function setNewsPublished(
   });
 }
 
+/**
+ * Копия для правки «на основе» существующей записи. Slug обязан быть уникальным,
+ * поэтому к нему добавляется суффикс; копия всегда создаётся черновиком, чтобы
+ * незаконченный дубль не уехал на сайт.
+ */
+function copySlug(slug: string): string {
+  const stamp = Date.now().toString(36).slice(-4);
+  return `${slug}-kopiya-${stamp}`.slice(0, 200);
+}
+
+export async function duplicateNews(id: number): Promise<NewsDetailDto> {
+  const source = await getNews(id);
+  return createNews({
+    title: `${source.title} (копия)`,
+    slug: copySlug(source.slug),
+    excerpt: source.excerpt,
+    content: source.content,
+    coverImage: source.coverImage,
+    categoryId: source.category?.id ?? null,
+    status: "DRAFT",
+    publishedAt: null,
+    featured: false,
+    seoTitle: source.seoTitle,
+    seoDescription: source.seoDescription,
+  });
+}
+
+export async function duplicateConcert(id: number): Promise<ConcertDetailDto> {
+  const source = await getConcert(id);
+  return createConcert({
+    title: `${source.title} (копия)`,
+    slug: copySlug(source.slug),
+    shortDescription: source.shortDescription,
+    description: source.description,
+    posterImage: source.posterImage,
+    publicationStatus: "DRAFT",
+    // Статус события сбрасывается: перенос или отмена относились к исходной дате.
+    eventStatus: "ANNOUNCED",
+    startsAt: source.startsAt,
+    timezone: source.timezone,
+    doorsOpenAt: source.doorsOpenAt,
+    city: source.city,
+    country: source.country,
+    venueName: source.venueName,
+    venueAddress: source.venueAddress,
+    mapUrl: source.mapUrl,
+    ageRestriction: source.ageRestriction,
+    ticketUrl: source.ticketUrl,
+    ticketProvider: source.ticketProvider,
+    organizerName: source.organizerName,
+    organizerUrl: source.organizerUrl,
+    newStartsAt: null,
+    cancellationReason: null,
+    featured: false,
+    seoTitle: source.seoTitle,
+    seoDescription: source.seoDescription,
+    participants: source.participants.map((participant, index) => ({
+      name: participant.name,
+      url: participant.url,
+      sortOrder: index,
+    })),
+  });
+}
+
 export async function listNewsCategories(): Promise<NewsCategoryDto[]> {
   return apiFetch<NewsCategoryDto[]>(`${PREFIX}/news/categories`, { auth: true });
 }

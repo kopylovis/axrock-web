@@ -1,6 +1,6 @@
 import { Link, useNavigate, useRevalidator, useSearchParams } from "react-router";
 import type { Route } from "./+types/news-list";
-import { deleteNews, listNews, setNewsPublished } from "~/api/admin-api";
+import { deleteNews, duplicateNews, listNews, setNewsPublished } from "~/api/admin-api";
 import { PageSkeleton } from "~/components/common/PageSkeleton";
 import { EmptyState, ErrorState } from "~/components/common/States";
 import { StatusChip } from "~/components/admin/fields";
@@ -42,6 +42,11 @@ export default function AdminNewsList({ loaderData }: Route.ComponentProps) {
   async function togglePublished(id: number, published: boolean) {
     await setNewsPublished(id, published);
     revalidator.revalidate();
+  }
+
+  async function duplicate(id: number) {
+    const copy = await duplicateNews(id);
+    navigate(`/admin/news/${copy.id}`);
   }
 
   async function remove(id: number, title: string) {
@@ -143,6 +148,10 @@ export default function AdminNewsList({ loaderData }: Route.ComponentProps) {
                             label:
                               item.status === "PUBLISHED" ? "Снять с публикации" : "Опубликовать",
                             onSelect: () => togglePublished(item.id, item.status !== "PUBLISHED"),
+                          },
+                          {
+                            label: "Дублировать",
+                            onSelect: () => duplicate(item.id),
                           },
                           {
                             label: "Удалить",

@@ -1,6 +1,6 @@
 import { Link, useNavigate, useRevalidator, useSearchParams } from "react-router";
 import type { Route } from "./+types/concerts-list";
-import { concertAction, deleteConcert, listConcerts } from "~/api/admin-api";
+import { concertAction, deleteConcert, duplicateConcert, listConcerts } from "~/api/admin-api";
 import { PageSkeleton } from "~/components/common/PageSkeleton";
 import { EmptyState, ErrorState } from "~/components/common/States";
 import { StatusChip } from "~/components/admin/fields";
@@ -48,6 +48,11 @@ export default function AdminConcertsList({ loaderData }: Route.ComponentProps) 
   async function run(action: () => Promise<unknown>) {
     await action();
     revalidator.revalidate();
+  }
+
+  async function duplicate(id: number) {
+    const copy = await duplicateConcert(id);
+    navigate(`/admin/concerts/${copy.id}`);
   }
 
   return (
@@ -149,6 +154,10 @@ export default function AdminConcertsList({ loaderData }: Route.ComponentProps) 
                               const reason = window.prompt("Причина отмены (необязательно)") ?? undefined;
                               run(() => concertAction(item.id, "cancel", { reason }));
                             },
+                          },
+                          {
+                            label: "Дублировать",
+                            onSelect: () => duplicate(item.id),
                           },
                           {
                             label: "Удалить",
