@@ -16,7 +16,7 @@ import { RELEASE_TYPE_LABELS } from "~/components/music/ReleaseCard";
 import { fetchMedia, fetchNews, fetchReleases, fetchUpcomingConcerts } from "~/api/public-api";
 import { buildMeta, jsonLd, ogImageFrom } from "~/lib/seo";
 import { SITE_URL } from "~/lib/config";
-import { formatDayNumber, formatMonthShort, pluralize } from "~/utils/format";
+import { formatDayNumber, formatMonthShort } from "~/utils/format";
 import styles from "~/components/home/home.module.css";
 
 const ABOUT_ANCHOR = "events";
@@ -127,46 +127,6 @@ export default function Home({ loaderData }: Route.ComponentProps) {
               }
             />
           )}
-        </div>
-      </AnimatedSection>
-
-      <AnimatedSection className="section" ariaLabelledby="about-heading">
-        <div className="container">
-          <SectionHeading id="about-heading" eyebrow="О группе" title={settings.bandName} />
-
-          <div className={styles.intro}>
-            <div className={styles.introText}>
-              <p className={styles.introLead}>
-                {settings.shortBiography ??
-                  "Описание группы появится здесь — его можно заполнить в разделе «Настройки» административной панели."}
-              </p>
-              <div className={styles.sectionFooter}>
-                <ButtonLink to="/about" variant="ghost">
-                  История группы
-                </ButtonLink>
-                <ButtonLink to="/about#lineup" variant="quiet">
-                  Состав
-                </ButtonLink>
-              </div>
-            </div>
-
-            <div className={styles.facts}>
-              <div className={styles.fact}>
-                <span className={styles.factLabel}>Ближайших концертов</span>
-                <span className={styles.factValue}>{concerts.length}</span>
-              </div>
-              <div className={styles.fact}>
-                <span className={styles.factLabel}>
-                  {pluralize(releases.length, ["Релиз", "Релиза", "Релизов"])}
-                </span>
-                <span className={styles.factValue}>{releases.length}</span>
-              </div>
-              <div className={styles.fact}>
-                <span className={styles.factLabel}>Публикаций</span>
-                <span className={styles.factValue}>{news.length}</span>
-              </div>
-            </div>
-          </div>
         </div>
       </AnimatedSection>
 
