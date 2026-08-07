@@ -182,7 +182,7 @@ export function ConcertForm({ concert }: ConcertFormProps) {
           ) : null}
         </div>
         <div className={styles.pageActions}>
-          <Link to="/admin/concerts" className={`${styles.btn} ${styles.btnSecondary} ${styles.btnSm}`}>
+          <Link to="/admin/concerts" className={`${styles.btn} ${styles.btnSecondary}`}>
             К списку
           </Link>
           {concert && publicationStatus === "PUBLISHED" ? (
@@ -190,7 +190,7 @@ export function ConcertForm({ concert }: ConcertFormProps) {
               href={`/concerts/${concert.slug}`}
               target="_blank"
               rel="noreferrer"
-              className={`${styles.btn} ${styles.btnSecondary} ${styles.btnSm}`}
+              className={`${styles.btn} ${styles.btnSecondary}`}
             >
               Открыть на сайте ↗
             </a>
@@ -471,7 +471,12 @@ export function ConcertForm({ concert }: ConcertFormProps) {
             {saving ? "Сохраняю…" : "Опубликовать"}
           </button>
           <span className={styles.spacer} />
-          <button type="button" className={`${styles.btn} ${styles.btnSecondary} ${styles.btnSm}`} disabled={saving} onClick={() => submit()}>
+          <button
+            type="button"
+            className={`${styles.btn} ${styles.btnSecondary}`}
+            disabled={saving}
+            onClick={() => submit()}
+          >
             Сохранить
           </button>
         </div>

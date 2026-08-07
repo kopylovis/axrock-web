@@ -539,6 +539,19 @@ export async function deleteMedia(id: number): Promise<void> {
   await apiFetch<void>(`${PREFIX}/media/${id}`, { method: "DELETE", auth: true });
 }
 
+export interface UploadItem {
+  url: string;
+  fileName: string;
+  mimeType: string;
+  size: number;
+  uploadedAt: string;
+}
+
+/** Ранее загруженные файлы — библиотека для повторного использования. */
+export async function listUploads(limit = 200): Promise<UploadItem[]> {
+  return apiFetch<UploadItem[]>(`${PREFIX}/uploads?limit=${limit}`, { auth: true });
+}
+
 export async function uploadImage(file: File): Promise<UploadResult> {
   const formData = new FormData();
   formData.append("file", file);

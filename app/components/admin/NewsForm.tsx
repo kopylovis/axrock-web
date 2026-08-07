@@ -108,7 +108,7 @@ export function NewsForm({ article, categories }: NewsFormProps) {
           {article ? <StatusChip status={status} /> : null}
         </div>
         <div className={styles.pageActions}>
-          <Link to="/admin/news" className={`${styles.btn} ${styles.btnSecondary} ${styles.btnSm}`}>
+          <Link to="/admin/news" className={`${styles.btn} ${styles.btnSecondary}`}>
             К списку
           </Link>
           {article && status === "PUBLISHED" ? (
@@ -116,7 +116,7 @@ export function NewsForm({ article, categories }: NewsFormProps) {
               href={`/news/${article.slug}`}
               target="_blank"
               rel="noreferrer"
-              className={`${styles.btn} ${styles.btnSecondary} ${styles.btnSm}`}
+              className={`${styles.btn} ${styles.btnSecondary}`}
             >
               Открыть на сайте ↗
             </a>
@@ -242,7 +242,12 @@ export function NewsForm({ article, categories }: NewsFormProps) {
             {saving ? "Сохраняю…" : "Опубликовать"}
           </button>
           <span className={styles.spacer} />
-          <button type="button" className={`${styles.btn} ${styles.btnSecondary} ${styles.btnSm}`} disabled={saving} onClick={() => submit()}>
+          <button
+            type="button"
+            className={`${styles.btn} ${styles.btnSecondary}`}
+            disabled={saving}
+            onClick={() => submit()}
+          >
             Сохранить
           </button>
         </div>

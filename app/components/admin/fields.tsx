@@ -1,7 +1,8 @@
-import { useId, useState, type ReactNode } from "react";
+import { useId, useRef, useState, type ReactNode } from "react";
 import { uploadImage } from "~/api/admin-api";
 import { specSize, type ImageSpecKey } from "~/components/common/ImagePlaceholder";
 import { ImageCropper } from "./ImageCropper";
+import { MediaPicker } from "./MediaPicker";
 import styles from "./admin.module.css";
 
 interface BaseFieldProps {
@@ -143,6 +144,8 @@ export function ImageField({ label, value, onChange, spec, hint }: ImageFieldPro
   const [pending, setPending] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [picking, setPicking] = useState(false);
+  const fileInput = useRef<HTMLInputElement>(null);
 
   function handleFile(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -175,14 +178,24 @@ export function ImageField({ label, value, onChange, spec, hint }: ImageFieldPro
         {value ? <img src={value} alt="" className={styles.imagePreview} /> : null}
 
         <div className={styles.imageActions}>
+          {/* Скрыт: диалог открывается из окна выбора, чтобы не было двух разных кнопок. */}
           <input
             id={id}
+            ref={fileInput}
             type="file"
             accept="image/jpeg,image/png,image/webp,image/avif"
             onChange={handleFile}
             disabled={uploading}
-            className={styles.fileInput}
+            hidden
           />
+          <button
+            type="button"
+            className={`${styles.btn} ${styles.btnSecondary}`}
+            onClick={() => setPicking(true)}
+            disabled={uploading}
+          >
+            {value ? "Заменить" : "Выбрать изображение"}
+          </button>
           {value ? (
             <button
               type="button"
@@ -206,6 +219,22 @@ export function ImageField({ label, value, onChange, spec, hint }: ImageFieldPro
           </span>
         ) : null}
       </div>
+
+      {picking ? (
+        <MediaPicker
+          accept={(item) => item.mimeType.startsWith("image/") && item.mimeType !== "image/svg+xml"}
+          selected={value}
+          onSelect={(url) => {
+            setPicking(false);
+            onChange(url);
+          }}
+          onUploadNew={() => {
+            setPicking(false);
+            fileInput.current?.click();
+          }}
+          onClose={() => setPicking(false)}
+        />
+      ) : null}
 
       {pending ? (
         <ImageCropper
@@ -231,6 +260,8 @@ export function VectorField({ label, value, onChange, hint }: VectorFieldProps) 
   const id = useId();
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [picking, setPicking] = useState(false);
+  const fileInput = useRef<HTMLInputElement>(null);
 
   async function handleFile(event: React.ChangeEvent<HTMLInputElement>) {
     const file = event.target.files?.[0];
@@ -265,12 +296,21 @@ export function VectorField({ label, value, onChange, hint }: VectorFieldProps) 
         <div className={styles.imageActions}>
           <input
             id={id}
+            ref={fileInput}
             type="file"
             accept="image/svg+xml,image/png"
             onChange={handleFile}
             disabled={uploading}
-            className={styles.fileInput}
+            hidden
           />
+          <button
+            type="button"
+            className={`${styles.btn} ${styles.btnSecondary}`}
+            onClick={() => setPicking(true)}
+            disabled={uploading}
+          >
+            {value ? "Заменить" : "Выбрать файл"}
+          </button>
           {value ? (
             <button
               type="button"
@@ -293,6 +333,21 @@ export function VectorField({ label, value, onChange, hint }: VectorFieldProps) 
           </span>
         ) : null}
       </div>
+      {picking ? (
+        <MediaPicker
+          accept={(item) => item.mimeType === "image/svg+xml" || item.mimeType === "image/png"}
+          selected={value}
+          onSelect={(url) => {
+            setPicking(false);
+            onChange(url);
+          }}
+          onUploadNew={() => {
+            setPicking(false);
+            fileInput.current?.click();
+          }}
+          onClose={() => setPicking(false)}
+        />
+      ) : null}
     </div>
   );
 }
