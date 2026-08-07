@@ -32,28 +32,25 @@ export function MediaPicker({ accept, selected, onSelect, onUploadNew, onClose }
   const [removing, setRemoving] = useState<string | null>(null);
 
   async function remove(item: UploadItem) {
-    // Когда backend не присылает inUse, обещать «файл свободен» нельзя —
-    // остаётся предупредить, что занятость проверится на сервере.
+    // Занятый файл удаляется только с явного согласия: вместе с ним изображение
+    // пропадёт везде, где стоит, — поэтому перечисляем эти места поимённо.
     const places = item.usedIn?.length ? `\n\n${item.usedIn.join("\n")}` : "";
-    const question =
-      item.inUse === true
-        ? "Это изображение сейчас используется на сайте. Пока оно не убрано оттуда, " +
-          `удалить его нельзя.${places}`
-        : item.inUse === false
-          ? "Удалить файл безвозвратно? Восстановить его будет нельзя."
-          : "Удалить файл безвозвратно? Если он где-то используется, сервер отклонит удаление.";
+    const question = item.inUse
+      ? "Изображение используется на сайте. Если удалить, оно пропадёт во всех этих " +
+        `местах — записи останутся, но без картинки.${places}\n\nУдалить безвозвратно?`
+      : "Удалить файл безвозвратно? Восстановить его будет нельзя.";
 
     if (!window.confirm(question)) return;
 
     setRemoving(item.url);
     setError(null);
     try {
-      await deleteUpload(item.url);
+      await deleteUpload(item.url, item.inUse === true);
       setItems((prev) => (prev ?? []).filter((candidate) => candidate.url !== item.url));
     } catch (cause) {
       setError(
         cause instanceof ApiError && cause.code === "UPLOAD_IN_USE"
-          ? "Файл используется в новости, концерте, участнике, релизе, медиа или настройках. Сначала уберите его оттуда."
+          ? "Файл используется — обновите список и повторите."
           : "Не удалось удалить файл",
       );
     } finally {

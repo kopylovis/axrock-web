@@ -560,13 +560,16 @@ export async function listUploads(limit = 200): Promise<UploadItem[]> {
 }
 
 /**
- * Удаляет файл вместе с уменьшенными копиями. Backend отказывает, если адрес
- * где-то используется, — поэтому битых картинок на сайте не появится.
+ * Удаляет файл вместе с уменьшенными копиями. Занятый файл backend по умолчанию
+ * не трогает; с force он сначала обнуляет ссылки — записи остаются без картинки.
  */
-export async function deleteUpload(url: string): Promise<void> {
+export async function deleteUpload(url: string, force = false): Promise<void> {
   const path = new URL(url).pathname.split("/uploads/").pop();
   if (!path) throw new Error("Не удалось разобрать адрес файла");
-  await apiFetch<void>(`${PREFIX}/uploads/${path}`, { method: "DELETE", auth: true });
+  await apiFetch<void>(`${PREFIX}/uploads/${path}${force ? "?force=true" : ""}`, {
+    method: "DELETE",
+    auth: true,
+  });
 }
 
 export async function uploadImage(file: File): Promise<UploadResult> {
