@@ -5,6 +5,7 @@ import { logout, me } from "~/api/admin-api";
 import { PageSkeleton } from "~/components/common/PageSkeleton";
 import { RebuildButton } from "~/components/admin/RebuildButton";
 import { canManageUsers, roleLabel } from "~/utils/roles";
+import { publicSiteUrl } from "~/utils/site-url";
 import styles from "~/components/admin/admin.module.css";
 
 const NAV = [
@@ -91,7 +92,7 @@ export default function AdminLayout({ loaderData }: Route.ComponentProps) {
             <span className={styles.sidebarUserRole}>{roleLabel(admin.role)}</span>
           </NavLink>
           <RebuildButton compact />
-          <a href="/" target="_blank" rel="noreferrer" className={styles.navLink}>
+          <a href={publicSiteUrl()} target="_blank" rel="noreferrer" className={styles.navLink}>
             Открыть сайт ↗
           </a>
           <button type="button" className={styles.navLink} onClick={handleLogout} disabled={leaving}>

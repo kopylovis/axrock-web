@@ -9,6 +9,7 @@ import { fromDateTimeLocalValue, slugify, toDateTimeLocalValue } from "~/utils/a
 import { CheckboxField, ImageField, SelectField, StatusChip, TextAreaField, TextField, focusFirstInvalidField } from "./fields";
 import { CONCERT_STATUS_LABELS } from "~/utils/format";
 import { RichTextEditor } from "./RichTextEditor";
+import { publicSiteUrl } from "~/utils/site-url";
 import styles from "./admin.module.css";
 
 const httpsUrl = z
@@ -188,7 +189,7 @@ export function ConcertForm({ concert }: ConcertFormProps) {
           </Link>
           {concert && publicationStatus === "PUBLISHED" ? (
             <a
-              href={`/concerts/${concert.slug}`}
+              href={publicSiteUrl(`concerts/${concert.slug}`)}
               target="_blank"
               rel="noreferrer"
               className={`${styles.btn} ${styles.btnSecondary}`}

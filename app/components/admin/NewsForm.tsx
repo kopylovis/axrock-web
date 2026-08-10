@@ -8,6 +8,7 @@ import type { PublicationStatus, RichTextDoc } from "~/types/content";
 import { fromDateTimeLocalValue, slugify, toDateTimeLocalValue } from "~/utils/admin-format";
 import { CheckboxField, ImageField, SelectField, StatusChip, TextAreaField, TextField, focusFirstInvalidField } from "./fields";
 import { RichTextEditor } from "./RichTextEditor";
+import { publicSiteUrl } from "~/utils/site-url";
 import styles from "./admin.module.css";
 
 const schema = z.object({
@@ -114,7 +115,7 @@ export function NewsForm({ article, categories }: NewsFormProps) {
           </Link>
           {article && status === "PUBLISHED" ? (
             <a
-              href={`/news/${article.slug}`}
+              href={publicSiteUrl(`news/${article.slug}`)}
               target="_blank"
               rel="noreferrer"
               className={`${styles.btn} ${styles.btnSecondary}`}
