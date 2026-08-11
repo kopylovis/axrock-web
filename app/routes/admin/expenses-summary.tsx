@@ -48,7 +48,7 @@ export default function AdminExpensesSummary({ loaderData }: Route.ComponentProp
   const [from, setFrom] = useState(loaderData.from);
   const [to, setTo] = useState(loaderData.to);
   const totalsSort = useTableSort<"user" | "amount">({ key: "amount", direction: "desc" });
-  const itemsSort = useTableSort<"user" | "title" | "amount" | "date">({
+  const itemsSort = useTableSort<"user" | "title" | "tour" | "amount" | "date">({
     key: "date",
     direction: "desc",
   });
@@ -103,10 +103,11 @@ export default function AdminExpensesSummary({ loaderData }: Route.ComponentProp
             onClick={() =>
               downloadCsv(
                 `raskhody-obshchie-${loaderData.from || "vse"}-${loaderData.to || "vse"}`,
-                ["Кто", "На что", "Сумма", "Валюта", "Дата", "Комментарий"],
+                ["Кто", "На что", "Выезд", "Сумма", "Валюта", "Дата", "Комментарий"],
                 (summary?.items ?? []).map((item) => [
                   item.userFullName || item.userName || "",
                   item.title,
+                  item.tourTitle ?? "",
                   csvAmount(item.amountMinor),
                   item.currency,
                   formatDate(parseUtcSafe(item.spentOn)),
@@ -230,6 +231,7 @@ export default function AdminExpensesSummary({ loaderData }: Route.ComponentProp
                   <tr>
                     <SortableTh label="Кто" sortKey="user" sort={itemsSort.sort} onSort={itemsSort.toggle} />
                     <SortableTh label="На что" sortKey="title" sort={itemsSort.sort} onSort={itemsSort.toggle} />
+                    <SortableTh label="Выезд" sortKey="tour" sort={itemsSort.sort} onSort={itemsSort.toggle} />
                     <SortableTh
                       label="Сумма"
                       sortKey="amount"
@@ -253,6 +255,8 @@ export default function AdminExpensesSummary({ loaderData }: Route.ComponentProp
                       if (key === "amount") return compareValues(a.amountMinor, b.amountMinor, direction);
                       if (key === "date") return compareValues(a.spentOn, b.spentOn, direction);
                       if (key === "title") return compareValues(a.title, b.title, direction);
+                      if (key === "tour")
+                        return compareValues(a.tourTitle ?? "", b.tourTitle ?? "", direction);
                       return compareValues(
                         a.userFullName ?? a.userName ?? "",
                         b.userFullName ?? b.userName ?? "",
@@ -269,6 +273,7 @@ export default function AdminExpensesSummary({ loaderData }: Route.ComponentProp
                         <span className={styles.rowTitle}>{item.title}</span>
                         {item.comment ? <div className={styles.hint}>{item.comment}</div> : null}
                       </td>
+                      <td>{item.tourTitle ?? "—"}</td>
                       <td>{formatMoney(item.amountMinor, item.currency)}</td>
                       <td>{formatDate(parseUtcSafe(item.spentOn))}</td>
                     </tr>

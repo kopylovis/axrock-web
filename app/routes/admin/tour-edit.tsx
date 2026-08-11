@@ -7,14 +7,16 @@ import {
   updateTour,
   type LogisticsItemInput,
   type TourDetail,
+  type TourStatus,
 } from "~/api/admin-api";
 import { GlassPanel } from "~/components/common/GlassPanel";
 import { PageSkeleton } from "~/components/common/PageSkeleton";
 import { ErrorState } from "~/components/common/States";
 import { LogisticsEditor } from "~/components/admin/LogisticsEditor";
-import { TextAreaField, TextField, focusFirstInvalidField } from "~/components/admin/fields";
+import { SelectField, TextAreaField, TextField, focusFirstInvalidField } from "~/components/admin/fields";
 import { parseUtcSafe, toDateTimeLocalValue } from "~/utils/admin-format";
 import { formatDateTime } from "~/utils/format";
+import { TOUR_STATUS_OPTIONS } from "~/utils/crew-format";
 import { TourReadOnly } from "~/components/admin/TourReadOnly";
 import { canEditContent } from "~/utils/roles";
 import styles from "~/components/admin/admin.module.css";
@@ -49,6 +51,7 @@ function dayValue(value: string | null): string {
 function TourForm({ tour, isNew }: { tour: TourDetail | null; isNew: boolean }) {
   const navigate = useNavigate();
   const [title, setTitle] = useState(tour?.title ?? "");
+  const [status, setStatus] = useState<TourStatus>(tour?.status ?? "ACTIVE");
   const [startsOn, setStartsOn] = useState(dayValue(tour?.startsOn ?? null));
   const [endsOn, setEndsOn] = useState(dayValue(tour?.endsOn ?? null));
   const [notes, setNotes] = useState(tour?.notes ?? "");
@@ -82,6 +85,7 @@ function TourForm({ tour, isNew }: { tour: TourDetail | null; isNew: boolean }) 
 
     const payload = {
       title: title.trim(),
+      status,
       startsOn: startsOn ? `${startsOn}T00:00:00` : null,
       endsOn: endsOn ? `${endsOn}T00:00:00` : null,
       notes: notes.trim() || null,
@@ -137,6 +141,13 @@ function TourForm({ tour, isNew }: { tour: TourDetail | null; isNew: boolean }) 
             placeholder="Улетай — Москва"
             hint="Одиночное мероприятие тоже заводится здесь: у него будет одна дата."
             onChange={(event) => setTitle(event.target.value)}
+          />
+          <SelectField
+            label="Статус"
+            value={status}
+            options={TOUR_STATUS_OPTIONS}
+            hint="Завершённые выезды остаются в списке, но их видно отдельно."
+            onChange={(event) => setStatus(event.target.value as TourStatus)}
           />
           <div className={`${styles.formGrid} ${styles.formGridTwo}`}>
             <TextField

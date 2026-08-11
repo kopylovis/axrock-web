@@ -599,9 +599,12 @@ export async function uploadImage(file: File): Promise<UploadResult> {
 
 /* ------------------------------------------------- Внутренние данные -- */
 
+export type TourStatus = "ACTIVE" | "DONE";
+
 export interface TourListItem {
   id: number;
   title: string;
+  status: TourStatus;
   startsOn: string | null;
   endsOn: string | null;
   concerts: number;
@@ -633,6 +636,7 @@ export interface TourConcert {
 export interface TourDetail {
   id: number;
   title: string;
+  status: TourStatus;
   startsOn: string | null;
   endsOn: string | null;
   notes: string | null;
@@ -651,6 +655,7 @@ export interface LogisticsItemInput {
 
 export interface TourInput {
   title: string;
+  status: TourStatus;
   startsOn: string | null;
   endsOn: string | null;
   notes: string | null;
@@ -688,12 +693,15 @@ export interface Expense {
   spentOn: string;
   comment: string | null;
   receiptUrl: string | null;
+  tourId?: number | null;
+  tourTitle?: string | null;
   userName?: string | null;
   userFullName?: string | null;
 }
 
 export interface ExpenseInput {
   title: string;
+  tourId: number | null;
   amountMinor: number;
   currency: string;
   spentOn: string;

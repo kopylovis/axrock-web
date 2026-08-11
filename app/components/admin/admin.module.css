@@ -1454,3 +1454,8 @@
   padding-left: var(--space-5);
   color: var(--ink-mute);
 }
+
+/* Строка, которая сейчас правится в форме наверху. */
+.rowEditing {
+  background: rgba(200, 162, 74, 0.08);
+}

@@ -1,4 +1,14 @@
-import type { LogisticsKind } from "~/api/admin-api";
+import type { LogisticsKind, TourStatus } from "~/api/admin-api";
+
+export const TOUR_STATUS_LABELS: Record<TourStatus, string> = {
+  ACTIVE: "Текущий",
+  DONE: "Завершён",
+};
+
+export const TOUR_STATUS_OPTIONS = (Object.keys(TOUR_STATUS_LABELS) as TourStatus[]).map((key) => ({
+  value: key,
+  label: TOUR_STATUS_LABELS[key],
+}));
 
 export const LOGISTICS_LABELS: Record<LogisticsKind, string> = {
   TRAIN: "Поезд",

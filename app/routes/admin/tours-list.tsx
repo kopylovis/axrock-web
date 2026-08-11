@@ -6,6 +6,7 @@ import { EmptyState, ErrorState } from "~/components/common/States";
 import { RowMenu } from "~/components/admin/RowMenu";
 import { parseUtcSafe } from "~/utils/admin-format";
 import { formatDateTime } from "~/utils/format";
+import { TOUR_STATUS_LABELS } from "~/utils/crew-format";
 import { SortableTh, compareValues, useTableSort } from "~/components/admin/sortable-table";
 import { canEditContent } from "~/utils/roles";
 import styles from "~/components/admin/admin.module.css";
@@ -33,11 +34,12 @@ function period(startsOn: string | null, endsOn: string | null): string {
 
 export default function AdminToursList({ loaderData }: Route.ComponentProps) {
   const { tours, failed } = loaderData;
-  const { sort, toggle } = useTableSort<"title" | "date" | "concerts" | "logistics">({ key: "date", direction: "desc" });
+  const { sort, toggle } = useTableSort<"title" | "status" | "date" | "concerts" | "logistics">({ key: "date", direction: "desc" });
 
   // Сортировка идёт по данным, а не по разметке: значения берутся из записи.
   const sorted = [...tours].sort((a, b) => {
       if (sort.key === "title") return compareValues(a.title, b.title, sort.direction);
+      if (sort.key === "status") return compareValues(a.status, b.status, sort.direction);
       if (sort.key === "date") return compareValues(a.startsOn ?? "", b.startsOn ?? "", sort.direction);
       if (sort.key === "concerts") return compareValues(a.concerts, b.concerts, sort.direction);
       if (sort.key === "logistics") return compareValues(a.logisticsItems, b.logisticsItems, sort.direction);
@@ -80,7 +82,11 @@ export default function AdminToursList({ loaderData }: Route.ComponentProps) {
       {!failed && tours.length === 0 ? (
         <EmptyState
           title="Пока пусто"
-          description="Логистика ведётся на выезд целиком. Одиночное мероприятие заводится так же — просто с одной датой."
+          description={
+            canEdit
+              ? "Логистика ведётся на выезд целиком. Одиночное мероприятие заводится так же — просто с одной датой."
+              : undefined
+          }
         />
       ) : null}
 
@@ -126,6 +132,15 @@ export default function AdminToursList({ loaderData }: Route.ComponentProps) {
                     <Link to={`/admin/tours/${tour.id}`} className={styles.rowLink}>
                       {tour.title}
                     </Link>
+                  </td>
+                  <td>
+                    <span
+                      className={`${styles.chip} ${
+                        tour.status === "DONE" ? styles.chipArchived : styles.chipPublished
+                      }`}
+                    >
+                      {TOUR_STATUS_LABELS[tour.status]}
+                    </span>
                   </td>
                   <td>{period(tour.startsOn, tour.endsOn)}</td>
                   <td>{tour.concerts}</td>
