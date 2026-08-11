@@ -1,14 +1,7 @@
 import { useState } from "react";
-import { useRevalidator, useRouteLoaderData } from "react-router";
+import { useRevalidator } from "react-router";
 import type { Route } from "./+types/expenses";
-import {
-  createExpense,
-  deleteExpense,
-  listAllExpenses,
-  listExpenses,
-  type Expense,
-  type ExpenseSummary,
-} from "~/api/admin-api";
+import { createExpense, deleteExpense, listExpenses, type Expense } from "~/api/admin-api";
 import { GlassPanel } from "~/components/common/GlassPanel";
 import { PageSkeleton } from "~/components/common/PageSkeleton";
 import { EmptyState, ErrorState } from "~/components/common/States";
@@ -17,19 +10,14 @@ import { RowMenu } from "~/components/admin/RowMenu";
 import { parseUtcSafe } from "~/utils/admin-format";
 import { formatDate } from "~/utils/format";
 import { formatMoney, parseMoneyToMinor } from "~/utils/crew-format";
-import { canManageUsers } from "~/utils/roles";
+import { csvAmount, downloadCsv, printPage } from "~/utils/export";
 import styles from "~/components/admin/admin.module.css";
 
 export async function clientLoader() {
   try {
-    // Сводку по всем видит не каждый — отсутствие прав не должно ронять страницу.
-    const [mine, all] = await Promise.all([
-      listExpenses(),
-      listAllExpenses().catch(() => null),
-    ]);
-    return { mine, all, failed: false as const };
+    return { mine: await listExpenses(), failed: false as const };
   } catch {
-    return { mine: [] as Expense[], all: null as ExpenseSummary | null, failed: true as const };
+    return { mine: [] as Expense[], failed: true as const };
   }
 }
 
@@ -38,10 +26,8 @@ export function HydrateFallback() {
 }
 
 export default function AdminExpenses({ loaderData }: Route.ComponentProps) {
-  const { mine, all, failed } = loaderData;
+  const { mine, failed } = loaderData;
   const revalidator = useRevalidator();
-  const layout = useRouteLoaderData("layouts/AdminLayout") as { admin?: { role?: string } } | undefined;
-  const isManager = canManageUsers(layout?.admin?.role ?? "");
 
   const [title, setTitle] = useState("");
   const [amount, setAmount] = useState("");
@@ -87,13 +73,43 @@ export default function AdminExpenses({ loaderData }: Route.ComponentProps) {
 
   return (
     <>
-      <div className={styles.pageHead}>
-        <h1 className={styles.pageTitle}>Расходы</h1>
+      <div className={`${styles.pageHead} ${styles.printHide}`}>
+        <h1 className={styles.pageTitle}>Мои расходы</h1>
+        <div className={styles.pageActions}>
+          <button
+            type="button"
+            className={`${styles.btn} ${styles.btnSecondary}`}
+            disabled={mine.length === 0}
+            onClick={() =>
+              downloadCsv(
+                `raskhody-${new Date().toISOString().slice(0, 10)}`,
+                ["На что", "Сумма", "Валюта", "Дата", "Комментарий"],
+                mine.map((item) => [
+                  item.title,
+                  csvAmount(item.amountMinor),
+                  item.currency,
+                  formatDate(parseUtcSafe(item.spentOn)),
+                  item.comment ?? "",
+                ]),
+              )
+            }
+          >
+            Таблица
+          </button>
+          <button
+            type="button"
+            className={`${styles.btn} ${styles.btnSecondary}`}
+            disabled={mine.length === 0}
+            onClick={printPage}
+          >
+            Печать / PDF
+          </button>
+        </div>
       </div>
 
       {failed ? <ErrorState /> : null}
 
-      <GlassPanel className={styles.panel}>
+      <GlassPanel className={`${styles.panel} ${styles.printHide}`}>
         <h2 className={styles.panelTitle}>Добавить трату</h2>
         {error ? (
           <p className={styles.alert} role="alert">
@@ -188,43 +204,6 @@ export default function AdminExpenses({ loaderData }: Route.ComponentProps) {
         )}
       </GlassPanel>
 
-      {isManager && all ? (
-        <GlassPanel className={styles.panel}>
-          <h2 className={styles.panelTitle}>Все участники</h2>
-          <p className={styles.hint}>
-            {all.totals.length > 0
-              ? `Итого: ${all.totals.map((t) => formatMoney(t.amountMinor, t.currency)).join(" · ")}`
-              : "Пока никто ничего не вносил."}
-          </p>
-          {all.items.length > 0 ? (
-            <div className={styles.tableWrap}>
-              <table className={styles.table}>
-                <thead>
-                  <tr>
-                    <th>Кто</th>
-                    <th>На что</th>
-                    <th>Сумма</th>
-                    <th>Дата</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {all.items.map((item) => (
-                    <tr key={item.id}>
-                      <td>{item.userName ?? "—"}</td>
-                      <td>
-                        <span className={styles.rowTitle}>{item.title}</span>
-                        {item.comment ? <div className={styles.hint}>{item.comment}</div> : null}
-                      </td>
-                      <td>{formatMoney(item.amountMinor, item.currency)}</td>
-                      <td>{formatDate(parseUtcSafe(item.spentOn))}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          ) : null}
-        </GlassPanel>
-      ) : null}
     </>
   );
 }

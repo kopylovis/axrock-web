@@ -1298,3 +1298,75 @@
 .navGroupItems .navLink {
   padding-inline-start: var(--space-6);
 }
+
+/* Пояснение под заголовком раздела. */
+.pageNote {
+  margin-top: calc(var(--space-4) * -1);
+  margin-bottom: var(--space-5);
+  font-size: var(--fs-sm);
+  color: var(--ink-faint);
+}
+
+/* ------------------------------------------------------------ Печать -- */
+
+.printOnly {
+  display: none;
+}
+
+/**
+ * На бумагу идут только таблицы. Тёмная тема при печати съедает картридж
+ * и плохо читается, поэтому переворачиваем в чёрное по белому.
+ */
+@media print {
+  .printHide,
+  .sidebar,
+  .rowActions {
+    display: none !important;
+  }
+
+  .printOnly {
+    display: block;
+    margin-bottom: var(--space-4);
+    font-family: var(--font-display);
+    font-size: var(--fs-h3);
+    text-transform: uppercase;
+  }
+
+  .shell {
+    display: block;
+    min-height: auto;
+  }
+
+  .content {
+    padding: 0;
+  }
+
+  .panel {
+    margin-bottom: var(--space-5);
+    padding: 0;
+    border: 0;
+    background: none;
+  }
+
+  .tableWrap {
+    overflow: visible;
+    border: 0;
+    background: none;
+  }
+
+  .table {
+    min-width: 0;
+  }
+
+  .table th,
+  .table td {
+    border-bottom: 1px solid #999;
+    color: #000;
+  }
+
+  .panelTitle,
+  .rowTitle,
+  .hint {
+    color: #000;
+  }
+}

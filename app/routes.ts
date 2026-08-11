@@ -41,6 +41,7 @@ export default [
       route("tours", "routes/admin/tours-list.tsx"),
       route("tours/:id", "routes/admin/tour-edit.tsx"),
       route("expenses", "routes/admin/expenses.tsx"),
+      route("expenses-summary", "routes/admin/expenses-summary.tsx"),
       route("contacts", "routes/admin/contacts.tsx"),
       route("settings", "routes/admin/settings.tsx"),
       route("users", "routes/admin/users.tsx"),

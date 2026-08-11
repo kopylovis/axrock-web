@@ -727,9 +727,13 @@ export async function listExpenses(): Promise<Expense[]> {
   return apiFetch<Expense[]>(`${CREW}/expenses`, { auth: true });
 }
 
-/** Траты всех участников с итогами — только владельцу и администратору. */
-export async function listAllExpenses(): Promise<ExpenseSummary> {
-  return apiFetch<ExpenseSummary>(`${CREW}/expenses/all`, { auth: true });
+/**
+ * Траты всех участников с итогами — только владельцу и администратору.
+ * Границы периода необязательны и включительны.
+ */
+export async function listAllExpenses(range: { from?: string; to?: string } = {}): Promise<ExpenseSummary> {
+  const search = buildQuery({ from: range.from, to: range.to });
+  return apiFetch<ExpenseSummary>(`${CREW}/expenses/all${search}`, { auth: true });
 }
 
 export async function createExpense(input: ExpenseInput): Promise<Expense> {

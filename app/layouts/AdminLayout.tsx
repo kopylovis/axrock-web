@@ -33,7 +33,7 @@ const NAV_GROUPS: Array<{
     label: "Для группы",
     items: [
       { to: "/admin/tours", label: "Туры/Концерты" },
-      { to: "/admin/expenses", label: "Расходы" },
+      { to: "/admin/expenses", label: "Мои расходы" },
     ],
   },
   {
@@ -44,6 +44,12 @@ const NAV_GROUPS: Array<{
       { to: "/admin/social-links", label: "Соцссылки" },
       { to: "/admin/settings", label: "Общие" },
     ],
+  },
+  {
+    id: "money",
+    label: "Финансы",
+    requiresUserManager: true,
+    items: [{ to: "/admin/expenses-summary", label: "Общие расходы" }],
   },
   {
     id: "access",

@@ -46,13 +46,15 @@ export default function AdminToursList({ loaderData }: Route.ComponentProps) {
         <h1 className={styles.pageTitle}>Туры и концерты</h1>
         <div className={styles.pageActions}>
           <Link to="/admin/tours/new" className={`${styles.btn} ${styles.btnPrimary}`}>
-            + Тур
+            + Добавить
           </Link>
-          <span className={styles.rebuildNote}>
-            Логистика и сет-листы на сайте не показываются — это внутренние данные для музыкантов.
-          </span>
         </div>
       </div>
+
+      {/* Подпись вне блока кнопок: внутри она растягивала контейнер и сдвигала кнопку. */}
+      <p className={styles.pageNote}>
+        Логистика и сет-листы на сайте не показываются — это внутренние данные для музыкантов.
+      </p>
 
       {failed ? <ErrorState /> : null}
 
