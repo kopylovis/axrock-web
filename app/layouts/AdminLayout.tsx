@@ -208,7 +208,7 @@ export default function AdminLayout({ loaderData }: Route.ComponentProps) {
             </span>
             <span className={styles.sidebarUserRole}>{roleLabel(admin.role)}</span>
           </NavLink>
-          <RebuildButton compact />
+          {canEdit ? <RebuildButton compact /> : null}
           <a href={publicSiteUrl()} target="_blank" rel="noreferrer" className={styles.navLink}>
             Открыть сайт ↗
           </a>
