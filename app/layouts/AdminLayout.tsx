@@ -4,7 +4,7 @@ import type { Route } from "./+types/AdminLayout";
 import { logout, me } from "~/api/admin-api";
 import { PageSkeleton } from "~/components/common/PageSkeleton";
 import { RebuildButton } from "~/components/admin/RebuildButton";
-import { canManageUsers, roleLabel } from "~/utils/roles";
+import { canManageUsers, canUseWebAdmin, roleLabel } from "~/utils/roles";
 import { publicSiteUrl } from "~/utils/site-url";
 import styles from "~/components/admin/admin.module.css";
 
@@ -15,6 +15,8 @@ const NAV = [
   { to: "/admin/members", label: "Участники" },
   { to: "/admin/releases", label: "Релизы" },
   { to: "/admin/media", label: "Медиа" },
+  { to: "/admin/tours", label: "Туры" },
+  { to: "/admin/expenses", label: "Расходы" },
   { to: "/admin/contacts", label: "Контакты" },
   { to: "/admin/social-links", label: "Соцссылки" },
   { to: "/admin/settings", label: "Настройки" },
@@ -43,6 +45,7 @@ export function HydrateFallback() {
 
 export default function AdminLayout({ loaderData }: Route.ComponentProps) {
   const { admin } = loaderData;
+  const webAllowed = canUseWebAdmin(admin.role);
   const navigate = useNavigate();
   const [leaving, setLeaving] = useState(false);
 
@@ -55,6 +58,24 @@ export default function AdminLayout({ loaderData }: Route.ComponentProps) {
     } finally {
       navigate("/admin/login", { replace: true });
     }
+  }
+
+  // Музыканту панель не показываем: его инструменты живут в приложении.
+  // Выход оставляем — иначе с чужого устройства не разлогиниться.
+  if (!webAllowed) {
+    return (
+      <div className={styles.lockedScreen}>
+        <h1 className={styles.pageTitle}>Панель недоступна</h1>
+        <p className={styles.lockedText}>
+          Учётная запись «{admin.username}» с ролью «{roleLabel(admin.role)}» работает в мобильном
+          приложении: там сет-листы, логистика тура и личные расходы. Управление сайтом сюда
+          не входит.
+        </p>
+        <button type="button" className={`${styles.btn} ${styles.btnSecondary}`} onClick={handleLogout} disabled={leaving}>
+          {leaving ? "Выхожу…" : "Выйти"}
+        </button>
+      </div>
+    );
   }
 
   return (

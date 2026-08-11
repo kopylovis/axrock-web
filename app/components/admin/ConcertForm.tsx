@@ -8,6 +8,7 @@ import type { ConcertEventStatus, PublicationStatus, RichTextDoc } from "~/types
 import { fromDateTimeLocalValue, slugify, toDateTimeLocalValue } from "~/utils/admin-format";
 import { CheckboxField, ImageField, SelectField, StatusChip, TextAreaField, TextField, focusFirstInvalidField } from "./fields";
 import { CONCERT_STATUS_LABELS } from "~/utils/format";
+import { SetlistPanel } from "./SetlistPanel";
 import { RichTextEditor } from "./RichTextEditor";
 import { publicSiteUrl } from "~/utils/site-url";
 import styles from "./admin.module.css";
@@ -454,6 +455,8 @@ export function ConcertForm({ concert }: ConcertFormProps) {
             onChange={(event) => update("seoDescription")(event.target.value)}
           />
         </div>
+
+        {concert ? <SetlistPanel concertId={concert.id} /> : null}
 
         {/* Набор действий зависит от статуса: у опубликованной записи «Опубликовать»
             и «Сохранить» делали бы одно и то же, а «Сохранить черновик» на самом

@@ -15,6 +15,7 @@ import type { ConcertEventStatus, MediaType, PublicationStatus, ReleaseType, Ric
 import type { AdminRole } from "~/utils/roles";
 
 const PREFIX = "/admin";
+const CREW = "/crew";
 
 export interface AdminUser {
   id: number;
@@ -580,4 +581,165 @@ export async function uploadImage(file: File): Promise<UploadResult> {
     formData,
     auth: true,
   });
+}
+
+/* ------------------------------------------------- Внутренние данные -- */
+
+export interface TourListItem {
+  id: number;
+  title: string;
+  startsOn: string | null;
+  endsOn: string | null;
+  concerts: number;
+  logisticsItems: number;
+}
+
+export type LogisticsKind = "TRAIN" | "FLIGHT" | "CAR" | "BUS" | "VENUE" | "OTHER";
+
+export interface LogisticsItem {
+  id: number;
+  happensOn: string;
+  timeLabel: string | null;
+  kind: LogisticsKind;
+  title: string;
+  details: string | null;
+  participants: string[];
+  sortOrder: number;
+}
+
+export interface TourConcert {
+  id: number;
+  title: string;
+  city: string;
+  venueName: string;
+  startsAt: string;
+  timezone: string;
+}
+
+export interface TourDetail {
+  id: number;
+  title: string;
+  startsOn: string | null;
+  endsOn: string | null;
+  notes: string | null;
+  logistics: LogisticsItem[];
+  concerts: TourConcert[];
+}
+
+export interface LogisticsItemInput {
+  happensOn: string;
+  timeLabel: string | null;
+  kind: LogisticsKind;
+  title: string;
+  details: string | null;
+  participants: string[];
+}
+
+export interface TourInput {
+  title: string;
+  startsOn: string | null;
+  endsOn: string | null;
+  notes: string | null;
+  logistics: LogisticsItemInput[];
+}
+
+export interface SetlistItem {
+  id: number;
+  title: string;
+  duration: string | null;
+  note: string | null;
+  backingTrackUrl: string | null;
+  sortOrder: number;
+}
+
+export interface SetlistItemInput {
+  title: string;
+  duration: string | null;
+  note: string | null;
+  backingTrackUrl: string | null;
+}
+
+export interface Setlist {
+  concertId: number;
+  items: SetlistItem[];
+  totalSeconds: number;
+}
+
+export interface Expense {
+  id: number;
+  title: string;
+  /** В копейках: дробные типы для денег теряют точность. */
+  amountMinor: number;
+  currency: string;
+  spentOn: string;
+  comment: string | null;
+  receiptUrl: string | null;
+  userName?: string | null;
+}
+
+export interface ExpenseInput {
+  title: string;
+  amountMinor: number;
+  currency: string;
+  spentOn: string;
+  comment: string | null;
+  receiptUrl: string | null;
+}
+
+export interface ExpenseSummary {
+  items: Expense[];
+  totals: Array<{ currency: string; amountMinor: number }>;
+}
+
+export async function listTours(): Promise<TourListItem[]> {
+  return apiFetch<TourListItem[]>(`${CREW}/tours`, { auth: true });
+}
+
+export async function getTour(id: number): Promise<TourDetail> {
+  return apiFetch<TourDetail>(`${CREW}/tours/${id}`, { auth: true });
+}
+
+export async function createTour(input: TourInput): Promise<TourDetail> {
+  return apiFetch<TourDetail>(`${CREW}/tours`, { method: "POST", body: input, auth: true });
+}
+
+export async function updateTour(id: number, input: TourInput): Promise<TourDetail> {
+  return apiFetch<TourDetail>(`${CREW}/tours/${id}`, { method: "PUT", body: input, auth: true });
+}
+
+export async function deleteTour(id: number): Promise<void> {
+  await apiFetch<void>(`${CREW}/tours/${id}`, { method: "DELETE", auth: true });
+}
+
+export async function getSetlist(concertId: number): Promise<Setlist> {
+  return apiFetch<Setlist>(`${CREW}/concerts/${concertId}/setlist`, { auth: true });
+}
+
+export async function saveSetlist(concertId: number, items: SetlistItemInput[]): Promise<Setlist> {
+  return apiFetch<Setlist>(`${CREW}/concerts/${concertId}/setlist`, {
+    method: "PUT",
+    body: items,
+    auth: true,
+  });
+}
+
+export async function listExpenses(): Promise<Expense[]> {
+  return apiFetch<Expense[]>(`${CREW}/expenses`, { auth: true });
+}
+
+/** Траты всех участников с итогами — только владельцу и администратору. */
+export async function listAllExpenses(): Promise<ExpenseSummary> {
+  return apiFetch<ExpenseSummary>(`${CREW}/expenses/all`, { auth: true });
+}
+
+export async function createExpense(input: ExpenseInput): Promise<Expense> {
+  return apiFetch<Expense>(`${CREW}/expenses`, { method: "POST", body: input, auth: true });
+}
+
+export async function updateExpense(id: number, input: ExpenseInput): Promise<Expense> {
+  return apiFetch<Expense>(`${CREW}/expenses/${id}`, { method: "PUT", body: input, auth: true });
+}
+
+export async function deleteExpense(id: number): Promise<void> {
+  await apiFetch<void>(`${CREW}/expenses/${id}`, { method: "DELETE", auth: true });
 }
