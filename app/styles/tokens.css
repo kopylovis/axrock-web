@@ -35,8 +35,8 @@
   --shadow-lift: 0 24px 70px rgba(0, 0, 0, 0.6);
   --text-shadow: 0 2px 10px #000;
 
-  /* Ruslan Display — заголовки, Oswald — даты и числа, Roboto — текст. */
-  --font-display: "Ruslan Display", "Oswald", Georgia, serif;
+  /* Benzin — заголовки, Oswald — даты и числа, Roboto — текст. */
+  --font-display: "Benzin", "Oswald", Georgia, sans-serif;
   --font-accent: "Oswald", "Roboto", -apple-system, sans-serif;
   --font-serif: "Cormorant Garamond", Georgia, serif;
   --font-sans: "Roboto", -apple-system, BlinkMacSystemFont, system-ui, "Segoe UI",

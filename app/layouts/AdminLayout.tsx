@@ -15,6 +15,7 @@ const NAV = [
   { to: "/admin/members", label: "Участники" },
   { to: "/admin/releases", label: "Релизы" },
   { to: "/admin/media", label: "Медиа" },
+  { to: "/admin/contacts", label: "Контакты" },
   { to: "/admin/social-links", label: "Соцссылки" },
   { to: "/admin/settings", label: "Настройки" },
   { to: "/admin/users", label: "Пользователи", requiresUserManager: true },

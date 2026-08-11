@@ -38,6 +38,7 @@ export default [
       route("releases/new", "routes/admin/releases-new.tsx"),
       route("releases/:id", "routes/admin/releases-edit.tsx"),
       route("media", "routes/admin/media.tsx"),
+      route("contacts", "routes/admin/contacts.tsx"),
       route("settings", "routes/admin/settings.tsx"),
       route("users", "routes/admin/users.tsx"),
       route("profile", "routes/admin/profile.tsx"),

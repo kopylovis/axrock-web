@@ -35,6 +35,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <link rel="icon" href={`${BASE}favicon.svg`} type="image/svg+xml" />
         <link
           rel="preload"
+          href={`${BASE}fonts/benzin-regular.woff2`}
+          as="font"
+          type="font/woff2"
+          crossOrigin="anonymous"
+        />
+        <link
+          rel="preload"
           href={`${BASE}fonts/roboto-cyrillic.woff2`}
           as="font"
           type="font/woff2"

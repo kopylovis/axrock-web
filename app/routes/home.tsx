@@ -16,7 +16,6 @@ import { RELEASE_TYPE_LABELS } from "~/components/music/ReleaseCard";
 import { fetchMedia, fetchNews, fetchReleases, fetchUpcomingConcerts } from "~/api/public-api";
 import { buildMeta, jsonLd, ogImageFrom } from "~/lib/seo";
 import { SITE_URL } from "~/lib/config";
-import { formatDayNumber, formatMonthShort } from "~/utils/format";
 import styles from "~/components/home/home.module.css";
 
 const ABOUT_ANCHOR = "events";
@@ -82,18 +81,11 @@ export default function Home({ loaderData }: Route.ComponentProps) {
 
   // Даты перемежаются короткими фразами: при двух концертах лента иначе
   // выглядит как повтор одного и того же.
-  const marqueeItems =
-    concerts.length > 0
-      ? [
-          "Ближайшие концерты",
-          ...concerts.map(
-            (concert) =>
-              `${formatDayNumber(concert.startsAt, concert.timezone)} ${formatMonthShort(concert.startsAt, concert.timezone)} · ${concert.city}`,
-          ),
-          settings.bandName,
-          "Билеты — на сайтах организаторов",
-        ]
-      : [settings.bandName, "Официальный сайт", "Новые даты скоро"];
+  // Девиз вместо дат: афиша и так идёт следующей секцией, дублировать её незачем.
+  const marqueeItems = [
+    "Создатели мистической лирики и хоррор историй",
+    "Амбассадоры мрачного фэнтезийного повествования под сопровождение перегруженных гитар",
+  ];
 
   return (
     <>

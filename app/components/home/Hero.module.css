@@ -127,6 +127,8 @@
   padding-block: var(--space-8);
 }
 
+/* На десктопе плашка налезала на логотип, а дата и так есть в афише ниже.
+   На телефоне логотип мельче и место остаётся — там она полезна. */
 .announce {
   display: inline-flex;
   align-self: flex-start;
@@ -140,6 +142,12 @@
   font-size: var(--fs-xs);
   letter-spacing: var(--track-caps);
   text-transform: uppercase;
+}
+
+@media (min-width: 768px) {
+  .announce {
+    display: none;
+  }
 }
 
 .announceDot {

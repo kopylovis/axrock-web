@@ -43,7 +43,7 @@ export function Marquee({ items, speed = 55 }: MarqueeProps) {
         <span key={`${item}-${index}`} className={styles.item}>
           {item}
           <span className={styles.separator} aria-hidden="true">
-            ✦
+            ●
           </span>
         </span>
       ))}

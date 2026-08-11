@@ -26,8 +26,9 @@ export function formatDayNumber(date: Date, timeZone = DEFAULT_TZ): string {
   return formatter({ day: "numeric" }, timeZone).format(date);
 }
 
+/** Месяц целиком: «окт» экономило место, но читалось хуже в крупной вёрстке афиши. */
 export function formatMonthShort(date: Date, timeZone = DEFAULT_TZ): string {
-  return formatter({ month: "short" }, timeZone).format(date).replace(".", "");
+  return formatter({ month: "long" }, timeZone).format(date);
 }
 
 export function toIsoDate(date: Date): string {

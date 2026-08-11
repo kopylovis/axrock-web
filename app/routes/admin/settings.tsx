@@ -137,36 +137,6 @@ function SettingsForm({ initial }: { initial: SiteSettingsDto }) {
 
         <div className={`${styles.formGrid} ${styles.formGridTwo}`}>
           <TextField
-            label="Почта для организаторов"
-            type="email"
-            value={form.bookingEmail}
-            onChange={(event) => update("bookingEmail")(event.target.value)}
-          />
-          <TextField
-            label="Почта для прессы"
-            type="email"
-            value={form.pressEmail}
-            onChange={(event) => update("pressEmail")(event.target.value)}
-          />
-        </div>
-
-        <div className={`${styles.formGrid} ${styles.formGridTwo}`}>
-          <TextField
-            label="Общая почта"
-            type="email"
-            value={form.contactEmail}
-            onChange={(event) => update("contactEmail")(event.target.value)}
-          />
-          <TextField
-            label="Телефон"
-            value={form.contactPhone}
-            hint="Публикуется на сайте — оставьте пустым, если не нужен."
-            onChange={(event) => update("contactPhone")(event.target.value)}
-          />
-        </div>
-
-        <div className={`${styles.formGrid} ${styles.formGridTwo}`}>
-          <TextField
             label="SEO-заголовок по умолчанию"
             value={form.defaultSeoTitle}
             hint="Подставляется в заголовок вкладки браузера и в синюю ссылку выдачи Яндекса и Google на тех страницах, где свой заголовок не задан. До 60 символов."
