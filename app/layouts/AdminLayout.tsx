@@ -32,7 +32,7 @@ const NAV_GROUPS: Array<{
     id: "crew",
     label: "Для группы",
     items: [
-      { to: "/admin/tours", label: "Туры" },
+      { to: "/admin/tours", label: "Туры/Концерты" },
       { to: "/admin/expenses", label: "Расходы" },
     ],
   },

@@ -43,7 +43,7 @@ export default function AdminToursList({ loaderData }: Route.ComponentProps) {
   return (
     <>
       <div className={styles.pageHead}>
-        <h1 className={styles.pageTitle}>Туры</h1>
+        <h1 className={styles.pageTitle}>Туры и концерты</h1>
         <div className={styles.pageActions}>
           <Link to="/admin/tours/new" className={`${styles.btn} ${styles.btnPrimary}`}>
             + Тур
@@ -58,8 +58,8 @@ export default function AdminToursList({ loaderData }: Route.ComponentProps) {
 
       {!failed && tours.length === 0 ? (
         <EmptyState
-          title="Туров пока нет"
-          description="Тур объединяет несколько дат: логистика ведётся на выезд целиком."
+          title="Пока пусто"
+          description="Логистика ведётся на выезд целиком. Одиночное мероприятие заводится так же — просто с одной датой."
         />
       ) : null}
 
@@ -68,7 +68,7 @@ export default function AdminToursList({ loaderData }: Route.ComponentProps) {
           <table className={styles.table}>
             <thead>
               <tr>
-                <th>Тур</th>
+                <th>Название</th>
                 <th>Даты</th>
                 <th>Концертов</th>
                 <th>Пунктов логистики</th>

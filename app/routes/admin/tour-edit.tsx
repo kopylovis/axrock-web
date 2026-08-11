@@ -100,7 +100,7 @@ function TourForm({ tour, isNew }: { tour: TourDetail | null; isNew: boolean }) 
   return (
     <>
       <div className={`${styles.pageHead} ${styles.pageHeadSticky}`}>
-        <h1 className={styles.pageTitle}>{tour ? "Тур" : "Новый тур"}</h1>
+        <h1 className={styles.pageTitle}>{tour ? "Тур или концерт" : "Новая запись"}</h1>
         <div className={styles.pageActions}>
           <Link to="/admin/tours" className={`${styles.btn} ${styles.btnSecondary}`}>
             К списку
@@ -120,7 +120,7 @@ function TourForm({ tour, isNew }: { tour: TourDetail | null; isNew: boolean }) 
       ) : null}
 
       <GlassPanel className={styles.panel}>
-        <h2 className={styles.panelTitle}>О туре</h2>
+        <h2 className={styles.panelTitle}>Общее</h2>
         <div className={styles.form}>
           <TextField
             label="Название"
@@ -128,6 +128,7 @@ function TourForm({ tour, isNew }: { tour: TourDetail | null; isNew: boolean }) 
             required
             error={errors.title}
             placeholder="Улетай — Москва"
+            hint="Одиночное мероприятие тоже заводится здесь: у него будет одна дата."
             onChange={(event) => setTitle(event.target.value)}
           />
           <div className={`${styles.formGrid} ${styles.formGridTwo}`}>
@@ -156,7 +157,7 @@ function TourForm({ tour, isNew }: { tour: TourDetail | null; isNew: boolean }) 
 
       {tour && tour.concerts.length > 0 ? (
         <GlassPanel className={styles.panel}>
-          <h2 className={styles.panelTitle}>Концерты тура</h2>
+          <h2 className={styles.panelTitle}>Привязанные концерты</h2>
           <ul className={styles.plainList}>
             {tour.concerts.map((concert) => (
               <li key={concert.id}>
@@ -174,7 +175,7 @@ function TourForm({ tour, isNew }: { tour: TourDetail | null; isNew: boolean }) 
       <GlassPanel className={styles.panel}>
         <h2 className={styles.panelTitle}>Логистика</h2>
         <p className={styles.hint}>
-          Ведётся на весь выезд: один тур обычно накрывает несколько дат.
+          Ведётся на весь выезд целиком — и для тура из нескольких дат, и для одиночного концерта.
         </p>
         <LogisticsEditor items={logistics} onChange={setLogistics} />
       </GlassPanel>
