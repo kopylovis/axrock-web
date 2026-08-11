@@ -353,9 +353,11 @@
   margin-bottom: var(--space-4);
 }
 
+/* Идёт следом за формой имени — без отступа кнопка липнет к списку. */
 .summary {
   display: grid;
   gap: var(--space-4);
+  margin-top: var(--space-6);
 }
 
 .summaryRow {
@@ -1369,4 +1371,38 @@
   .hint {
     color: #000;
   }
+}
+
+/* ------------------------------------------- Сортировка таблиц -- */
+
+.sortButton {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font: inherit;
+  letter-spacing: inherit;
+  text-transform: inherit;
+  color: inherit;
+  transition: color var(--t-fast);
+}
+
+.sortButton:hover {
+  color: var(--ink);
+}
+
+.sortMark {
+  font-size: 0.7em;
+  color: var(--accent);
+}
+
+/* Стрелка неактивного столбца видна только при наведении: иначе шапка рябит. */
+.sortMarkIdle {
+  font-size: 0.7em;
+  opacity: 0;
+  transition: opacity var(--t-fast);
+}
+
+.sortButton:hover .sortMarkIdle,
+.sortButton:focus-visible .sortMarkIdle {
+  opacity: 0.6;
 }

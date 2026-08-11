@@ -237,7 +237,6 @@ export default function AdminUsers({ loaderData }: Route.ComponentProps) {
               label="Фамилия"
               value={lastName}
               placeholder="Копылов"
-              hint="Показывается в сводке расходов вместо логина."
               onChange={(event) => setLastName(event.target.value)}
             />
           </div>

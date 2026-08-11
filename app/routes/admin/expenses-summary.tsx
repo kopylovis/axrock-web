@@ -7,6 +7,7 @@ import { GlassPanel } from "~/components/common/GlassPanel";
 import { PageSkeleton } from "~/components/common/PageSkeleton";
 import { EmptyState, ErrorState } from "~/components/common/States";
 import { TextField } from "~/components/admin/fields";
+import { SortableTh, compareValues, useTableSort } from "~/components/admin/sortable-table";
 import { parseUtcSafe } from "~/utils/admin-format";
 import { formatDate } from "~/utils/format";
 import { formatMoney } from "~/utils/crew-format";
@@ -46,6 +47,11 @@ export default function AdminExpensesSummary({ loaderData }: Route.ComponentProp
   const [searchParams, setSearchParams] = useSearchParams();
   const [from, setFrom] = useState(loaderData.from);
   const [to, setTo] = useState(loaderData.to);
+  const totalsSort = useTableSort<"user" | "amount">({ key: "amount", direction: "desc" });
+  const itemsSort = useTableSort<"user" | "title" | "amount" | "date">({
+    key: "date",
+    direction: "desc",
+  });
 
   function apply() {
     const next = new URLSearchParams(searchParams);
@@ -176,13 +182,32 @@ export default function AdminExpensesSummary({ loaderData }: Route.ComponentProp
               <table className={styles.table}>
                 <thead>
                   <tr>
-                    <th>Участник</th>
-                    <th>Сумма</th>
+                    <SortableTh
+                      label="Участник"
+                      sortKey="user"
+                      sort={totalsSort.sort}
+                      onSort={totalsSort.toggle}
+                    />
+                    <SortableTh
+                      label="Сумма"
+                      sortKey="amount"
+                      sort={totalsSort.sort}
+                      onSort={totalsSort.toggle}
+                      preferred="desc"
+                    />
                   </tr>
                 </thead>
                 <tbody>
                   {[...byUser.entries()]
-                    .sort((a, b) => b[1].amount - a[1].amount)
+                    .sort(([loginA, a], [loginB, b]) =>
+                      totalsSort.sort.key === "amount"
+                        ? compareValues(a.amount, b.amount, totalsSort.sort.direction)
+                        : compareValues(
+                            a.full ?? loginA,
+                            b.full ?? loginB,
+                            totalsSort.sort.direction,
+                          ),
+                    )
                     .map(([login, entry]) => (
                       <tr key={login}>
                         <td>
@@ -203,14 +228,38 @@ export default function AdminExpensesSummary({ loaderData }: Route.ComponentProp
               <table className={styles.table}>
                 <thead>
                   <tr>
-                    <th>Кто</th>
-                    <th>На что</th>
-                    <th>Сумма</th>
-                    <th>Дата</th>
+                    <SortableTh label="Кто" sortKey="user" sort={itemsSort.sort} onSort={itemsSort.toggle} />
+                    <SortableTh label="На что" sortKey="title" sort={itemsSort.sort} onSort={itemsSort.toggle} />
+                    <SortableTh
+                      label="Сумма"
+                      sortKey="amount"
+                      sort={itemsSort.sort}
+                      onSort={itemsSort.toggle}
+                      preferred="desc"
+                    />
+                    <SortableTh
+                      label="Дата"
+                      sortKey="date"
+                      sort={itemsSort.sort}
+                      onSort={itemsSort.toggle}
+                      preferred="desc"
+                    />
                   </tr>
                 </thead>
                 <tbody>
-                  {summary.items.map((item) => (
+                  {[...summary.items]
+                    .sort((a, b) => {
+                      const { key, direction } = itemsSort.sort;
+                      if (key === "amount") return compareValues(a.amountMinor, b.amountMinor, direction);
+                      if (key === "date") return compareValues(a.spentOn, b.spentOn, direction);
+                      if (key === "title") return compareValues(a.title, b.title, direction);
+                      return compareValues(
+                        a.userFullName ?? a.userName ?? "",
+                        b.userFullName ?? b.userName ?? "",
+                        direction,
+                      );
+                    })
+                    .map((item) => (
                     <tr key={item.id}>
                       <td>
                         <span className={styles.rowTitle}>{item.userFullName ?? item.userName ?? "—"}</span>
