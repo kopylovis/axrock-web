@@ -1413,3 +1413,44 @@
 .sortButton:focus-visible .sortMarkIdle {
   opacity: 0.6;
 }
+
+/* --------------------------------------- Просмотр выезда -- */
+
+.readText {
+  white-space: pre-line;
+  color: var(--ink-mute);
+  line-height: var(--lh-body);
+}
+
+.logisticsDay {
+  margin-bottom: var(--space-5);
+}
+
+.logisticsDate {
+  margin-bottom: var(--space-3);
+  font-family: var(--font-accent);
+  font-size: var(--fs-xs);
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.logisticsItem {
+  display: grid;
+  grid-template-columns: 72px minmax(0, 1fr);
+  gap: var(--space-3);
+  padding-block: var(--space-2);
+  border-bottom: 1px solid var(--line);
+}
+
+.logisticsTime {
+  font-family: var(--font-accent);
+  color: var(--ink);
+}
+
+.setlist {
+  display: grid;
+  gap: var(--space-2);
+  padding-left: var(--space-5);
+  color: var(--ink-mute);
+}

@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate, useRouteLoaderData } from "react-router";
 import type { Route } from "./+types/tour-edit";
 import {
   createTour,
@@ -15,6 +15,8 @@ import { LogisticsEditor } from "~/components/admin/LogisticsEditor";
 import { TextAreaField, TextField, focusFirstInvalidField } from "~/components/admin/fields";
 import { parseUtcSafe, toDateTimeLocalValue } from "~/utils/admin-format";
 import { formatDateTime } from "~/utils/format";
+import { TourReadOnly } from "~/components/admin/TourReadOnly";
+import { canEditContent } from "~/utils/roles";
 import styles from "~/components/admin/admin.module.css";
 
 export async function clientLoader({ params }: Route.ClientLoaderArgs) {
@@ -31,7 +33,12 @@ export function HydrateFallback() {
 }
 
 export default function AdminTourEdit({ loaderData, params }: Route.ComponentProps) {
+  const layout = useRouteLoaderData("layouts/AdminLayout") as { admin?: { role?: string } } | undefined;
+  const canEdit = canEditContent(layout?.admin?.role ?? "");
+
   if (loaderData.failed) return <ErrorState title="Не удалось загрузить тур" />;
+  // Музыкант правами на правку не обладает — показываем то же, но на чтение.
+  if (!canEdit && loaderData.tour) return <TourReadOnly tour={loaderData.tour} />;
   return <TourForm tour={loaderData.tour} isNew={params.id === "new"} />;
 }
 

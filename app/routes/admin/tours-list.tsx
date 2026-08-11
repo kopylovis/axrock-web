@@ -1,4 +1,4 @@
-import { Link, useNavigate, useRevalidator } from "react-router";
+import { Link, useNavigate, useRevalidator, useRouteLoaderData } from "react-router";
 import type { Route } from "./+types/tours-list";
 import { deleteTour, listTours } from "~/api/admin-api";
 import { PageSkeleton } from "~/components/common/PageSkeleton";
@@ -7,6 +7,7 @@ import { RowMenu } from "~/components/admin/RowMenu";
 import { parseUtcSafe } from "~/utils/admin-format";
 import { formatDateTime } from "~/utils/format";
 import { SortableTh, compareValues, useTableSort } from "~/components/admin/sortable-table";
+import { canEditContent } from "~/utils/roles";
 import styles from "~/components/admin/admin.module.css";
 
 export async function clientLoader() {
@@ -44,6 +45,8 @@ export default function AdminToursList({ loaderData }: Route.ComponentProps) {
   });
   const revalidator = useRevalidator();
   const navigate = useNavigate();
+  const layout = useRouteLoaderData("layouts/AdminLayout") as { admin?: { role?: string } } | undefined;
+  const canEdit = canEditContent(layout?.admin?.role ?? "");
 
   async function remove(id: number, title: string) {
     if (!window.confirm(`Удалить тур «${title}»? Логистика удалится вместе с ним, концерты останутся.`)) return;
@@ -55,16 +58,18 @@ export default function AdminToursList({ loaderData }: Route.ComponentProps) {
     <>
       <div className={styles.pageHead}>
         <h1 className={styles.pageTitle}>Туры и концерты</h1>
-        <div className={styles.pageActions}>
-          <Link to="/admin/tours/new" className={`${styles.btn} ${styles.btnPrimary}`}>
-            + Добавить
-          </Link>
-        </div>
+        {canEdit ? (
+          <div className={styles.pageActions}>
+            <Link to="/admin/tours/new" className={`${styles.btn} ${styles.btnPrimary}`}>
+              + Добавить
+            </Link>
+          </div>
+        ) : null}
       </div>
 
       {/* Подпись вне блока кнопок: внутри она растягивала контейнер и сдвигала кнопку. */}
       <p className={styles.pageNote}>
-        Логистика и сет-листы на сайте не показываются — это внутренние данные для музыкантов.
+        Логистика и сет-листы на сайте не показываются — это внутренние данные группы.
       </p>
 
       {failed ? <ErrorState /> : null}
@@ -128,7 +133,15 @@ export default function AdminToursList({ loaderData }: Route.ComponentProps) {
                         label={`Действия: ${tour.title}`}
                         items={[
                           { label: "Открыть", onSelect: () => navigate(`/admin/tours/${tour.id}`) },
-                          { label: "Удалить", danger: true, onSelect: () => remove(tour.id, tour.title) },
+                          ...(canEdit
+                            ? [
+                                {
+                                  label: "Удалить",
+                                  danger: true,
+                                  onSelect: () => remove(tour.id, tour.title),
+                                },
+                              ]
+                            : []),
                         ]}
                       />
                     </div>

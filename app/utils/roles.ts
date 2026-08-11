@@ -26,7 +26,11 @@ export function canManageUsers(role: string): boolean {
   return role === "OWNER" || role === "ADMIN";
 }
 
-/** Музыканту веб-панель не нужна: его инструменты — в приложении. */
-export function canUseWebAdmin(role: string): boolean {
+/**
+ * Музыкант в панель заходит, но правит только свои расходы: контент сайта,
+ * туры и сет-листы для него доступны на чтение. Те же правила стоят и на
+ * маршрутах backend, так что запретом в интерфейсе защита не исчерпывается.
+ */
+export function canEditContent(role: string): boolean {
   return role !== "MUSICIAN";
 }

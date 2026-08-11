@@ -1,6 +1,7 @@
-import { Link } from "react-router";
+import { Link, redirect } from "react-router";
 import type { Route } from "./+types/dashboard";
-import { dashboard } from "~/api/admin-api";
+import { dashboard, me } from "~/api/admin-api";
+import { canEditContent } from "~/utils/roles";
 import { GlassPanel } from "~/components/common/GlassPanel";
 import { RebuildButton } from "~/components/admin/RebuildButton";
 import { PageSkeleton } from "~/components/common/PageSkeleton";
@@ -25,8 +26,13 @@ const KIND_PATHS: Record<string, string> = {
 
 export async function clientLoader() {
   try {
+    // Сводка по сайту музыканту недоступна — сразу отправляем в его раздел.
+    const admin = await me();
+    if (!canEditContent(admin.role)) throw redirect("/admin/tours");
+
     return { data: await dashboard(), failed: false as const };
-  } catch {
+  } catch (error) {
+    if (error instanceof Response) throw error;
     return { data: null, failed: true as const };
   }
 }

@@ -4,7 +4,7 @@ import type { Route } from "./+types/AdminLayout";
 import { logout, me } from "~/api/admin-api";
 import { PageSkeleton } from "~/components/common/PageSkeleton";
 import { RebuildButton } from "~/components/admin/RebuildButton";
-import { canManageUsers, canUseWebAdmin, roleLabel } from "~/utils/roles";
+import { canEditContent, canManageUsers, roleLabel } from "~/utils/roles";
 import { publicSiteUrl } from "~/utils/site-url";
 import styles from "~/components/admin/admin.module.css";
 
@@ -15,11 +15,14 @@ const NAV_GROUPS: Array<{
   id: string;
   label: string;
   requiresUserManager?: boolean;
+  /** Скрыто от музыканта: он в панели только смотрит свой выезд и траты. */
+  requiresEditor?: boolean;
   items: Array<{ to: string; label: string }>;
 }> = [
   {
     id: "content",
     label: "Сайт",
+    requiresEditor: true,
     items: [
       { to: "/admin/news", label: "Новости" },
       { to: "/admin/concerts", label: "Концерты" },
@@ -39,6 +42,7 @@ const NAV_GROUPS: Array<{
   {
     id: "settings",
     label: "Настройки сайта",
+    requiresEditor: true,
     items: [
       { to: "/admin/contacts", label: "Контакты" },
       { to: "/admin/social-links", label: "Соцссылки" },
@@ -92,7 +96,7 @@ export function HydrateFallback() {
 
 export default function AdminLayout({ loaderData }: Route.ComponentProps) {
   const { admin } = loaderData;
-  const webAllowed = canUseWebAdmin(admin.role);
+  const canEdit = canEditContent(admin.role);
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const [leaving, setLeaving] = useState(false);
@@ -122,24 +126,6 @@ export default function AdminLayout({ loaderData }: Route.ComponentProps) {
     }
   }
 
-  // Музыканту панель не показываем: его инструменты живут в приложении.
-  // Выход оставляем — иначе с чужого устройства не разлогиниться.
-  if (!webAllowed) {
-    return (
-      <div className={styles.lockedScreen}>
-        <h1 className={styles.pageTitle}>Панель недоступна</h1>
-        <p className={styles.lockedText}>
-          Учётная запись «{admin.username}» с ролью «{roleLabel(admin.role)}» работает в мобильном
-          приложении: там сет-листы, логистика тура и личные расходы. Управление сайтом сюда
-          не входит.
-        </p>
-        <button type="button" className={`${styles.btn} ${styles.btnSecondary}`} onClick={handleLogout} disabled={leaving}>
-          {leaving ? "Выхожу…" : "Выйти"}
-        </button>
-      </div>
-    );
-  }
-
   return (
     <div className={styles.shell}>
       <aside className={styles.sidebar}>
@@ -149,18 +135,22 @@ export default function AdminLayout({ loaderData }: Route.ComponentProps) {
         </div>
 
         <nav className={styles.nav} aria-label="Разделы админки">
-          <NavLink
-            to={OVERVIEW.to}
-            end
-            className={({ isActive }) =>
-              [styles.navLink, isActive ? styles.navLinkActive : null].filter(Boolean).join(" ")
-            }
-          >
-            {OVERVIEW.label}
-          </NavLink>
+          {canEdit ? (
+            <NavLink
+              to={OVERVIEW.to}
+              end
+              className={({ isActive }) =>
+                [styles.navLink, isActive ? styles.navLinkActive : null].filter(Boolean).join(" ")
+              }
+            >
+              {OVERVIEW.label}
+            </NavLink>
+          ) : null}
 
           {NAV_GROUPS.filter(
-            (group) => !group.requiresUserManager || canManageUsers(admin.role),
+            (group) =>
+              (!group.requiresUserManager || canManageUsers(admin.role)) &&
+              (!group.requiresEditor || canEdit),
           ).map((group) => {
             // Группу с текущим разделом не даём держать закрытой: иначе непонятно,
             // где находишься, и до соседних страниц не добраться.
