@@ -123,11 +123,12 @@
 
 /* ------------------------------------------------------- Ссылки, связь -- */
 
+/* Верхней границы нет намеренно: её даёт отбивка заголовка секции,
+   иначе под ним оказываются две линии подряд с пустой полосой между ними. */
 .linksBand {
   display: grid;
   gap: var(--space-6);
-  padding-block: var(--space-7);
-  border-top: 1px solid var(--line);
+  padding-bottom: var(--space-7);
   border-bottom: 1px solid var(--line);
 }
 

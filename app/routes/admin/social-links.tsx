@@ -6,6 +6,7 @@ import { GlassPanel } from "~/components/common/GlassPanel";
 import { PageSkeleton } from "~/components/common/PageSkeleton";
 import { EmptyState, ErrorState } from "~/components/common/States";
 import { TextField } from "~/components/admin/fields";
+import { SOCIAL_PLATFORMS, SocialIcon } from "~/components/common/SocialIcon";
 import styles from "~/components/admin/admin.module.css";
 
 export async function clientLoader() {
@@ -83,9 +84,36 @@ export default function AdminSocialLinks({ loaderData }: Route.ComponentProps) {
         ) : null}
 
         <div className={styles.form}>
+          <div className={styles.field}>
+            <span className={styles.label}>Значок площадки</span>
+            <div className={styles.iconPicker}>
+              {SOCIAL_PLATFORMS.map((option) => (
+                <button
+                  key={option.key}
+                  type="button"
+                  className={`${styles.iconTile} ${platform === option.key ? styles.iconTileActive : ""}`}
+                  onClick={() => {
+                    setPlatform(option.key);
+                    // Подпись подставляем, только если её ещё не трогали.
+                    if (!title.trim()) setTitle(option.label);
+                  }}
+                  title={option.label}
+                  aria-pressed={platform === option.key}
+                >
+                  <SocialIcon platform={option.key} className={styles.iconGlyph} />
+                  <span className={styles.iconCaption}>{option.label}</span>
+                </button>
+              ))}
+            </div>
+            <span className={styles.hint}>
+              Значок подставляется по выбранной площадке. Если нужной нет, впишите свой ключ ниже —
+              ссылка останется текстовой.
+            </span>
+          </div>
+
           <div className={`${styles.formGrid} ${styles.formGridTwo}`}>
             <TextField
-              label="Платформа"
+              label="Ключ платформы"
               value={platform}
               placeholder="vk"
               onChange={(event) => setPlatform(event.target.value)}
@@ -136,7 +164,12 @@ export default function AdminSocialLinks({ loaderData }: Route.ComponentProps) {
             <tbody>
               {links.map((link) => (
                 <tr key={link.id}>
-                  <td className={styles.rowTitle}>{link.title}</td>
+                  <td>
+                    <span className={styles.rowWithIcon}>
+                      <SocialIcon platform={link.platform} className={styles.iconGlyph} />
+                      <span className={styles.rowTitle}>{link.title}</span>
+                    </span>
+                  </td>
                   <td>{link.platform}</td>
                   <td>
                     <a href={link.url} target="_blank" rel="noreferrer">

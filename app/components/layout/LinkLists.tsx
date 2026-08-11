@@ -1,4 +1,5 @@
 import type { ReleaseLink, SocialLink } from "~/types/content";
+import { SocialIcon } from "~/components/common/SocialIcon";
 import { isSafeExternalUrl } from "~/utils/url";
 import styles from "./LinkLists.module.css";
 
@@ -22,7 +23,7 @@ function ArrowIcon() {
 }
 
 interface ExternalListProps {
-  items: Array<{ id: number; title: string; url: string }>;
+  items: Array<{ id: number; title: string; url: string; platform?: string | null }>;
   label: string;
   accent?: boolean;
 }
@@ -41,6 +42,7 @@ function ExternalList({ items, label, accent }: ExternalListProps) {
             rel="noopener noreferrer"
             className={[styles.item, accent ? styles.itemAccent : null].filter(Boolean).join(" ")}
           >
+            <SocialIcon platform={item.platform} className={styles.brand} />
             {item.title}
             <ArrowIcon />
             <span className="visually-hidden">— откроется на стороннем сайте</span>
@@ -55,7 +57,12 @@ export function SocialLinks({ links }: { links: SocialLink[] }) {
   return (
     <ExternalList
       label="Социальные сети"
-      items={links.map((link) => ({ id: link.id, title: link.title || link.platform, url: link.url }))}
+      items={links.map((link) => ({
+        id: link.id,
+        title: link.title || link.platform,
+        url: link.url,
+        platform: link.platform,
+      }))}
     />
   );
 }
@@ -65,7 +72,12 @@ export function MusicPlatformLinks({ links }: { links: ReleaseLink[] }) {
     <ExternalList
       accent
       label="Музыкальные площадки"
-      items={links.map((link) => ({ id: link.id, title: link.platform, url: link.url }))}
+      items={links.map((link) => ({
+        id: link.id,
+        title: link.platform,
+        url: link.url,
+        platform: link.platform,
+      }))}
     />
   );
 }

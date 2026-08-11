@@ -1154,3 +1154,53 @@
   letter-spacing: var(--track-label);
   text-transform: uppercase;
 }
+
+/* ------------------------------------------------ Значки площадок -- */
+
+.iconPicker {
+  display: grid;
+  gap: var(--space-2);
+  grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+}
+
+.iconTile {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-2);
+  padding: var(--space-3) var(--space-2);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  background: var(--bg-deep);
+  color: var(--ink-mute);
+  transition:
+    border-color var(--t-fast),
+    color var(--t-fast);
+}
+
+.iconTile:hover {
+  border-color: var(--line-strong);
+  color: var(--ink);
+}
+
+.iconTileActive {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
+.iconGlyph {
+  width: 22px;
+  height: 22px;
+}
+
+.iconCaption {
+  font-size: var(--fs-xs);
+  line-height: 1.2;
+  text-align: center;
+  overflow-wrap: anywhere;
+}
+
+.rowWithIcon {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+}
