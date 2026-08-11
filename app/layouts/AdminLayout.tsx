@@ -26,6 +26,7 @@ const NAV_GROUPS: Array<{
     items: [
       { to: "/admin/news", label: "Новости" },
       { to: "/admin/concerts", label: "Концерты" },
+      { to: "/admin/about", label: "О группе" },
       { to: "/admin/members", label: "Участники" },
       { to: "/admin/releases", label: "Релизы" },
       { to: "/admin/media", label: "Медиа" },

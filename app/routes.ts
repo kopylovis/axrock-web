@@ -31,6 +31,7 @@ export default [
       route("concerts", "routes/admin/concerts-list.tsx"),
       route("concerts/new", "routes/admin/concerts-new.tsx"),
       route("concerts/:id", "routes/admin/concerts-edit.tsx"),
+      route("about", "routes/admin/about.tsx"),
       route("members", "routes/admin/members-list.tsx"),
       route("members/new", "routes/admin/members-new.tsx"),
       route("members/:id", "routes/admin/members-edit.tsx"),

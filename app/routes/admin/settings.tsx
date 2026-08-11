@@ -4,9 +4,7 @@ import { getSettings, updateSettings } from "~/api/admin-api";
 import type { SiteSettingsDto } from "~/api/dto";
 import { PageSkeleton } from "~/components/common/PageSkeleton";
 import { ErrorState } from "~/components/common/States";
-import { ImageField, TextAreaField, TextField, VectorField } from "~/components/admin/fields";
-import { RichTextEditor } from "~/components/admin/RichTextEditor";
-import type { RichTextDoc } from "~/types/content";
+import { ImageField, TextField, VectorField } from "~/components/admin/fields";
 import styles from "~/components/admin/admin.module.css";
 
 export async function clientLoader() {
@@ -34,7 +32,6 @@ function SettingsForm({ initial }: { initial: SiteSettingsDto }) {
     siteName: initial.siteName,
     bandName: initial.bandName,
     heroTitle: initial.heroTitle,
-    shortBiography: initial.shortBiography ?? "",
     contactEmail: initial.contactEmail ?? "",
     contactPhone: initial.contactPhone ?? "",
     bookingEmail: initial.bookingEmail ?? "",
@@ -46,7 +43,6 @@ function SettingsForm({ initial }: { initial: SiteSettingsDto }) {
   const [heroImage, setHeroImage] = useState<string | null>(initial.heroImage);
   const [logo, setLogo] = useState<string | null>(initial.logo);
   const [ogImage, setOgImage] = useState<string | null>(initial.defaultOgImage);
-  const [fullBiography, setFullBiography] = useState<RichTextDoc | null>(initial.fullBiography);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -60,15 +56,16 @@ function SettingsForm({ initial }: { initial: SiteSettingsDto }) {
     setSaved(false);
 
     try {
+      // Биографию правят в «О группе» — переносим её значение как есть,
+      // иначе сохранение общих настроек стёрло бы текст страницы.
       await updateSettings({
+        ...initial,
         siteName: form.siteName.trim(),
         bandName: form.bandName.trim(),
         heroTitle: form.heroTitle.trim(),
         heroSubtitle: "",
         heroImage,
         logo,
-        shortBiography: form.shortBiography.trim() || null,
-        fullBiography,
         contactEmail: form.contactEmail.trim() || null,
         contactPhone: form.contactPhone.trim() || null,
         bookingEmail: form.bookingEmail.trim() || null,
@@ -122,18 +119,6 @@ function SettingsForm({ initial }: { initial: SiteSettingsDto }) {
         <VectorField label="Логотип группы" value={logo} onChange={setLogo} />
 
         <ImageField label="Главная фотография" spec="hero" value={heroImage} onChange={setHeroImage} />
-
-        <TextAreaField
-          label="Краткое описание группы"
-          value={form.shortBiography}
-          onChange={(event) => update("shortBiography")(event.target.value)}
-        />
-
-        <RichTextEditor
-          label="Полная биография"
-          value={fullBiography}
-          onChange={setFullBiography}
-        />
 
         <div className={`${styles.formGrid} ${styles.formGridTwo}`}>
           <TextField
