@@ -7,6 +7,7 @@ import { PageSkeleton } from "~/components/common/PageSkeleton";
 import { EmptyState, ErrorState } from "~/components/common/States";
 import { TextField } from "~/components/admin/fields";
 import { SOCIAL_PLATFORMS, SocialIcon } from "~/components/common/SocialIcon";
+import { SortableTh, compareValues, useTableSort } from "~/components/admin/sortable-table";
 import styles from "~/components/admin/admin.module.css";
 
 export async function clientLoader() {
@@ -23,6 +24,15 @@ export function HydrateFallback() {
 
 export default function AdminSocialLinks({ loaderData }: Route.ComponentProps) {
   const { links, failed } = loaderData;
+  const { sort, toggle } = useTableSort<"title" | "platform" | "url">({ key: "title", direction: "asc" });
+
+  // Сортировка идёт по данным, а не по разметке: значения берутся из записи.
+  const sorted = [...links].sort((a, b) => {
+      if (sort.key === "title") return compareValues(a.title, b.title, sort.direction);
+      if (sort.key === "platform") return compareValues(a.platform, b.platform, sort.direction);
+      if (sort.key === "url") return compareValues(a.url, b.url, sort.direction);
+      return 0;
+  });
   const revalidator = useRevalidator();
 
   const [platform, setPlatform] = useState("");
@@ -155,14 +165,29 @@ export default function AdminSocialLinks({ loaderData }: Route.ComponentProps) {
           <table className={styles.table}>
             <thead>
               <tr>
-                <th>Подпись</th>
-                <th>Платформа</th>
-                <th>Адрес</th>
+                <SortableTh
+                      label="Подпись"
+                      sortKey="title"
+                      sort={sort}
+                      onSort={toggle}
+                    />
+                <SortableTh
+                      label="Платформа"
+                      sortKey="platform"
+                      sort={sort}
+                      onSort={toggle}
+                    />
+                <SortableTh
+                      label="Адрес"
+                      sortKey="url"
+                      sort={sort}
+                      onSort={toggle}
+                    />
                 <th />
               </tr>
             </thead>
             <tbody>
-              {links.map((link) => (
+              {sorted.map((link) => (
                 <tr key={link.id}>
                   <td>
                     <span className={styles.rowWithIcon}>

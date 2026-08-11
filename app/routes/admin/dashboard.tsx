@@ -6,6 +6,7 @@ import { RebuildButton } from "~/components/admin/RebuildButton";
 import { PageSkeleton } from "~/components/common/PageSkeleton";
 import { ErrorState } from "~/components/common/States";
 import { formatDateTime, parseUtcSafe } from "~/utils/admin-format";
+import { SortableTh, compareValues, useTableSort } from "~/components/admin/sortable-table";
 import styles from "~/components/admin/admin.module.css";
 
 const KIND_LABELS: Record<string, string> = {
@@ -37,6 +38,15 @@ export function HydrateFallback() {
 export default function AdminDashboard({ loaderData }: Route.ComponentProps) {
   const { data, failed } = loaderData;
   const recentlyUpdated = data?.recentlyUpdated ?? [];
+  const { sort, toggle } = useTableSort<"kind" | "title" | "updated">({
+    key: "updated",
+    direction: "desc",
+  });
+  const sortedRecent = [...recentlyUpdated].sort((a, b) => {
+    if (sort.key === "kind") return compareValues(KIND_LABELS[a.kind] ?? a.kind, KIND_LABELS[b.kind] ?? b.kind, sort.direction);
+    if (sort.key === "title") return compareValues(a.title, b.title, sort.direction);
+    return compareValues(a.updatedAt, b.updatedAt, sort.direction);
+  });
 
   if (failed || !data) {
     return (
@@ -110,13 +120,13 @@ export default function AdminDashboard({ loaderData }: Route.ComponentProps) {
             <table className={styles.table}>
               <thead>
                 <tr>
-                  <th>Тип</th>
-                  <th>Название</th>
-                  <th>Изменено</th>
+                  <SortableTh label="Тип" sortKey="kind" sort={sort} onSort={toggle} />
+                  <SortableTh label="Название" sortKey="title" sort={sort} onSort={toggle} />
+                  <SortableTh label="Изменено" sortKey="updated" sort={sort} onSort={toggle} preferred="desc" />
                 </tr>
               </thead>
               <tbody>
-                {recentlyUpdated.map((item) => {
+                {sortedRecent.map((item) => {
                   const section = KIND_PATHS[item.kind];
                   return (
                     <tr key={`${item.kind}-${item.id}`} className={section ? styles.rowLinked : undefined}>

@@ -7,6 +7,7 @@ import { StatusChip } from "~/components/admin/fields";
 import { RowMenu } from "~/components/admin/RowMenu";
 import { CONCERT_STATUS_LABELS } from "~/utils/format";
 import { formatDateTime, parseUtcSafe } from "~/utils/admin-format";
+import { SortableTh, compareValues, useTableSort } from "~/components/admin/sortable-table";
 import styles from "~/components/admin/admin.module.css";
 
 export async function clientLoader({ request }: Route.ClientLoaderArgs) {
@@ -40,6 +41,16 @@ const FILTERS = [
 
 export default function AdminConcertsList({ loaderData }: Route.ComponentProps) {
   const { data, failed } = loaderData;
+  const { sort, toggle } = useTableSort<"title" | "date" | "city" | "publication" | "event">({ key: "date", direction: "desc" });
+  // Список постраничный: сортируется загруженная страница, а не вся база.
+  const sorted = [...(data?.items ?? [])].sort((a, b) => {
+    if (sort.key === "title") return compareValues(a.title, b.title, sort.direction);
+    if (sort.key === "date") return compareValues(a.startsAt, b.startsAt, sort.direction);
+    if (sort.key === "city") return compareValues(a.city, b.city, sort.direction);
+    if (sort.key === "publication") return compareValues(a.publicationStatus, b.publicationStatus, sort.direction);
+    if (sort.key === "event") return compareValues(a.eventStatus, b.eventStatus, sort.direction);
+    return 0;
+  });
   const [searchParams, setSearchParams] = useSearchParams();
   const revalidator = useRevalidator();
   const navigate = useNavigate();
@@ -96,16 +107,42 @@ export default function AdminConcertsList({ loaderData }: Route.ComponentProps) 
           <table className={styles.table}>
             <thead>
               <tr>
-                <th>Событие</th>
-                <th>Дата</th>
-                <th>Город</th>
-                <th>Публикация</th>
-                <th>Статус</th>
+                <SortableTh
+                      label="Событие"
+                      sortKey="title"
+                      sort={sort}
+                      onSort={toggle}
+                    />
+                <SortableTh
+                      label="Дата"
+                      sortKey="date"
+                      sort={sort}
+                      onSort={toggle}
+                      preferred="desc"
+                    />
+                <SortableTh
+                      label="Город"
+                      sortKey="city"
+                      sort={sort}
+                      onSort={toggle}
+                    />
+                <SortableTh
+                      label="Публикация"
+                      sortKey="publication"
+                      sort={sort}
+                      onSort={toggle}
+                    />
+                <SortableTh
+                      label="Статус"
+                      sortKey="event"
+                      sort={sort}
+                      onSort={toggle}
+                    />
                 <th />
               </tr>
             </thead>
             <tbody>
-              {data.items.map((item) => (
+              {sorted.map((item) => (
                 <tr key={item.id} className={styles.rowLinked}>
                   <td>
                     <Link to={`/admin/concerts/${item.id}`} className={styles.rowLink}>

@@ -25,6 +25,7 @@ import {
   roleLabel,
   type AdminRole,
 } from "~/utils/roles";
+import { SortableTh, compareValues, useTableSort } from "~/components/admin/sortable-table";
 import styles from "~/components/admin/admin.module.css";
 
 const ROLE_OPTIONS = ASSIGNABLE_ROLES.map((role) => ({
@@ -91,6 +92,16 @@ function describeError(cause: unknown, fallback: string): string {
 
 export default function AdminUsers({ loaderData }: Route.ComponentProps) {
   const { admin, users, forbidden, failed } = loaderData;
+  const { sort, toggle } = useTableSort<"user" | "role" | "created" | "login">({ key: "user", direction: "asc" });
+
+  // Сортировка идёт по данным, а не по разметке: значения берутся из записи.
+  const sorted = [...users].sort((a, b) => {
+      if (sort.key === "user") return compareValues([a.firstName, a.lastName].filter(Boolean).join(" ") || a.username, [b.firstName, b.lastName].filter(Boolean).join(" ") || b.username, sort.direction);
+      if (sort.key === "role") return compareValues(a.role, b.role, sort.direction);
+      if (sort.key === "created") return compareValues(a.createdAt, b.createdAt, sort.direction);
+      if (sort.key === "login") return compareValues(a.lastLoginAt ?? "", b.lastLoginAt ?? "", sort.direction);
+      return 0;
+  });
   const revalidator = useRevalidator();
 
   const [username, setUsername] = useState("");
@@ -288,15 +299,37 @@ export default function AdminUsers({ loaderData }: Route.ComponentProps) {
           <table className={styles.table}>
             <thead>
               <tr>
-                <th>Пользователь</th>
-                <th>Роль</th>
-                <th>Создан</th>
-                <th>Последний вход</th>
+                <SortableTh
+                      label="Пользователь"
+                      sortKey="user"
+                      sort={sort}
+                      onSort={toggle}
+                    />
+                <SortableTh
+                      label="Роль"
+                      sortKey="role"
+                      sort={sort}
+                      onSort={toggle}
+                    />
+                <SortableTh
+                      label="Создан"
+                      sortKey="created"
+                      sort={sort}
+                      onSort={toggle}
+                      preferred="desc"
+                    />
+                <SortableTh
+                      label="Последний вход"
+                      sortKey="login"
+                      sort={sort}
+                      onSort={toggle}
+                      preferred="desc"
+                    />
                 <th />
               </tr>
             </thead>
             <tbody>
-              {users.map((user) => {
+              {sorted.map((user) => {
                 const itsSelf = user.id === admin?.id;
                 // Владельца трогает только он сам — то же правило проверяет бэкенд.
                 const locked = user.role === "OWNER" && !itsSelf;

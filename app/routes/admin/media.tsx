@@ -8,6 +8,7 @@ import { PageSkeleton } from "~/components/common/PageSkeleton";
 import { EmptyState, ErrorState } from "~/components/common/States";
 import { ImageField, SelectField, TextField } from "~/components/admin/fields";
 import type { MediaType, PublicationStatus } from "~/types/content";
+import { SortableTh, compareValues, useTableSort } from "~/components/admin/sortable-table";
 import styles from "~/components/admin/admin.module.css";
 
 export async function clientLoader() {
@@ -32,6 +33,13 @@ const TYPES = [
 
 export default function AdminMedia({ loaderData }: Route.ComponentProps) {
   const { items, failed } = loaderData;
+  const { sort, toggle } = useTableSort<"title" | "type" | "url">({ key: "title", direction: "asc" });
+  const sorted = [...(items)].sort((a, b) => {
+    if (sort.key === "title") return compareValues(a.title ?? "", b.title ?? "", sort.direction);
+    if (sort.key === "type") return compareValues(a.type, b.type, sort.direction);
+    if (sort.key === "url") return compareValues(a.fileUrl ?? a.externalUrl ?? "", b.fileUrl ?? b.externalUrl ?? "", sort.direction);
+    return 0;
+  });
   const revalidator = useRevalidator();
 
   const [type, setType] = useState<MediaType>("PHOTO");
@@ -156,14 +164,29 @@ export default function AdminMedia({ loaderData }: Route.ComponentProps) {
           <table className={styles.table}>
             <thead>
               <tr>
-                <th>Подпись</th>
-                <th>Тип</th>
-                <th>Ссылка</th>
+                <SortableTh
+                      label="Подпись"
+                      sortKey="title"
+                      sort={sort}
+                      onSort={toggle}
+                    />
+                <SortableTh
+                      label="Тип"
+                      sortKey="type"
+                      sort={sort}
+                      onSort={toggle}
+                    />
+                <SortableTh
+                      label="Ссылка"
+                      sortKey="url"
+                      sort={sort}
+                      onSort={toggle}
+                    />
                 <th />
               </tr>
             </thead>
             <tbody>
-              {items.map((item) => (
+              {sorted.map((item) => (
                 <tr key={item.id}>
                   <td className={styles.rowTitle}>{item.title ?? "—"}</td>
                   <td>{TYPES.find((entry) => entry.value === item.type)?.label ?? item.type}</td>

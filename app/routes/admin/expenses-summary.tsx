@@ -175,7 +175,7 @@ export default function AdminExpensesSummary({ loaderData }: Route.ComponentProp
         <>
           <GlassPanel className={styles.panel}>
             <h2 className={styles.panelTitle}>Итого</h2>
-            <p className={styles.hint}>
+            <p className={styles.panelTotal}>
               {summary.totals.map((total) => formatMoney(total.amountMinor, total.currency)).join(" · ")}
             </p>
             <div className={styles.tableWrap}>

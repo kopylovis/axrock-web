@@ -6,6 +6,7 @@ import { EmptyState, ErrorState } from "~/components/common/States";
 import { StatusChip } from "~/components/admin/fields";
 import { RowMenu } from "~/components/admin/RowMenu";
 import { formatDateTime, parseUtcSafe } from "~/utils/admin-format";
+import { SortableTh, compareValues, useTableSort } from "~/components/admin/sortable-table";
 import styles from "~/components/admin/admin.module.css";
 
 export async function clientLoader({ request }: Route.ClientLoaderArgs) {
@@ -34,6 +35,15 @@ const FILTERS = [
 
 export default function AdminNewsList({ loaderData }: Route.ComponentProps) {
   const { data, failed } = loaderData;
+  const { sort, toggle } = useTableSort<"title" | "status" | "category" | "published">({ key: "published", direction: "desc" });
+  // Список постраничный: сортируется загруженная страница, а не вся база.
+  const sorted = [...(data?.items ?? [])].sort((a, b) => {
+    if (sort.key === "title") return compareValues(a.title, b.title, sort.direction);
+    if (sort.key === "status") return compareValues(a.status, b.status, sort.direction);
+    if (sort.key === "category") return compareValues(a.categoryName ?? "", b.categoryName ?? "", sort.direction);
+    if (sort.key === "published") return compareValues(a.publishedAt ?? "", b.publishedAt ?? "", sort.direction);
+    return 0;
+  });
   const [searchParams, setSearchParams] = useSearchParams();
   const revalidator = useRevalidator();
   const navigate = useNavigate();
@@ -111,15 +121,36 @@ export default function AdminNewsList({ loaderData }: Route.ComponentProps) {
           <table className={styles.table}>
             <thead>
               <tr>
-                <th>Заголовок</th>
-                <th>Статус</th>
-                <th>Категория</th>
-                <th>Публикация</th>
+                <SortableTh
+                      label="Заголовок"
+                      sortKey="title"
+                      sort={sort}
+                      onSort={toggle}
+                    />
+                <SortableTh
+                      label="Статус"
+                      sortKey="status"
+                      sort={sort}
+                      onSort={toggle}
+                    />
+                <SortableTh
+                      label="Категория"
+                      sortKey="category"
+                      sort={sort}
+                      onSort={toggle}
+                    />
+                <SortableTh
+                      label="Публикация"
+                      sortKey="published"
+                      sort={sort}
+                      onSort={toggle}
+                      preferred="desc"
+                    />
                 <th />
               </tr>
             </thead>
             <tbody>
-              {data.items.map((item) => (
+              {sorted.map((item) => (
                 <tr key={item.id} className={styles.rowLinked}>
                   <td>
                     <Link to={`/admin/news/${item.id}`} className={styles.rowLink}>

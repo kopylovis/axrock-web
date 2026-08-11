@@ -4,6 +4,7 @@ import { deleteMember, listMembers } from "~/api/admin-api";
 import { PageSkeleton } from "~/components/common/PageSkeleton";
 import { EmptyState, ErrorState } from "~/components/common/States";
 import { RowMenu } from "~/components/admin/RowMenu";
+import { SortableTh, compareValues, useTableSort } from "~/components/admin/sortable-table";
 import styles from "~/components/admin/admin.module.css";
 
 export async function clientLoader() {
@@ -20,6 +21,16 @@ export function HydrateFallback() {
 
 export default function AdminMembersList({ loaderData }: Route.ComponentProps) {
   const { members, failed } = loaderData;
+  const { sort, toggle } = useTableSort<"name" | "role" | "order" | "current">({ key: "order", direction: "asc" });
+
+  // Сортировка идёт по данным, а не по разметке: значения берутся из записи.
+  const sorted = [...members].sort((a, b) => {
+      if (sort.key === "name") return compareValues(a.name, b.name, sort.direction);
+      if (sort.key === "role") return compareValues(a.role, b.role, sort.direction);
+      if (sort.key === "order") return compareValues(a.sortOrder, b.sortOrder, sort.direction);
+      if (sort.key === "current") return compareValues(a.currentMember ? 1 : 0, b.currentMember ? 1 : 0, sort.direction);
+      return 0;
+  });
   const revalidator = useRevalidator();
 
   async function remove(id: number, name: string) {
@@ -50,15 +61,36 @@ export default function AdminMembersList({ loaderData }: Route.ComponentProps) {
           <table className={styles.table}>
             <thead>
               <tr>
-                <th>Имя</th>
-                <th>Роль</th>
-                <th>Порядок</th>
-                <th>Состав</th>
+                <SortableTh
+                      label="Имя"
+                      sortKey="name"
+                      sort={sort}
+                      onSort={toggle}
+                    />
+                <SortableTh
+                      label="Роль"
+                      sortKey="role"
+                      sort={sort}
+                      onSort={toggle}
+                    />
+                <SortableTh
+                      label="Порядок"
+                      sortKey="order"
+                      sort={sort}
+                      onSort={toggle}
+                    />
+                <SortableTh
+                      label="Состав"
+                      sortKey="current"
+                      sort={sort}
+                      onSort={toggle}
+                      preferred="desc"
+                    />
                 <th />
               </tr>
             </thead>
             <tbody>
-              {members.map((member) => (
+              {sorted.map((member) => (
                 <tr key={member.id}>
                   <td>
                     <Link to={`/admin/members/${member.id}`} className={styles.rowTitle}>

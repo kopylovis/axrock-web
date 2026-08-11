@@ -7,6 +7,7 @@ import { PageSkeleton } from "~/components/common/PageSkeleton";
 import { EmptyState, ErrorState } from "~/components/common/States";
 import { TextAreaField, TextField } from "~/components/admin/fields";
 import { RowMenu } from "~/components/admin/RowMenu";
+import { SortableTh, compareValues, useTableSort } from "~/components/admin/sortable-table";
 import { parseUtcSafe } from "~/utils/admin-format";
 import { formatDate } from "~/utils/format";
 import { formatMoney, parseMoneyToMinor } from "~/utils/crew-format";
@@ -28,6 +29,15 @@ export function HydrateFallback() {
 export default function AdminExpenses({ loaderData }: Route.ComponentProps) {
   const { mine, failed } = loaderData;
   const revalidator = useRevalidator();
+  const { sort, toggle } = useTableSort<"title" | "amount" | "date">({
+    key: "date",
+    direction: "desc",
+  });
+  const sorted = [...mine].sort((a, b) => {
+    if (sort.key === "title") return compareValues(a.title, b.title, sort.direction);
+    if (sort.key === "amount") return compareValues(a.amountMinor, b.amountMinor, sort.direction);
+    return compareValues(a.spentOn, b.spentOn, sort.direction);
+  });
 
   const [title, setTitle] = useState("");
   const [amount, setAmount] = useState("");
@@ -167,19 +177,19 @@ export default function AdminExpenses({ loaderData }: Route.ComponentProps) {
           <EmptyState title="Пока пусто" description="Добавьте первую трату — она видна только вам." />
         ) : (
           <>
-            <p className={styles.hint}>Итого: {formatMoney(myTotal, "RUB")}</p>
+            <p className={styles.panelTotal}>Итого: {formatMoney(myTotal, "RUB")}</p>
             <div className={styles.tableWrap}>
               <table className={styles.table}>
                 <thead>
                   <tr>
-                    <th>На что</th>
-                    <th>Сумма</th>
-                    <th>Дата</th>
+                    <SortableTh label="На что" sortKey="title" sort={sort} onSort={toggle} />
+                    <SortableTh label="Сумма" sortKey="amount" sort={sort} onSort={toggle} preferred="desc" />
+                    <SortableTh label="Дата" sortKey="date" sort={sort} onSort={toggle} preferred="desc" />
                     <th />
                   </tr>
                 </thead>
                 <tbody>
-                  {mine.map((item) => (
+                  {sorted.map((item) => (
                     <tr key={item.id}>
                       <td>
                         <span className={styles.rowTitle}>{item.title}</span>

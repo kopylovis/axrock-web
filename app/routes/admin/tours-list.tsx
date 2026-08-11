@@ -6,6 +6,7 @@ import { EmptyState, ErrorState } from "~/components/common/States";
 import { RowMenu } from "~/components/admin/RowMenu";
 import { parseUtcSafe } from "~/utils/admin-format";
 import { formatDateTime } from "~/utils/format";
+import { SortableTh, compareValues, useTableSort } from "~/components/admin/sortable-table";
 import styles from "~/components/admin/admin.module.css";
 
 export async function clientLoader() {
@@ -31,6 +32,16 @@ function period(startsOn: string | null, endsOn: string | null): string {
 
 export default function AdminToursList({ loaderData }: Route.ComponentProps) {
   const { tours, failed } = loaderData;
+  const { sort, toggle } = useTableSort<"title" | "date" | "concerts" | "logistics">({ key: "date", direction: "desc" });
+
+  // Сортировка идёт по данным, а не по разметке: значения берутся из записи.
+  const sorted = [...tours].sort((a, b) => {
+      if (sort.key === "title") return compareValues(a.title, b.title, sort.direction);
+      if (sort.key === "date") return compareValues(a.startsOn ?? "", b.startsOn ?? "", sort.direction);
+      if (sort.key === "concerts") return compareValues(a.concerts, b.concerts, sort.direction);
+      if (sort.key === "logistics") return compareValues(a.logisticsItems, b.logisticsItems, sort.direction);
+      return 0;
+  });
   const revalidator = useRevalidator();
   const navigate = useNavigate();
 
@@ -70,15 +81,38 @@ export default function AdminToursList({ loaderData }: Route.ComponentProps) {
           <table className={styles.table}>
             <thead>
               <tr>
-                <th>Название</th>
-                <th>Даты</th>
-                <th>Концертов</th>
-                <th>Пунктов логистики</th>
+                <SortableTh
+                      label="Название"
+                      sortKey="title"
+                      sort={sort}
+                      onSort={toggle}
+                    />
+                <SortableTh
+                      label="Даты"
+                      sortKey="date"
+                      sort={sort}
+                      onSort={toggle}
+                      preferred="desc"
+                    />
+                <SortableTh
+                      label="Концертов"
+                      sortKey="concerts"
+                      sort={sort}
+                      onSort={toggle}
+                      preferred="desc"
+                    />
+                <SortableTh
+                      label="Пунктов логистики"
+                      sortKey="logistics"
+                      sort={sort}
+                      onSort={toggle}
+                      preferred="desc"
+                    />
                 <th />
               </tr>
             </thead>
             <tbody>
-              {tours.map((tour) => (
+              {sorted.map((tour) => (
                 <tr key={tour.id} className={styles.rowLinked}>
                   <td>
                     <Link to={`/admin/tours/${tour.id}`} className={styles.rowLink}>
