@@ -213,7 +213,9 @@ export default function AdminLayout({ loaderData }: Route.ComponentProps) {
                 .join(" ")
             }
           >
-            <span className={styles.sidebarUserName}>{admin.username}</span>
+            <span className={styles.sidebarUserName}>
+              {[admin.firstName, admin.lastName].filter(Boolean).join(" ") || admin.username}
+            </span>
             <span className={styles.sidebarUserRole}>{roleLabel(admin.role)}</span>
           </NavLink>
           <RebuildButton compact />

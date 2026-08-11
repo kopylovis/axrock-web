@@ -95,6 +95,8 @@ export default function AdminUsers({ loaderData }: Route.ComponentProps) {
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [role, setRole] = useState<AdminRole>("EDITOR");
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -114,9 +116,17 @@ export default function AdminUsers({ loaderData }: Route.ComponentProps) {
     setError(null);
     setNotice(null);
     try {
-      await createAdminUser({ username: username.trim(), password, role });
+      await createAdminUser({
+        username: username.trim(),
+        password,
+        role,
+        firstName: firstName.trim() || null,
+        lastName: lastName.trim() || null,
+      });
       setUsername("");
       setPassword("");
+      setFirstName("");
+      setLastName("");
       setRole("EDITOR");
       setNotice("Пользователь создан");
       revalidator.revalidate();
@@ -218,6 +228,22 @@ export default function AdminUsers({ loaderData }: Route.ComponentProps) {
         <div className={styles.form}>
           <div className={`${styles.formGrid} ${styles.formGridTwo}`}>
             <TextField
+              label="Имя"
+              value={firstName}
+              placeholder="Иван"
+              onChange={(event) => setFirstName(event.target.value)}
+            />
+            <TextField
+              label="Фамилия"
+              value={lastName}
+              placeholder="Копылов"
+              hint="Показывается в сводке расходов вместо логина."
+              onChange={(event) => setLastName(event.target.value)}
+            />
+          </div>
+
+          <div className={`${styles.formGrid} ${styles.formGridTwo}`}>
+            <TextField
               label="Логин"
               value={username}
               autoComplete="off"
@@ -263,7 +289,7 @@ export default function AdminUsers({ loaderData }: Route.ComponentProps) {
           <table className={styles.table}>
             <thead>
               <tr>
-                <th>Логин</th>
+                <th>Пользователь</th>
                 <th>Роль</th>
                 <th>Создан</th>
                 <th>Последний вход</th>
@@ -289,9 +315,14 @@ export default function AdminUsers({ loaderData }: Route.ComponentProps) {
 
                 return (
                   <tr key={user.id}>
-                    <td className={styles.rowTitle}>
-                      {user.username}
-                      {itsSelf ? <span className={styles.rowNote}> — это вы</span> : null}
+                    <td>
+                      <span className={styles.rowTitle}>
+                        {[user.firstName, user.lastName].filter(Boolean).join(" ") || user.username}
+                        {itsSelf ? <span className={styles.rowNote}> — это вы</span> : null}
+                      </span>
+                      {user.firstName || user.lastName ? (
+                        <div className={styles.hint}>{user.username}</div>
+                      ) : null}
                     </td>
                     <td>
                       <span

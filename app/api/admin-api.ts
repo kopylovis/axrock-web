@@ -21,6 +21,8 @@ export interface AdminUser {
   id: number;
   username: string;
   role: AdminRole;
+  firstName?: string | null;
+  lastName?: string | null;
 }
 
 export interface AdminUserListItem extends AdminUser {
@@ -32,11 +34,15 @@ export interface AdminUserCreateInput {
   username: string;
   password: string;
   role: AdminRole;
+  firstName: string | null;
+  lastName: string | null;
 }
 
 export interface AdminUserUpdateInput {
   role?: AdminRole;
   password?: string;
+  firstName?: string | null;
+  lastName?: string | null;
 }
 
 export interface AdminNewsListItem {
@@ -212,6 +218,14 @@ export async function me(): Promise<AdminUser> {
 }
 
 /** Смена собственного пароля: доступна любой роли, текущая сессия остаётся живой. */
+/** Своё имя и фамилия: логин и роль этим запросом не меняются. */
+export async function updateOwnProfile(input: {
+  firstName: string | null;
+  lastName: string | null;
+}): Promise<AdminUser> {
+  return apiFetch<AdminUser>(`${PREFIX}/auth/profile`, { method: "PUT", body: input, auth: true });
+}
+
 export async function changeOwnPassword(input: {
   currentPassword: string;
   newPassword: string;
@@ -675,6 +689,7 @@ export interface Expense {
   comment: string | null;
   receiptUrl: string | null;
   userName?: string | null;
+  userFullName?: string | null;
 }
 
 export interface ExpenseInput {

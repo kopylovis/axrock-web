@@ -77,10 +77,12 @@ export default function AdminExpensesSummary({ loaderData }: Route.ComponentProp
   }
 
   // По людям удобнее сверять, кому и сколько возмещать.
-  const byUser = new Map<string, number>();
+  const byUser = new Map<string, { full: string | null; amount: number }>();
   for (const item of summary?.items ?? []) {
     const key = item.userName ?? "—";
-    byUser.set(key, (byUser.get(key) ?? 0) + item.amountMinor);
+    const entry = byUser.get(key) ?? { full: item.userFullName ?? null, amount: 0 };
+    entry.amount += item.amountMinor;
+    byUser.set(key, entry);
   }
 
   return (
@@ -97,7 +99,7 @@ export default function AdminExpensesSummary({ loaderData }: Route.ComponentProp
                 `raskhody-obshchie-${loaderData.from || "vse"}-${loaderData.to || "vse"}`,
                 ["Кто", "На что", "Сумма", "Валюта", "Дата", "Комментарий"],
                 (summary?.items ?? []).map((item) => [
-                  item.userName ?? "",
+                  item.userFullName || item.userName || "",
                   item.title,
                   csvAmount(item.amountMinor),
                   item.currency,
@@ -180,11 +182,14 @@ export default function AdminExpensesSummary({ loaderData }: Route.ComponentProp
                 </thead>
                 <tbody>
                   {[...byUser.entries()]
-                    .sort((a, b) => b[1] - a[1])
-                    .map(([name, amount]) => (
-                      <tr key={name}>
-                        <td className={styles.rowTitle}>{name}</td>
-                        <td>{formatMoney(amount, summary.totals[0]?.currency ?? "RUB")}</td>
+                    .sort((a, b) => b[1].amount - a[1].amount)
+                    .map(([login, entry]) => (
+                      <tr key={login}>
+                        <td>
+                          <span className={styles.rowTitle}>{entry.full ?? login}</span>
+                          {entry.full ? <div className={styles.hint}>{login}</div> : null}
+                        </td>
+                        <td>{formatMoney(entry.amount, summary.totals[0]?.currency ?? "RUB")}</td>
                       </tr>
                     ))}
                 </tbody>
@@ -207,7 +212,10 @@ export default function AdminExpensesSummary({ loaderData }: Route.ComponentProp
                 <tbody>
                   {summary.items.map((item) => (
                     <tr key={item.id}>
-                      <td>{item.userName ?? "—"}</td>
+                      <td>
+                        <span className={styles.rowTitle}>{item.userFullName ?? item.userName ?? "—"}</span>
+                        {item.userFullName ? <div className={styles.hint}>{item.userName}</div> : null}
+                      </td>
                       <td>
                         <span className={styles.rowTitle}>{item.title}</span>
                         {item.comment ? <div className={styles.hint}>{item.comment}</div> : null}

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import type { Route } from "./+types/profile";
-import { changeOwnPassword, me } from "~/api/admin-api";
+import { changeOwnPassword, me, updateOwnProfile } from "~/api/admin-api";
 import { ApiError } from "~/api/errors";
 import { GlassPanel } from "~/components/common/GlassPanel";
 import { PageSkeleton } from "~/components/common/PageSkeleton";
@@ -39,6 +39,12 @@ function describeError(cause: unknown): string {
 
 export default function AdminProfile({ loaderData }: Route.ComponentProps) {
   const { admin, failed } = loaderData;
+
+  const [firstName, setFirstName] = useState(admin?.firstName ?? "");
+  const [lastName, setLastName] = useState(admin?.lastName ?? "");
+  const [nameSaving, setNameSaving] = useState(false);
+  const [nameSaved, setNameSaved] = useState(false);
+  const [nameError, setNameError] = useState<string | null>(null);
 
   const [current, setCurrent] = useState("");
   const [next, setNext] = useState("");
@@ -81,6 +87,23 @@ export default function AdminProfile({ loaderData }: Route.ComponentProps) {
     }
   }
 
+  async function saveName() {
+    setNameSaving(true);
+    setNameError(null);
+    setNameSaved(false);
+    try {
+      await updateOwnProfile({
+        firstName: firstName.trim() || null,
+        lastName: lastName.trim() || null,
+      });
+      setNameSaved(true);
+    } catch (cause) {
+      setNameError(cause instanceof Error ? cause.message : "Не удалось сохранить имя");
+    } finally {
+      setNameSaving(false);
+    }
+  }
+
   if (failed || !admin) {
     return (
       <>
@@ -100,6 +123,45 @@ export default function AdminProfile({ loaderData }: Route.ComponentProps) {
 
       <GlassPanel className={styles.panel}>
         <h2 className={styles.panelTitle}>Учётная запись</h2>
+        <div className={styles.form}>
+          {nameError ? (
+            <p className={styles.alert} role="alert">
+              {nameError}
+            </p>
+          ) : null}
+          {nameSaved ? (
+            <p className={styles.success} role="status">
+              Имя сохранено.
+            </p>
+          ) : null}
+
+          <div className={`${styles.formGrid} ${styles.formGridTwo}`}>
+            <TextField
+              label="Имя"
+              value={firstName}
+              placeholder="Иван"
+              onChange={(event) => setFirstName(event.target.value)}
+            />
+            <TextField
+              label="Фамилия"
+              value={lastName}
+              placeholder="Копылов"
+              hint="Показывается в сводке расходов вместо логина."
+              onChange={(event) => setLastName(event.target.value)}
+            />
+          </div>
+          <div className={styles.formActions}>
+            <button
+              type="button"
+              className={`${styles.btn} ${styles.btnSecondary}`}
+              disabled={nameSaving}
+              onClick={saveName}
+            >
+              {nameSaving ? "Сохраняю…" : "Сохранить имя"}
+            </button>
+          </div>
+        </div>
+
         <dl className={styles.summary}>
           <div className={styles.summaryRow}>
             <dt>Логин</dt>
