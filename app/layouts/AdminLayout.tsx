@@ -1,4 +1,4 @@
-import { NavLink, Outlet, redirect, useNavigate } from "react-router";
+import { NavLink, Outlet, redirect, useLocation, useNavigate } from "react-router";
 import { useState } from "react";
 import type { Route } from "./+types/AdminLayout";
 import { logout, me } from "~/api/admin-api";
@@ -8,20 +8,61 @@ import { canManageUsers, canUseWebAdmin, roleLabel } from "~/utils/roles";
 import { publicSiteUrl } from "~/utils/site-url";
 import styles from "~/components/admin/admin.module.css";
 
-const NAV = [
-  { to: "/admin", label: "Обзор", end: true },
-  { to: "/admin/news", label: "Новости" },
-  { to: "/admin/concerts", label: "Концерты" },
-  { to: "/admin/members", label: "Участники" },
-  { to: "/admin/releases", label: "Релизы" },
-  { to: "/admin/media", label: "Медиа" },
-  { to: "/admin/tours", label: "Туры" },
-  { to: "/admin/expenses", label: "Расходы" },
-  { to: "/admin/contacts", label: "Контакты" },
-  { to: "/admin/social-links", label: "Соцссылки" },
-  { to: "/admin/settings", label: "Настройки" },
-  { to: "/admin/users", label: "Пользователи", requiresUserManager: true },
+/** Обзор стоит отдельно: это не раздел, а точка входа. */
+const OVERVIEW = { to: "/admin", label: "Обзор" };
+
+const NAV_GROUPS: Array<{
+  id: string;
+  label: string;
+  requiresUserManager?: boolean;
+  items: Array<{ to: string; label: string }>;
+}> = [
+  {
+    id: "content",
+    label: "Сайт",
+    items: [
+      { to: "/admin/news", label: "Новости" },
+      { to: "/admin/concerts", label: "Концерты" },
+      { to: "/admin/members", label: "Участники" },
+      { to: "/admin/releases", label: "Релизы" },
+      { to: "/admin/media", label: "Медиа" },
+    ],
+  },
+  {
+    id: "crew",
+    label: "Для группы",
+    items: [
+      { to: "/admin/tours", label: "Туры" },
+      { to: "/admin/expenses", label: "Расходы" },
+    ],
+  },
+  {
+    id: "settings",
+    label: "Настройки сайта",
+    items: [
+      { to: "/admin/contacts", label: "Контакты" },
+      { to: "/admin/social-links", label: "Соцссылки" },
+      { to: "/admin/settings", label: "Общие" },
+    ],
+  },
+  {
+    id: "access",
+    label: "Доступ",
+    requiresUserManager: true,
+    items: [{ to: "/admin/users", label: "Пользователи" }],
+  },
 ];
+
+const COLLAPSED_KEY = "axrock:admin-nav-collapsed";
+
+function loadCollapsed(): string[] {
+  try {
+    const raw = localStorage.getItem(COLLAPSED_KEY);
+    return raw ? (JSON.parse(raw) as string[]) : [];
+  } catch {
+    return [];
+  }
+}
 
 export async function clientLoader({ request }: Route.ClientLoaderArgs) {
   try {
@@ -47,7 +88,22 @@ export default function AdminLayout({ loaderData }: Route.ComponentProps) {
   const { admin } = loaderData;
   const webAllowed = canUseWebAdmin(admin.role);
   const navigate = useNavigate();
+  const { pathname } = useLocation();
   const [leaving, setLeaving] = useState(false);
+  // Состояние групп переживает переходы между страницами.
+  const [collapsed, setCollapsed] = useState<string[]>(loadCollapsed);
+
+  function toggleGroup(id: string) {
+    setCollapsed((prev) => {
+      const next = prev.includes(id) ? prev.filter((value) => value !== id) : [...prev, id];
+      try {
+        localStorage.setItem(COLLAPSED_KEY, JSON.stringify(next));
+      } catch {
+        // Приватный режим — просто не запоминаем.
+      }
+      return next;
+    });
+  }
 
   // Через <Form> выход не сделать: форма отправляется в текущий листовой
   // маршрут, а не в макет, где она объявлена.
@@ -87,18 +143,59 @@ export default function AdminLayout({ loaderData }: Route.ComponentProps) {
         </div>
 
         <nav className={styles.nav} aria-label="Разделы админки">
-          {NAV.filter((item) => !item.requiresUserManager || canManageUsers(admin.role)).map((item) => (
-            <NavLink
-              key={item.to}
-              to={item.to}
-              end={item.end}
-              className={({ isActive }) =>
-                [styles.navLink, isActive ? styles.navLinkActive : null].filter(Boolean).join(" ")
-              }
-            >
-              {item.label}
-            </NavLink>
-          ))}
+          <NavLink
+            to={OVERVIEW.to}
+            end
+            className={({ isActive }) =>
+              [styles.navLink, isActive ? styles.navLinkActive : null].filter(Boolean).join(" ")
+            }
+          >
+            {OVERVIEW.label}
+          </NavLink>
+
+          {NAV_GROUPS.filter(
+            (group) => !group.requiresUserManager || canManageUsers(admin.role),
+          ).map((group) => {
+            // Группу с текущим разделом не даём держать закрытой: иначе непонятно,
+            // где находишься, и до соседних страниц не добраться.
+            const hasActive = group.items.some((item) => pathname.startsWith(item.to));
+            const open = hasActive || !collapsed.includes(group.id);
+
+            return (
+              <div key={group.id} className={styles.navGroup}>
+                <button
+                  type="button"
+                  className={styles.navGroupTitle}
+                  aria-expanded={open}
+                  onClick={() => toggleGroup(group.id)}
+                  disabled={hasActive}
+                >
+                  <span className={styles.navGroupChevron} aria-hidden="true">
+                    {open ? "▾" : "▸"}
+                  </span>
+                  {group.label}
+                </button>
+
+                {open ? (
+                  <div className={styles.navGroupItems}>
+                    {group.items.map((item) => (
+                      <NavLink
+                        key={item.to}
+                        to={item.to}
+                        className={({ isActive }) =>
+                          [styles.navLink, isActive ? styles.navLinkActive : null]
+                            .filter(Boolean)
+                            .join(" ")
+                        }
+                      >
+                        {item.label}
+                      </NavLink>
+                    ))}
+                  </div>
+                ) : null}
+              </div>
+            );
+          })}
         </nav>
 
         <div className={styles.sidebarFooter}>

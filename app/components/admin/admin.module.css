@@ -1252,3 +1252,49 @@
   color: var(--ink-mute);
   list-style: none;
 }
+
+/* --------------------------------------------- Группы в меню -- */
+
+.navGroup {
+  display: grid;
+  gap: 2px;
+  margin-top: var(--space-3);
+}
+
+.navGroupTitle {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  width: 100%;
+  padding: var(--space-2) var(--space-4);
+  color: var(--ink-faint);
+  font-family: var(--font-accent);
+  font-size: var(--fs-xs);
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+  transition: color var(--t-fast);
+}
+
+.navGroupTitle:hover:not(:disabled) {
+  color: var(--ink-mute);
+}
+
+/* Группа с открытым разделом не сворачивается — иначе теряешь, где находишься. */
+.navGroupTitle:disabled {
+  cursor: default;
+  color: var(--accent);
+}
+
+.navGroupChevron {
+  font-size: 0.7em;
+  line-height: 1;
+}
+
+.navGroupItems {
+  display: grid;
+  gap: 2px;
+}
+
+.navGroupItems .navLink {
+  padding-inline-start: var(--space-6);
+}
