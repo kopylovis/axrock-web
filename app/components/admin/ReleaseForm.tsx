@@ -6,7 +6,7 @@ import { createRelease, updateRelease } from "~/api/admin-api";
 import type { ReleaseDetailDto } from "~/api/dto";
 import type { ReleaseType } from "~/types/content";
 import { fromDateInputValue, slugify, toDateInputValue } from "~/utils/admin-format";
-import { CheckboxField, ImageField, SelectField, TextAreaField, TextField, focusFirstInvalidField } from "./fields";
+import { CheckboxField, ImageField, SelectField, StatusChip, TextAreaField, TextField, focusFirstInvalidField } from "./fields";
 import { SOCIAL_PLATFORMS, SocialIcon, hasSocialIcon } from "~/components/common/SocialIcon";
 import styles from "./admin.module.css";
 
@@ -137,7 +137,15 @@ export function ReleaseForm({ release }: { release: ReleaseDetailDto | null }) {
   return (
     <>
       <div className={`${styles.pageHead} ${styles.pageHeadSticky}`}>
-        <h1 className={styles.pageTitle}>{release ? "Редактирование релиза" : "Новый релиз"}</h1>
+        <div className={styles.pageHeadStatus}>
+          <h1 className={styles.pageTitle}>{release ? "Редактирование релиза" : "Новый релиз"}</h1>
+          {release ? (
+            <StatusChip
+              status={published ? "PUBLISHED" : "DRAFT"}
+              label={published ? "Опубликован" : "Снят с публикации"}
+            />
+          ) : null}
+        </div>
         <div className={styles.pageActions}>
           <Link to="/admin/releases" className={`${styles.btn} ${styles.btnSecondary}`}>
             К списку
@@ -336,10 +344,19 @@ export function ReleaseForm({ release }: { release: ReleaseDetailDto | null }) {
             value={sortOrder}
             onChange={(event) => setSortOrder(event.target.value)}
           />
-          <CheckboxField
-            label="Опубликован"
-            checked={published}
-            onChange={(event) => setPublished(event.target.checked)}
+          <SelectField
+            label="Статус"
+            value={published ? "PUBLISHED" : "DRAFT"}
+            hint={
+              published
+                ? "Релиз виден в разделе «Музыка» и на главной."
+                : "Снятый с публикации релиз остаётся в админке, но на сайте не показывается."
+            }
+            options={[
+              { value: "PUBLISHED", label: "Опубликован" },
+              { value: "DRAFT", label: "Снят с публикации" },
+            ]}
+            onChange={(event) => setPublished(event.target.value === "PUBLISHED")}
           />
         </div>
 

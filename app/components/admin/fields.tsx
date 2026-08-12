@@ -368,7 +368,7 @@ export function VectorField({ label, value, onChange, hint }: VectorFieldProps) 
   );
 }
 
-export function StatusChip({ status }: { status: string }) {
+export function StatusChip({ status, label }: { status: string; label?: string }) {
   const className =
     status === "PUBLISHED"
       ? styles.chipPublished
@@ -376,8 +376,9 @@ export function StatusChip({ status }: { status: string }) {
         ? styles.chipDraft
         : styles.chipArchived;
 
-  const label =
-    status === "PUBLISHED" ? "Опубликовано" : status === "DRAFT" ? "Черновик" : "В архиве";
+  // Слово подставляют разделы, где «черновик» звучит не к месту — например релизы.
+  const text =
+    label ?? (status === "PUBLISHED" ? "Опубликовано" : status === "DRAFT" ? "Черновик" : "В архиве");
 
-  return <span className={`${styles.chip} ${className}`}>{label}</span>;
+  return <span className={`${styles.chip} ${className}`}>{text}</span>;
 }
