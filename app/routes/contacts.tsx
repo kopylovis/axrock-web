@@ -3,7 +3,6 @@ import { useSiteData } from "~/layouts/PublicLayout";
 import { AnimatedSection } from "~/components/common/AnimatedSection";
 import { EmptyState } from "~/components/common/States";
 import { breadcrumbs, buildMeta, jsonLd, ogImageFrom } from "~/lib/seo";
-import homeStyles from "~/components/home/home.module.css";
 import styles from "~/styles/page.module.css";
 
 export function meta({ location, matches }: Route.MetaArgs) {
@@ -43,28 +42,24 @@ export default function Contacts() {
 
   const rows = [
     settings.contactPhone
-      ? { label: "Телефон", value: settings.contactPhone, href: telHref(settings.contactPhone) }
+      ? { label: "Tel.:", value: settings.contactPhone, href: telHref(settings.contactPhone) }
       : null,
     settings.managerTelegram
       ? {
-          label: "Telegram",
+          label: "Telegram:",
           value: settings.managerTelegram,
           href: telegramHref(settings.managerTelegram),
         }
       : null,
     settings.managerMaxPhone
-      ? { label: "Max", value: settings.managerMaxPhone, href: telHref(settings.managerMaxPhone) }
+      ? { label: "Max:", value: settings.managerMaxPhone, href: telHref(settings.managerMaxPhone) }
       : null,
     settings.bookingEmail
-      ? {
-          label: "E-mail",
-          value: settings.bookingEmail,
-          href: `mailto:${settings.bookingEmail}`,
-        }
+      ? { label: "E-mail:", value: settings.bookingEmail, href: `mailto:${settings.bookingEmail}` }
       : null,
     settings.managerVkUrl
       ? {
-          label: "ВКонтакте",
+          label: null,
           value: settings.managerVkUrl.replace(/^https?:\/\//, ""),
           href: vkHref(settings.managerVkUrl),
         }
@@ -82,28 +77,27 @@ export default function Contacts() {
         {settings.managerName || rows.length > 0 ? (
           <AnimatedSection className={styles.block}>
             {settings.managerName ? (
-              <div>
-                <p className={homeStyles.contactLabel}>Менеджмент / организация концертов</p>
-                <p className={styles.managerName}>{settings.managerName}</p>
-              </div>
+              <p className={styles.contactLead}>
+                Менеджмент/Организация концертов: {settings.managerName}
+              </p>
             ) : null}
 
-            <div className={homeStyles.contacts}>
+            <ul className={styles.contactList}>
               {rows.map((row) => (
-                <div key={row.label} className={homeStyles.contactCard}>
-                  <span className={homeStyles.contactLabel}>{row.label}</span>
+                <li key={row.value}>
+                  {row.label ? <span className={styles.contactKey}>{row.label}</span> : null}
                   <a
                     href={row.href}
-                    className={homeStyles.contactValue}
+                    className={styles.contactLink}
                     {...(row.href.startsWith("http")
                       ? { target: "_blank", rel: "noreferrer" }
                       : {})}
                   >
                     {row.value}
                   </a>
-                </div>
+                </li>
               ))}
-            </div>
+            </ul>
           </AnimatedSection>
         ) : (
           <EmptyState

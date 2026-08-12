@@ -131,11 +131,32 @@
   max-width: none;
 }
 
-.managerName {
-  margin-top: var(--space-2);
-  font-family: var(--font-display);
-  font-size: var(--fs-h3);
-  text-transform: uppercase;
+/* Контакты — простой столбик «подпись: значение», как в исходной записке. */
+.contactLead {
+  font-size: var(--fs-lg);
+}
+
+.contactList {
+  display: grid;
+  gap: var(--space-2);
+  list-style: none;
+  padding: 0;
+  font-size: var(--fs-lg);
+}
+
+.contactKey {
+  color: var(--ink-mute);
+  margin-right: var(--space-2);
+}
+
+.contactLink {
+  color: var(--accent-bright);
+  transition: color var(--t-fast);
+}
+
+.contactLink:hover {
+  text-decoration: underline;
+  text-underline-offset: 3px;
 }
 
 .prose h2 {
