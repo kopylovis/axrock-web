@@ -17,6 +17,7 @@ const PRIORITIES = [
   [/^\/(news|concerts)$/, "0.9", "daily"],
   [/^\/(news|concerts)\//, "0.8", "weekly"],
   [/^\/music$/, "0.8", "weekly"],
+  [/^\/music\//, "0.7", "monthly"],
   [/^\/(about|members)$/, "0.7", "monthly"],
   [/^\/media$/, "0.6", "weekly"],
   [/^\/(privacy|personal-data-consent)$/, "0.2", "yearly"],

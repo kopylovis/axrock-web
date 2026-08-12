@@ -15,6 +15,7 @@ export default [
     route("concerts", "routes/concerts.tsx"),
     route("concerts/:slug", "routes/concert-detail.tsx"),
     route("music", "routes/music.tsx"),
+    route("music/:category", "routes/music-category.tsx"),
     route("media", "routes/media.tsx"),
     route("contacts", "routes/contacts.tsx"),
     route("privacy", "routes/privacy.tsx"),

@@ -1391,6 +1391,14 @@
 }
 
 /* Строка с итогом перед таблицей: у .hint нет нижнего отступа, и сумма липла к шапке. */
+/* Пояснение под заголовком панели: без отступа липнет к первому полю. */
+.panelNote {
+  margin-bottom: var(--space-5);
+  font-size: var(--fs-xs);
+  line-height: 1.45;
+  color: var(--ink-faint);
+}
+
 .panelTotal {
   margin-bottom: var(--space-4);
   font-size: var(--fs-sm);

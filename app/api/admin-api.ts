@@ -5,6 +5,7 @@ import type {
   ConcertDetailDto,
   LinkKind,
   MediaItemDto,
+  MusicSectionDto,
   NewsCategoryDto,
   NewsDetailDto,
   PageDto,
@@ -512,6 +513,21 @@ export async function updateSettings(
   return apiFetch<SiteSettingsDto>(`${PREFIX}/settings`, {
     method: "PUT",
     body: input,
+    auth: true,
+  });
+}
+
+export async function listMusicSections(): Promise<MusicSectionDto[]> {
+  return apiFetch<MusicSectionDto[]>(`${PREFIX}/music-sections`, { auth: true });
+}
+
+export async function saveMusicSection(
+  slug: string,
+  image: string | null,
+): Promise<MusicSectionDto> {
+  return apiFetch<MusicSectionDto>(`${PREFIX}/music-sections/${slug}`, {
+    method: "PUT",
+    body: { image },
     auth: true,
   });
 }

@@ -1,26 +1,27 @@
-import { useState } from "react";
+import { Link } from "react-router";
 import type { Route } from "./+types/music";
 import { useSiteData } from "~/layouts/PublicLayout";
 import { AnimatedSection } from "~/components/common/AnimatedSection";
 import { EmptyState, ErrorState } from "~/components/common/States";
 import { PageSkeleton } from "~/components/common/PageSkeleton";
+import { ResponsiveImage } from "~/components/common/ResponsiveImage";
 import { MusicPlatformLinks } from "~/components/layout/LinkLists";
-import { ReleaseCard } from "~/components/music/ReleaseCard";
-import { fetchReleases } from "~/api/public-api";
+import { fetchMusicSections, fetchReleases } from "~/api/public-api";
 import { breadcrumbs, buildMeta, jsonLd, ogImageFrom } from "~/lib/seo";
-import { SITE_URL, canonicalUrl } from "~/lib/config";
-import { absoluteImageUrl } from "~/utils/images";
-import type { ReleaseType } from "~/types/content";
+import { RELEASE_CATEGORIES, releaseCountLabel } from "~/utils/release-categories";
 import homeStyles from "~/components/home/home.module.css";
-import newsStyles from "~/components/news/news.module.css";
-import releaseStyles from "~/components/music/ReleaseCard.module.css";
 import styles from "~/styles/page.module.css";
 
 async function load() {
   try {
-    return { releases: await fetchReleases(), failed: false as const };
+    const [releases, sections] = await Promise.all([
+      fetchReleases(),
+      // Обложка раздела необязательна — без неё соберём коллаж из релизов.
+      fetchMusicSections().catch(() => []),
+    ]);
+    return { releases, sections, failed: false as const };
   } catch {
-    return { releases: [], failed: true as const };
+    return { releases: [], sections: [], failed: true as const };
   }
 }
 
@@ -36,23 +37,13 @@ export function HydrateFallback() {
   return <PageSkeleton />;
 }
 
-export function meta({ loaderData, location, matches }: Route.MetaArgs) {
-  const albums = (loaderData?.releases ?? []).map((release) => ({
-    "@context": "https://schema.org",
-    "@type": release.type === "SINGLE" ? "MusicRecording" : "MusicAlbum",
-    name: release.title,
-    url: canonicalUrl("/music"),
-    datePublished: release.releaseDate?.toISOString(),
-    image: absoluteImageUrl(release.coverImage, SITE_URL),
-    byArtist: { "@type": "MusicGroup", name: "Ангел-Хранитель" },
-  }));
-
+export function meta({ location, matches }: Route.MetaArgs) {
   return [
     ...buildMeta({
       title: "Музыка и дискография",
       image: ogImageFrom(matches),
       description:
-        "Дискография группы «Ангел-Хранитель»: альбомы, EP и синглы, треклисты и ссылки на музыкальные площадки.",
+        "Дискография группы «Ангел-Хранитель»: альбомы, концертные записи и синглы, треклисты и ссылки на музыкальные площадки.",
       pathname: location.pathname,
     }),
     jsonLd(
@@ -61,29 +52,51 @@ export function meta({ loaderData, location, matches }: Route.MetaArgs) {
         { name: "Музыка", path: "/music" },
       ]),
     ),
-    ...albums.map((album) => jsonLd(album)),
   ];
 }
 
-const FILTERS: Array<{ value: ReleaseType | "ALL"; label: string }> = [
-  { value: "ALL", label: "Все" },
-  { value: "ALBUM", label: "Альбомы" },
-  { value: "EP", label: "EP" },
-  { value: "SINGLE", label: "Синглы" },
-  { value: "LIVE", label: "Концертные" },
-  { value: "COMPILATION", label: "Сборники" },
-];
+/** Обложка раздела: своя картинка, а если её нет — коллаж из обложек релизов. */
+function SectionCover({ image, covers }: { image: string | null; covers: string[] }) {
+  if (image || covers.length < 2) {
+    return (
+      <ResponsiveImage
+        src={image ?? covers[0] ?? null}
+        spec="releaseCover"
+        alt=""
+        className={styles.tileCover}
+        sizes="(max-width: 700px) 100vw, 320px"
+        compactPlaceholder
+      />
+    );
+  }
+
+  return (
+    <div className={styles.tileCollage}>
+      {covers.slice(0, 4).map((cover) => (
+        <ResponsiveImage
+          key={cover}
+          src={cover}
+          spec="releaseCover"
+          alt=""
+          className={styles.tileCollageItem}
+          sizes="160px"
+          compactPlaceholder
+        />
+      ))}
+    </div>
+  );
+}
 
 export default function Music({ loaderData }: Route.ComponentProps) {
-  const { releases, failed } = loaderData;
+  const { releases, sections: covers, failed } = loaderData;
   const { musicLinks } = useSiteData();
-  const [filter, setFilter] = useState<ReleaseType | "ALL">("ALL");
 
-  const availableTypes = new Set(releases.map((release) => release.type));
-  const visibleFilters = FILTERS.filter(
-    (item) => item.value === "ALL" || availableTypes.has(item.value),
-  );
-  const shown = filter === "ALL" ? releases : releases.filter((item) => item.type === filter);
+  // Пустые разделы не показываем: заходить в них не за чем.
+  const sections = RELEASE_CATEGORIES.map((category) => {
+    const items = releases.filter((release) => release.type === category.type);
+    const image = covers.find((cover) => cover.slug === category.slug)?.image ?? null;
+    return { category, items, image };
+  }).filter((section) => section.items.length > 0);
 
   return (
     <div className={styles.page}>
@@ -92,7 +105,7 @@ export default function Music({ loaderData }: Route.ComponentProps) {
           <span className={styles.eyebrow}>Дискография</span>
           <h1 className={styles.title}>Музыка</h1>
           <p className={styles.lead}>
-            Альбомы, EP и синглы группы. Слушайте на любой удобной площадке.
+            Альбомы, концертные записи и синглы группы. Слушайте на любой удобной площадке.
           </p>
         </header>
 
@@ -104,37 +117,34 @@ export default function Music({ loaderData }: Route.ComponentProps) {
 
         {failed ? <ErrorState /> : null}
 
-        {!failed && releases.length === 0 ? (
+        {!failed && sections.length === 0 ? (
           <EmptyState
             title="Релизы скоро появятся"
             description="Дискография наполняется через административную панель."
           />
         ) : null}
 
-        {releases.length > 0 ? (
-          <>
-            {visibleFilters.length > 2 ? (
-              <div className={newsStyles.filters}>
-                {visibleFilters.map((item) => (
-                  <button
-                    key={item.value}
-                    type="button"
-                    className={`${newsStyles.filter} ${filter === item.value ? newsStyles.filterActive : ""}`}
-                    aria-pressed={filter === item.value}
-                    onClick={() => setFilter(item.value)}
-                  >
-                    {item.label}
-                  </button>
-                ))}
-              </div>
-            ) : null}
+        {sections.length > 0 ? (
+          <AnimatedSection className={styles.tiles}>
+            {sections.map(({ category, items, image }) => {
+              // Сначала свежие: коллаж собирается из последних обложек раздела.
+              const releaseCovers = [...items]
+                .sort((a, b) => (b.releaseDate?.getTime() ?? 0) - (a.releaseDate?.getTime() ?? 0))
+                .map((release) => release.coverImage)
+                .filter((cover): cover is string => Boolean(cover));
 
-            <AnimatedSection className={releaseStyles.grid}>
-              {shown.map((release) => (
-                <ReleaseCard key={release.id} release={release} />
-              ))}
-            </AnimatedSection>
-          </>
+              return (
+                <Link key={category.slug} to={`/music/${category.slug}`} className={styles.tile}>
+                  <SectionCover image={image} covers={releaseCovers} />
+                  <div className={styles.tileBody}>
+                    <h2 className={styles.tileTitle}>{category.title}</h2>
+                    <p className={styles.tileText}>{category.description}</p>
+                    <span className={styles.tileCount}>{releaseCountLabel(items.length)}</span>
+                  </div>
+                </Link>
+              );
+            })}
+          </AnimatedSection>
         ) : null}
       </div>
     </div>

@@ -166,6 +166,11 @@ export interface MediaItemDto {
   sortOrder: number;
 }
 
+export interface MusicSectionDto {
+  slug: string;
+  image: string | null;
+}
+
 export interface SiteSettingsDto {
   siteName: string;
   bandName: string;

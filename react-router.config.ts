@@ -1,5 +1,6 @@
 import type { Config } from "@react-router/dev/config";
 import { PRERENDER_PLACEHOLDER } from "./app/lib/prerender";
+import { RELEASE_CATEGORIES } from "./app/utils/release-categories";
 
 const STATIC_PATHS = [
   "/",
@@ -14,6 +15,28 @@ const STATIC_PATHS = [
 ];
 
 const API_BASE_URL = process.env.VITE_API_BASE_URL ?? "https://api.monoroh.com/api/axrock";
+
+/**
+ * Разделы дискографии живут в коде, но собирать имеет смысл только те, где есть
+ * релизы: пустой раздел не нужен ни посетителю, ни поисковику.
+ */
+async function collectMusicCategoryPaths(): Promise<string[]> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/public/releases`, {
+      signal: AbortSignal.timeout(20_000),
+    });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+    const releases = (await response.json()) as Array<{ type: string }>;
+    const types = new Set(releases.map((release) => release.type));
+
+    return RELEASE_CATEGORIES.filter((category) => types.has(category.type)).map(
+      (category) => `/music/${category.slug}`,
+    );
+  } catch {
+    return [];
+  }
+}
 
 /**
  * GitHub Pages отдаёт только статику, поэтому публичные страницы собираются в HTML
@@ -37,8 +60,9 @@ async function collectPrerenderPaths(): Promise<string[]> {
   }
 
   const dynamic = entries.map((entry) => entry.path).filter((path) => path.startsWith("/"));
+  dynamic.push(...(await collectMusicCategoryPaths()));
 
-  for (const prefix of ["/news/", "/concerts/"]) {
+  for (const prefix of ["/news/", "/concerts/", "/music/"]) {
     if (!dynamic.some((path) => path.startsWith(prefix))) {
       dynamic.push(`${prefix}${PRERENDER_PLACEHOLDER}`);
     }

@@ -4,6 +4,7 @@ import type {
   ConcertDetailDto,
   ConcertSummaryDto,
   MediaItemDto,
+  MusicSectionDto,
   NewsCategoryDto,
   NewsDetailDto,
   NewsSummaryDto,
@@ -112,6 +113,10 @@ export async function fetchConcertBySlug(slug: string): Promise<ConcertDetail> {
 export async function fetchReleases(): Promise<ReleaseDetail[]> {
   const dto = await apiFetch<ReleaseDetailDto[]>(`${PREFIX}/releases`);
   return dto.map(mapReleaseDetail);
+}
+
+export async function fetchMusicSections(): Promise<MusicSectionDto[]> {
+  return apiFetch<MusicSectionDto[]>(`${PREFIX}/music-sections`);
 }
 
 export async function fetchReleaseBySlug(slug: string): Promise<ReleaseDetail> {

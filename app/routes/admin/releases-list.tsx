@@ -1,6 +1,10 @@
+import { useState } from "react";
 import { Link, useRevalidator } from "react-router";
 import type { Route } from "./+types/releases-list";
-import { deleteRelease, listReleases } from "~/api/admin-api";
+import { deleteRelease, listMusicSections, listReleases, saveMusicSection } from "~/api/admin-api";
+import { GlassPanel } from "~/components/common/GlassPanel";
+import { ImageField } from "~/components/admin/fields";
+import { RELEASE_CATEGORIES } from "~/utils/release-categories";
 import { PageSkeleton } from "~/components/common/PageSkeleton";
 import { EmptyState, ErrorState } from "~/components/common/States";
 import { RowMenu } from "~/components/admin/RowMenu";
@@ -12,9 +16,13 @@ import styles from "~/components/admin/admin.module.css";
 
 export async function clientLoader() {
   try {
-    return { releases: await listReleases(), failed: false as const };
+    const [releases, sections] = await Promise.all([
+      listReleases(),
+      listMusicSections().catch(() => []),
+    ]);
+    return { releases, sections, failed: false as const };
   } catch {
-    return { releases: [], failed: true as const };
+    return { releases: [], sections: [], failed: true as const };
   }
 }
 
@@ -23,7 +31,12 @@ export function HydrateFallback() {
 }
 
 export default function AdminReleasesList({ loaderData }: Route.ComponentProps) {
-  const { releases, failed } = loaderData;
+  const { releases, sections, failed } = loaderData;
+  // Картинку сохраняем сразу после выбора: отдельной кнопки тут не нужно.
+  const [covers, setCovers] = useState<Record<string, string | null>>(
+    Object.fromEntries(sections.map((section) => [section.slug, section.image])),
+  );
+  const [coverError, setCoverError] = useState<string | null>(null);
   const { sort, toggle } = useTableSort<"title" | "status" | "type" | "date" | "tracks">({ key: "date", direction: "desc" });
 
   // Сортировка идёт по данным, а не по разметке: значения берутся из записи.
@@ -36,6 +49,16 @@ export default function AdminReleasesList({ loaderData }: Route.ComponentProps) 
       return 0;
   });
   const revalidator = useRevalidator();
+
+  async function changeCover(slug: string, image: string | null) {
+    setCovers((prev) => ({ ...prev, [slug]: image }));
+    setCoverError(null);
+    try {
+      await saveMusicSection(slug, image);
+    } catch (cause) {
+      setCoverError(cause instanceof Error ? cause.message : "Не удалось сохранить обложку раздела");
+    }
+  }
 
   async function remove(id: number, title: string) {
     if (!window.confirm(`Удалить релиз «${title}»?`)) return;
@@ -144,6 +167,37 @@ export default function AdminReleasesList({ loaderData }: Route.ComponentProps) 
           </table>
         </div>
       ) : null}
+
+      <GlassPanel className={styles.panel}>
+        <h2 className={styles.panelTitle}>Обложки разделов</h2>
+        <p className={styles.panelNote}>
+          Картинка плитки раздела на странице «Музыка». Если не задать, собирается коллаж из
+          обложек релизов раздела.
+        </p>
+
+        {coverError ? (
+          <p className={styles.alert} role="alert">
+            {coverError}
+          </p>
+        ) : null}
+
+        <div className={`${styles.formGrid} ${styles.formGridTwo}`}>
+          {RELEASE_CATEGORIES.map((category) => (
+            <ImageField
+              key={category.slug}
+              label={category.title}
+              spec="releaseCover"
+              value={covers[category.slug] ?? null}
+              hint={
+                releases.some((release) => release.type === category.type)
+                  ? undefined
+                  : "Пока нет релизов — на сайте раздел не показывается."
+              }
+              onChange={(image) => changeCover(category.slug, image)}
+            />
+          ))}
+        </div>
+      </GlassPanel>
     </>
   );
 }
