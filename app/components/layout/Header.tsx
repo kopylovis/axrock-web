@@ -1,5 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { NavLink, useLocation } from "react-router";
+import { SocialLinks } from "./LinkLists";
+import type { SocialLink } from "~/types/content";
 import styles from "./Header.module.css";
 
 const NAV_ITEMS = [
@@ -11,7 +13,15 @@ const NAV_ITEMS = [
   { to: "/contacts", label: "Контакты" },
 ];
 
-export function Header({ bandName, logo }: { bandName: string; logo: string | null }) {
+export function Header({
+  bandName,
+  logo,
+  socialLinks = [],
+}: {
+  bandName: string;
+  logo: string | null;
+  socialLinks?: SocialLink[];
+}) {
   const [open, setOpen] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
@@ -112,18 +122,18 @@ export function Header({ bandName, logo }: { bandName: string; logo: string | nu
             aria-label={open ? "Закрыть меню" : "Открыть меню"}
             onClick={() => setOpen((value) => !value)}
           >
-            <svg
-              width="20"
-              height="20"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
+            {/* Полосы складываются в крест: три отдельных элемента, чтобы
+                переход был анимированным, а не подменой иконки. */}
+            <span
+              className={[styles.toggleIcon, open ? styles.toggleIconOpen : null]
+                .filter(Boolean)
+                .join(" ")}
               aria-hidden="true"
             >
-              {open ? <path d="M18 6 6 18M6 6l12 12" /> : <path d="M3 6h18M3 12h18M3 18h18" />}
-            </svg>
+              <span />
+              <span />
+              <span />
+            </span>
           </button>
         </div>
       </header>
@@ -131,12 +141,28 @@ export function Header({ bandName, logo }: { bandName: string; logo: string | nu
       {open ? (
         <div className={styles.drawer} id="mobile-nav">
           <nav className={styles.drawerNav} aria-label="Мобильная навигация">
-            {NAV_ITEMS.map((item) => (
-              <NavLink key={item.to} to={item.to} className={drawerLinkClass}>
+            {NAV_ITEMS.map((item, index) => (
+              <NavLink
+                key={item.to}
+                to={item.to}
+                className={drawerLinkClass}
+                /* Пункты проявляются по очереди — задержка своя у каждого. */
+                style={{ "--stagger": `${index * 45}ms` } as React.CSSProperties}
+              >
+                <span className={styles.drawerIndex} aria-hidden="true">
+                  {String(index + 1).padStart(2, "0")}
+                </span>
                 {item.label}
               </NavLink>
             ))}
           </nav>
+
+          {socialLinks.length > 0 ? (
+            <div className={styles.drawerFooter}>
+              <span className={styles.drawerFooterLabel}>Мы в сети</span>
+              <SocialLinks links={socialLinks} />
+            </div>
+          ) : null}
         </div>
       ) : null}
     </>

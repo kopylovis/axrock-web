@@ -36,7 +36,11 @@ export default function PublicLayout({ loaderData }: Route.ComponentProps) {
       <a href="#main" className="skip-link">
         Перейти к содержимому
       </a>
-      <Header bandName={site.settings.bandName} logo={site.settings.logo} />
+      <Header
+        bandName={site.settings.bandName}
+        logo={site.settings.logo}
+        socialLinks={site.socialLinks}
+      />
       <main id="main">
         <Outlet />
       </main>

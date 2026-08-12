@@ -182,38 +182,142 @@
   border-color: var(--ink);
 }
 
+.toggleIcon {
+  position: relative;
+  display: block;
+  width: 20px;
+  height: 14px;
+}
+
+.toggleIcon span {
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 1.5px;
+  background: currentColor;
+  transition:
+    transform var(--t-base),
+    opacity var(--t-fast);
+}
+
+.toggleIcon span:nth-child(1) {
+  top: 0;
+}
+
+.toggleIcon span:nth-child(2) {
+  top: 50%;
+  margin-top: -0.75px;
+}
+
+.toggleIcon span:nth-child(3) {
+  bottom: 0;
+}
+
+.toggleIconOpen span:nth-child(1) {
+  transform: translateY(6.25px) rotate(45deg);
+}
+
+.toggleIconOpen span:nth-child(2) {
+  opacity: 0;
+}
+
+.toggleIconOpen span:nth-child(3) {
+  transform: translateY(-6.25px) rotate(-45deg);
+}
+
+/* Меню открывается поверх страницы. Фон непрозрачный: сквозь полупрозрачный
+   просвечивала верхушка страницы и читалась как обрезанная строка. */
 .drawer {
   position: fixed;
   inset: var(--header-height) 0 0;
   z-index: 45;
-  padding: var(--space-6) var(--space-5);
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-6) var(--space-5) calc(var(--space-6) + env(safe-area-inset-bottom));
   overflow-y: auto;
-  background: var(--bg-overlay);
-  -webkit-backdrop-filter: blur(var(--blur-large));
-  backdrop-filter: blur(var(--blur-large));
+  overscroll-behavior: contain;
+  background: var(--bg);
+  /* Токены --t-* несут в себе кривую, поэтому в animation идёт голая
+     длительность: вторая функция сглаживания сделала бы правило неверным. */
+  animation: drawerIn 200ms var(--ease-out) both;
+}
+
+@keyframes drawerIn {
+  from {
+    opacity: 0;
+  }
 }
 
 .drawerNav {
   display: grid;
+  width: 100%;
   max-width: var(--container);
   margin-inline: auto;
-  border-top: 1px solid var(--line);
 }
 
 .drawerLink {
   display: flex;
-  align-items: center;
-  padding: var(--space-5) var(--space-2);
+  align-items: baseline;
+  gap: var(--space-4);
+  padding: var(--space-5) 0;
   border-bottom: 1px solid var(--line);
   color: var(--ink);
-  font-size: var(--fs-h3);
-  font-weight: 800;
-  letter-spacing: -0.01em;
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--fs-h2);
+  line-height: var(--lh-snug);
   text-transform: uppercase;
+  transition: color var(--t-fast);
+  animation: drawerLinkIn 340ms var(--ease-out) both;
+  animation-delay: var(--stagger, 0ms);
+}
+
+.drawerLink:first-child {
+  border-top: 1px solid var(--line);
+}
+
+@keyframes drawerLinkIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+/* Номер пункта — набор моноширинным, как остальные служебные подписи сайта. */
+.drawerIndex {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  letter-spacing: 0.06em;
+  color: var(--ink-ghost);
 }
 
 .drawerLinkActive {
   color: var(--accent-bright);
+}
+
+.drawerLinkActive .drawerIndex {
+  color: var(--accent);
+}
+
+/* Соцсети занимают пустоту под коротким списком разделов. */
+.drawerFooter {
+  display: grid;
+  gap: var(--space-4);
+  width: 100%;
+  max-width: var(--container);
+  margin-inline: auto;
+  margin-top: auto;
+  padding-top: var(--space-7);
+  animation: drawerLinkIn 340ms var(--ease-out) both;
+  animation-delay: 300ms;
+}
+
+.drawerFooterLabel {
+  font-family: var(--font-accent);
+  font-size: var(--fs-xs);
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--ink-faint);
 }
 
 @media (min-width: 980px) {
