@@ -250,12 +250,6 @@ export default function Home({ loaderData }: Route.ComponentProps) {
               ) : null}
             </div>
           ) : null}
-
-          <div className={styles.sectionFooter}>
-            <ButtonLink to="/contacts" variant="ghost">
-              Все контакты
-            </ButtonLink>
-          </div>
         </div>
       </AnimatedSection>
     </>

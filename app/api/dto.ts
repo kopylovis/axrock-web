@@ -113,6 +113,8 @@ export interface BandMemberDto {
   photo: string | null;
   currentMember: boolean;
   sortOrder: number;
+  /** Отдаётся только административным API — публичное всегда возвращает видимых. */
+  visible?: boolean;
   links: SocialLinkDto[];
 }
 
@@ -142,6 +144,8 @@ export interface ReleaseSummaryDto {
 }
 
 export interface ReleaseDetailDto extends ReleaseSummaryDto {
+  /** Отдаётся только административным API — публичное всегда возвращает опубликованное. */
+  published?: boolean;
   description: string | null;
   seoTitle: string | null;
   seoDescription: string | null;

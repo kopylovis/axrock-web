@@ -52,7 +52,7 @@ export function ReleaseForm({ release }: { release: ReleaseDetailDto | null }) {
   const [coverImage, setCoverImage] = useState<string | null>(release?.coverImage ?? null);
   const [description, setDescription] = useState(release?.description ?? "");
   const [releaseDate, setReleaseDate] = useState(toDateInputValue(release?.releaseDate));
-  const [published, setPublished] = useState(false);
+  const [published, setPublished] = useState(release?.published ?? false);
   const [sortOrder, setSortOrder] = useState(String(release?.sortOrder ?? 0));
   const [tracks, setTracks] = useState<Track[]>(
     (release?.tracks ?? []).map((track) => ({

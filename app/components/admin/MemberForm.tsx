@@ -16,7 +16,7 @@ export function MemberForm({ member }: { member: BandMemberDto | null }) {
   const [biography, setBiography] = useState(member?.biography ?? "");
   const [photo, setPhoto] = useState<string | null>(member?.photo ?? null);
   const [currentMember, setCurrentMember] = useState(member?.currentMember ?? true);
-  const [visible, setVisible] = useState(true);
+  const [visible, setVisible] = useState(member?.visible ?? true);
   const [sortOrder, setSortOrder] = useState(String(member?.sortOrder ?? 0));
 
   const [errors, setErrors] = useState<Record<string, string>>({});
