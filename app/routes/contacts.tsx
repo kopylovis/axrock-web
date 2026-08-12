@@ -2,7 +2,6 @@ import type { Route } from "./+types/contacts";
 import { useSiteData } from "~/layouts/PublicLayout";
 import { AnimatedSection } from "~/components/common/AnimatedSection";
 import { EmptyState } from "~/components/common/States";
-import { MusicPlatformLinks, SocialLinks } from "~/components/layout/LinkLists";
 import { breadcrumbs, buildMeta, jsonLd, ogImageFrom } from "~/lib/seo";
 import homeStyles from "~/components/home/home.module.css";
 import styles from "~/styles/page.module.css";
@@ -13,7 +12,7 @@ export function meta({ location, matches }: Route.MetaArgs) {
       title: "Контакты",
       image: ogImageFrom(matches),
       description:
-        "Контакты группы «Ангел-Хранитель»: booking для организаторов, пресса, сотрудничество и соцсети.",
+        "Контакты группы «Ангел-Хранитель»: менеджмент и организация концертов, телефон, Telegram и почта.",
       pathname: location.pathname,
     }),
     jsonLd(
@@ -25,42 +24,82 @@ export function meta({ location, matches }: Route.MetaArgs) {
   ];
 }
 
-export default function Contacts() {
-  const { settings, socialLinks, musicLinks } = useSiteData();
+/** Телефон в ссылке tel: не терпит пробелов и скобок. */
+function telHref(value: string): string {
+  return `tel:${value.replace(/[^\d+]/g, "")}`;
+}
 
-  const contacts = [
-    { label: "Организаторам и booking", value: settings.bookingEmail, type: "email" as const },
-    { label: "Пресса", value: settings.pressEmail, type: "email" as const },
-    { label: "Сотрудничество", value: settings.contactEmail, type: "email" as const },
-    { label: "Телефон", value: settings.contactPhone, type: "phone" as const },
-  ].filter((item) => Boolean(item.value));
+/** В админке пишут либо «@ник», либо готовую ссылку — принимаем оба варианта. */
+function telegramHref(value: string): string {
+  return value.startsWith("http") ? value : `https://t.me/${value.replace(/^@/, "")}`;
+}
+
+function vkHref(value: string): string {
+  return value.startsWith("http") ? value : `https://${value}`;
+}
+
+export default function Contacts() {
+  const { settings } = useSiteData();
+
+  const rows = [
+    settings.contactPhone
+      ? { label: "Телефон", value: settings.contactPhone, href: telHref(settings.contactPhone) }
+      : null,
+    settings.managerTelegram
+      ? {
+          label: "Telegram",
+          value: settings.managerTelegram,
+          href: telegramHref(settings.managerTelegram),
+        }
+      : null,
+    settings.managerMaxPhone
+      ? { label: "Max", value: settings.managerMaxPhone, href: telHref(settings.managerMaxPhone) }
+      : null,
+    settings.bookingEmail
+      ? {
+          label: "E-mail",
+          value: settings.bookingEmail,
+          href: `mailto:${settings.bookingEmail}`,
+        }
+      : null,
+    settings.managerVkUrl
+      ? {
+          label: "ВКонтакте",
+          value: settings.managerVkUrl.replace(/^https?:\/\//, ""),
+          href: vkHref(settings.managerVkUrl),
+        }
+      : null,
+  ].filter((row) => row !== null);
 
   return (
     <div className={styles.page}>
       <div className="container">
-        <header className={`${styles.header} ${styles.headerWide}`}>
+        <header className={styles.header}>
           <span className={styles.eyebrow}>Связаться</span>
           <h1 className={styles.title}>Контакты</h1>
-          <p className={styles.lead}>
-            Пишите по вопросам концертов, интервью и совместных проектов.
-          </p>
         </header>
 
-        {contacts.length > 0 ? (
+        {settings.managerName || rows.length > 0 ? (
           <AnimatedSection className={styles.block}>
+            {settings.managerName ? (
+              <div>
+                <p className={homeStyles.contactLabel}>Менеджмент / организация концертов</p>
+                <p className={styles.managerName}>{settings.managerName}</p>
+              </div>
+            ) : null}
+
             <div className={homeStyles.contacts}>
-              {contacts.map((contact) => (
-                <div key={contact.label} className={homeStyles.contactCard}>
-                  <span className={homeStyles.contactLabel}>{contact.label}</span>
+              {rows.map((row) => (
+                <div key={row.label} className={homeStyles.contactCard}>
+                  <span className={homeStyles.contactLabel}>{row.label}</span>
                   <a
-                    href={
-                      contact.type === "email"
-                        ? `mailto:${contact.value}`
-                        : `tel:${contact.value?.replace(/[^\d+]/g, "")}`
-                    }
+                    href={row.href}
                     className={homeStyles.contactValue}
+                    {...(row.href.startsWith("http")
+                      ? { target: "_blank", rel: "noreferrer" }
+                      : {})}
                   >
-                    {contact.value}
+                    {row.value}
                   </a>
                 </div>
               ))}
@@ -72,24 +111,6 @@ export default function Contacts() {
             description="Раздел заполняется через административную панель сайта."
           />
         )}
-
-        {socialLinks.length > 0 ? (
-          <AnimatedSection className={styles.block}>
-            <div className={homeStyles.linksGroup}>
-              <p className={homeStyles.contactLabel}>Соцсети</p>
-              <SocialLinks links={socialLinks} />
-            </div>
-          </AnimatedSection>
-        ) : null}
-
-        {musicLinks.length > 0 ? (
-          <AnimatedSection className={styles.block}>
-            <div className={homeStyles.linksGroup}>
-              <p className={homeStyles.contactLabel}>Музыкальные площадки</p>
-              <MusicPlatformLinks links={musicLinks} />
-            </div>
-          </AnimatedSection>
-        ) : null}
       </div>
     </div>
   );

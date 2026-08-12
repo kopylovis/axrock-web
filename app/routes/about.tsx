@@ -63,7 +63,9 @@ export default function About({ loaderData }: Route.ComponentProps) {
       <div className="container">
         <header className={`${styles.header} ${styles.headerWide}`}>
           <span className={styles.eyebrow}>О группе</span>
-          <h1 className={styles.title}>{settings.bandName}</h1>
+          <div className={styles.titleFit}>
+            <h1 className={styles.title}>{settings.bandName}</h1>
+          </div>
           {settings.shortBiography ? <p className={styles.lead}>{settings.shortBiography}</p> : null}
         </header>
 
@@ -82,7 +84,7 @@ export default function About({ loaderData }: Route.ComponentProps) {
 
         <AnimatedSection className={styles.block}>
           {settings.fullBiography ? (
-            <div className={styles.prose}>
+            <div className={`${styles.prose} ${styles.proseWide}`}>
               <RichText doc={settings.fullBiography} />
             </div>
           ) : (

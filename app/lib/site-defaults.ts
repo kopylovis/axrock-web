@@ -17,6 +17,10 @@ export const FALLBACK_SITE_DATA: SiteData = {
     contactPhone: null,
     bookingEmail: null,
     pressEmail: null,
+    managerName: null,
+    managerTelegram: null,
+    managerMaxPhone: null,
+    managerVkUrl: null,
     defaultSeoTitle: `${BAND_NAME} — официальный сайт группы`,
     defaultSeoDescription:
       "Официальный сайт рок-группы «Ангел-Хранитель»: новости, афиша концертов, дискография, фото и видео.",

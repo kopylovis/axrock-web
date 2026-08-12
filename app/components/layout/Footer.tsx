@@ -1,6 +1,5 @@
 import { Link } from "react-router";
 import type { SiteData } from "~/types/content";
-import { MusicPlatformLinks, SocialLinks } from "./LinkLists";
 import styles from "./Footer.module.css";
 
 const SECTIONS = [
@@ -16,7 +15,7 @@ const MORE = [
 ];
 
 export function Footer({ site }: { site: SiteData }) {
-  const { settings, socialLinks, musicLinks } = site;
+  const { settings } = site;
   const year = new Date().getFullYear();
 
   return (
@@ -29,17 +28,6 @@ export function Footer({ site }: { site: SiteData }) {
             ) : (
               <p className={styles.brandName}>{settings.bandName}</p>
             )}
-            {settings.shortBiography ? (
-              <p className={styles.brandText}>{settings.shortBiography}</p>
-            ) : null}
-            {settings.bookingEmail ? (
-              <p className={styles.brandText}>
-                Концерты и booking:{" "}
-                <a href={`mailto:${settings.bookingEmail}`} className={styles.columnLink}>
-                  {settings.bookingEmail}
-                </a>
-              </p>
-            ) : null}
           </div>
 
           <div className={styles.columns}>
@@ -70,23 +58,6 @@ export function Footer({ site }: { site: SiteData }) {
             </nav>
           </div>
         </div>
-
-        {socialLinks.length > 0 || musicLinks.length > 0 ? (
-          <div className={styles.groups}>
-            {socialLinks.length > 0 ? (
-              <div>
-                <p className={styles.groupTitle}>Соцсети</p>
-                <SocialLinks links={socialLinks} />
-              </div>
-            ) : null}
-            {musicLinks.length > 0 ? (
-              <div>
-                <p className={styles.groupTitle}>Слушать</p>
-                <MusicPlatformLinks links={musicLinks} />
-              </div>
-            ) : null}
-          </div>
-        ) : null}
 
         <div className={styles.bottom}>
           <p>

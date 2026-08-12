@@ -169,6 +169,10 @@ export interface SiteSettingsDto {
   contactPhone: string | null;
   bookingEmail: string | null;
   pressEmail: string | null;
+  managerName: string | null;
+  managerTelegram: string | null;
+  managerMaxPhone: string | null;
+  managerVkUrl: string | null;
   defaultSeoTitle: string | null;
   defaultSeoDescription: string | null;
   defaultOgImage: string | null;

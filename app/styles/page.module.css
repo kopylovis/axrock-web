@@ -24,9 +24,16 @@
     grid-row: 1;
   }
 
-  .headerWide .title {
+  .headerWide .title,
+  .headerWide .titleFit {
     grid-column: 1;
     grid-row: 2;
+  }
+
+  /* Длинное название набором BENZIN не помещается в строку на полном кегле:
+     считаем размер от ширины колонки, а не от окна. */
+  .titleFit .title {
+    font-size: min(var(--fs-h1), 7cqw);
   }
 
   .headerWide .lead {
@@ -62,6 +69,10 @@
   line-height: var(--lh-snug);
   text-transform: uppercase;
   text-wrap: balance;
+}
+
+.titleFit {
+  container-type: inline-size;
 }
 
 .lead {
@@ -112,6 +123,19 @@
 /* Юридические тексты: узкая мера, спокойная типографика. */
 .prose {
   max-width: var(--container-narrow);
+}
+
+/* Биография занимает всю ширину страницы — иначе на широком экране колонка
+   текста теряется в пустоте. */
+.proseWide {
+  max-width: none;
+}
+
+.managerName {
+  margin-top: var(--space-2);
+  font-family: var(--font-display);
+  font-size: var(--fs-h3);
+  text-transform: uppercase;
 }
 
 .prose h2 {

@@ -43,11 +43,6 @@
   opacity: 0.9;
 }
 
-.brandText {
-  color: var(--ink-mute);
-  max-width: 46ch;
-}
-
 .columns {
   display: grid;
   gap: var(--space-6);
@@ -88,19 +83,6 @@
 
 .columnLink:hover {
   color: var(--accent-bright);
-}
-
-.groups {
-  display: grid;
-  gap: var(--space-5);
-}
-
-.groupTitle {
-  font-family: var(--font-accent);
-  font-size: var(--fs-xs);
-  letter-spacing: var(--track-caps);
-  text-transform: uppercase;
-  color: var(--ink-faint);
 }
 
 .bottom {
