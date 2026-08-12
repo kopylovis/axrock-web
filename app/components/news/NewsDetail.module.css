@@ -1,6 +1,6 @@
+/* Статья идёт во всю ширину основного контейнера — как остальные разделы сайта. */
 .article {
-  max-width: var(--container-narrow);
-  margin-inline: auto;
+  max-width: none;
 }
 
 .meta {
@@ -39,20 +39,11 @@
   margin-bottom: var(--space-7);
 }
 
-/* Обложка выходит за пределы колонки текста — крупнее, чем мера. */
 .cover {
   width: 100%;
   border: 1px solid var(--line);
   object-fit: cover;
   margin-bottom: var(--space-8);
-}
-
-@media (min-width: 1100px) {
-  .cover {
-    width: calc(100% + var(--space-10));
-    margin-inline: calc(var(--space-10) / -2);
-    max-width: none;
-  }
 }
 
 .share {

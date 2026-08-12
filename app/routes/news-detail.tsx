@@ -119,23 +119,25 @@ export default function NewsDetail({ loaderData }: Route.ComponentProps) {
             ) : null}
           </div>
 
-          <h1 className={detailStyles.title}>{article.title}</h1>
+          <div className={detailStyles.main}>
+            <h1 className={detailStyles.title}>{article.title}</h1>
 
-          {article.excerpt ? <p className={detailStyles.excerpt}>{article.excerpt}</p> : null}
+            {article.excerpt ? <p className={detailStyles.excerpt}>{article.excerpt}</p> : null}
 
-          {article.coverImage ? (
-            <ResponsiveImage
-              src={article.coverImage}
-              spec="newsCover"
-              alt={article.title}
-              className={detailStyles.cover}
-              aspectRatio="16 / 9"
-              priority
-              sizes="(max-width: 740px) 100vw, 740px"
-            />
-          ) : null}
+            {article.coverImage ? (
+              <ResponsiveImage
+                src={article.coverImage}
+                spec="newsCover"
+                alt={article.title}
+                className={detailStyles.cover}
+                aspectRatio="16 / 9"
+                priority
+                sizes="100vw"
+              />
+            ) : null}
 
-          <RichText doc={article.content} />
+            <RichText doc={article.content} />
+          </div>
 
           <div className={detailStyles.share}>
             <span className={detailStyles.shareLabel}>Поделиться</span>
