@@ -5,7 +5,8 @@ import { createSocialLink, deleteSocialLink, listSocialLinks } from "~/api/admin
 import { GlassPanel } from "~/components/common/GlassPanel";
 import { PageSkeleton } from "~/components/common/PageSkeleton";
 import { EmptyState, ErrorState } from "~/components/common/States";
-import { TextField } from "~/components/admin/fields";
+import { SelectField, TextField } from "~/components/admin/fields";
+import type { LinkKind } from "~/api/dto";
 import { SOCIAL_PLATFORMS, SocialIcon } from "~/components/common/SocialIcon";
 import { SortableTh, compareValues, useTableSort } from "~/components/admin/sortable-table";
 import styles from "~/components/admin/admin.module.css";
@@ -22,19 +23,42 @@ export function HydrateFallback() {
   return <PageSkeleton label="Загрузка ссылок" />;
 }
 
+const KIND_LABELS: Record<LinkKind, string> = {
+  SOCIAL: "Соцсеть",
+  MUSIC: "Музыкальная площадка",
+};
+
+const KIND_OPTIONS = (Object.keys(KIND_LABELS) as LinkKind[]).map((value) => ({
+  value,
+  label: KIND_LABELS[value],
+}));
+
+const KIND_HINTS: Record<LinkKind, string> = {
+  SOCIAL: "Показывается на главной и на странице участников в блоке «Соцсети».",
+  MUSIC:
+    "Кнопки «Слушать» на главной и в разделе «Музыка». Ссылка должна вести на профиль группы на площадке, а не на конкретный альбом — ссылки альбомов задаются в самом релизе.",
+};
+
+/** Старые записи приходят без вида — это соцсети. */
+function kindOf(link: { kind?: LinkKind }): LinkKind {
+  return link.kind ?? "SOCIAL";
+}
+
 export default function AdminSocialLinks({ loaderData }: Route.ComponentProps) {
   const { links, failed } = loaderData;
-  const { sort, toggle } = useTableSort<"title" | "platform" | "url">({ key: "title", direction: "asc" });
+  const { sort, toggle } = useTableSort<"title" | "platform" | "url" | "kind">({ key: "title", direction: "asc" });
 
   // Сортировка идёт по данным, а не по разметке: значения берутся из записи.
   const sorted = [...links].sort((a, b) => {
       if (sort.key === "title") return compareValues(a.title, b.title, sort.direction);
       if (sort.key === "platform") return compareValues(a.platform, b.platform, sort.direction);
       if (sort.key === "url") return compareValues(a.url, b.url, sort.direction);
+      if (sort.key === "kind") return compareValues(KIND_LABELS[kindOf(a)], KIND_LABELS[kindOf(b)], sort.direction);
       return 0;
   });
   const revalidator = useRevalidator();
 
+  const [kind, setKind] = useState<LinkKind>("SOCIAL");
   const [platform, setPlatform] = useState("");
   const [title, setTitle] = useState("");
   const [url, setUrl] = useState("");
@@ -55,6 +79,7 @@ export default function AdminSocialLinks({ loaderData }: Route.ComponentProps) {
     setError(null);
     try {
       await createSocialLink({
+        kind,
         platform: platform.trim(),
         title: title.trim(),
         url: url.trim(),
@@ -81,7 +106,7 @@ export default function AdminSocialLinks({ loaderData }: Route.ComponentProps) {
   return (
     <>
       <div className={styles.pageHead}>
-        <h1 className={styles.pageTitle}>Ссылки на соцсети</h1>
+        <h1 className={styles.pageTitle}>Ссылки группы</h1>
       </div>
 
       <GlassPanel className={styles.panel}>
@@ -94,6 +119,14 @@ export default function AdminSocialLinks({ loaderData }: Route.ComponentProps) {
         ) : null}
 
         <div className={styles.form}>
+          <SelectField
+            label="Где показывать"
+            value={kind}
+            options={KIND_OPTIONS}
+            hint={KIND_HINTS[kind]}
+            onChange={(event) => setKind(event.target.value as LinkKind)}
+          />
+
           <div className={styles.field}>
             <span className={styles.label}>Значок площадки</span>
             <div className={styles.iconPicker}>
@@ -157,7 +190,10 @@ export default function AdminSocialLinks({ loaderData }: Route.ComponentProps) {
       {failed ? <ErrorState /> : null}
 
       {!failed && links.length === 0 ? (
-        <EmptyState title="Ссылок пока нет" description="Добавьте профили группы в соцсетях." />
+        <EmptyState
+          title="Ссылок пока нет"
+          description="Добавьте профили группы в соцсетях и на музыкальных площадках."
+        />
       ) : null}
 
       {links.length > 0 ? (
@@ -168,6 +204,12 @@ export default function AdminSocialLinks({ loaderData }: Route.ComponentProps) {
                 <SortableTh
                       label="Подпись"
                       sortKey="title"
+                      sort={sort}
+                      onSort={toggle}
+                    />
+                <SortableTh
+                      label="Где показывать"
+                      sortKey="kind"
                       sort={sort}
                       onSort={toggle}
                     />
@@ -193,6 +235,15 @@ export default function AdminSocialLinks({ loaderData }: Route.ComponentProps) {
                     <span className={styles.rowWithIcon}>
                       <SocialIcon platform={link.platform} className={styles.iconGlyph} />
                       <span className={styles.rowTitle}>{link.title}</span>
+                    </span>
+                  </td>
+                  <td>
+                    <span
+                      className={`${styles.chip} ${
+                        kindOf(link) === "MUSIC" ? styles.chipPublished : styles.chipDraft
+                      }`}
+                    >
+                      {KIND_LABELS[kindOf(link)]}
                     </span>
                   </td>
                   <td>{link.platform}</td>

@@ -46,7 +46,7 @@ const NAV_GROUPS: Array<{
     requiresEditor: true,
     items: [
       { to: "/admin/contacts", label: "Контакты" },
-      { to: "/admin/social-links", label: "Соцссылки" },
+      { to: "/admin/social-links", label: "Ссылки группы" },
       { to: "/admin/settings", label: "Общие" },
     ],
   },

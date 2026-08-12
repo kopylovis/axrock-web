@@ -90,12 +90,15 @@ export interface ConcertDetailDto extends ConcertSummaryDto {
   participants: ConcertParticipantDto[];
 }
 
+export type LinkKind = "SOCIAL" | "MUSIC";
+
 export interface SocialLinkDto {
   id: number;
   platform: string;
   title: string;
   url: string;
   sortOrder: number;
+  kind?: LinkKind;
 }
 
 export interface BandMemberDto {

@@ -3,6 +3,7 @@ import { clearAdminToken, setAdminToken } from "./auth-token";
 import type {
   BandMemberDto,
   ConcertDetailDto,
+  LinkKind,
   MediaItemDto,
   NewsCategoryDto,
   NewsDetailDto,
@@ -165,6 +166,7 @@ export interface SocialLinkInput {
   url: string;
   sortOrder: number;
   visible: boolean;
+  kind: LinkKind;
 }
 
 export interface MediaInput {
