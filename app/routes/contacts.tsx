@@ -59,7 +59,7 @@ export default function Contacts() {
       : null,
     settings.managerVkUrl
       ? {
-          label: null,
+          label: "VK:",
           value: settings.managerVkUrl.replace(/^https?:\/\//, ""),
           href: vkHref(settings.managerVkUrl),
         }
@@ -78,7 +78,8 @@ export default function Contacts() {
           <AnimatedSection className={styles.block}>
             {settings.managerName ? (
               <p className={styles.contactLead}>
-                Менеджмент/Организация концертов: {settings.managerName}
+                <span className={styles.contactKey}>Менеджмент/Организация концертов:</span>
+                {settings.managerName}
               </p>
             ) : null}
 
