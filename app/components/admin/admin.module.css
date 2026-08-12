@@ -1,12 +1,100 @@
 .shell {
+  --topbar-height: 56px;
   display: grid;
   min-height: 100dvh;
   grid-template-columns: 1fr;
+  grid-template-rows: auto minmax(0, 1fr);
 }
 
 @media (min-width: 960px) {
   .shell {
     grid-template-columns: 248px minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
+  }
+}
+
+/* ------------------------------------------------- Мобильная шапка -- */
+
+/* Меню целиком не помещается на телефоне, поэтому на узком экране остаётся
+   только полоса с кнопкой и названием текущего раздела. */
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 40;
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  height: var(--topbar-height);
+  padding-inline: var(--space-4);
+  border-bottom: 1px solid var(--line);
+  background: rgba(16, 14, 11, 0.86);
+  -webkit-backdrop-filter: blur(var(--blur-medium));
+  backdrop-filter: blur(var(--blur-medium));
+}
+
+.topbarTitle {
+  font-family: var(--font-accent);
+  font-size: var(--fs-xs);
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.burger {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  margin-left: calc(var(--space-2) * -1);
+  border-radius: var(--r-sm);
+  color: var(--ink-mute);
+}
+
+.burger:hover {
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.05);
+}
+
+/* Три полосы: сама середина плюс два псевдоэлемента. */
+.burgerIcon,
+.burgerIcon::before,
+.burgerIcon::after {
+  display: block;
+  width: 18px;
+  height: 1.5px;
+  background: currentColor;
+}
+
+.burgerIcon {
+  position: relative;
+}
+
+.burgerIcon::before,
+.burgerIcon::after {
+  content: "";
+  position: absolute;
+  left: 0;
+}
+
+.burgerIcon::before {
+  top: -6px;
+}
+
+.burgerIcon::after {
+  top: 6px;
+}
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  z-index: 55;
+  background: rgba(0, 0, 0, 0.6);
+}
+
+@media (min-width: 960px) {
+  .topbar,
+  .scrim {
+    display: none;
   }
 }
 
@@ -23,6 +111,31 @@
   backdrop-filter: blur(var(--blur-medium));
 }
 
+/* На узком экране меню выезжает панелью поверх страницы. */
+@media (max-width: 959.98px) {
+  .sidebar {
+    position: fixed;
+    inset-block: 0;
+    left: 0;
+    z-index: 60;
+    width: min(300px, 86vw);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    background: var(--bg-card-solid);
+    transform: translateX(-100%);
+    /* Спрятанное меню не должно ловить фокус с клавиатуры. */
+    visibility: hidden;
+    transition:
+      transform var(--t-base),
+      visibility var(--t-base);
+  }
+
+  .sidebarOpen {
+    transform: none;
+    visibility: visible;
+  }
+}
+
 @media (min-width: 960px) {
   .sidebar {
     position: sticky;
@@ -30,6 +143,27 @@
     height: 100dvh;
     overflow-y: auto;
   }
+
+  .sidebarClose {
+    display: none;
+  }
+}
+
+.sidebarClose {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--r-sm);
+  color: var(--ink-faint);
+}
+
+.sidebarClose:hover {
+  color: var(--ink);
+  background: rgba(255, 255, 255, 0.05);
 }
 
 .brand {
@@ -172,7 +306,8 @@
    padding контента, чтобы подложка шла от края до края колонки. */
 .pageHeadSticky {
   position: sticky;
-  top: 0;
+  /* Под мобильной шапкой, иначе заголовок редактора уезжает ей за спину. */
+  top: var(--topbar-height);
   z-index: 20;
   margin-inline: calc(var(--space-5) * -1);
   padding-inline: var(--space-5);
@@ -185,6 +320,7 @@
 
 @media (min-width: 960px) {
   .pageHeadSticky {
+    top: 0;
     margin-inline: calc(var(--space-7) * -1);
     padding-inline: var(--space-7);
   }
@@ -307,6 +443,21 @@
 
 .btnFull {
   width: 100%;
+}
+
+/* Пальцем в кнопку 32px не попасть — на сенсорных экранах всё крупнее. */
+@media (max-width: 759.98px) {
+  .btn {
+    min-height: 44px;
+  }
+
+  .btnSm {
+    min-height: 40px;
+  }
+
+  .navLink {
+    min-height: 44px;
+  }
 }
 
 /* -------------------------------------------------------------- Панели -- */
@@ -460,6 +611,83 @@
   white-space: nowrap;
 }
 
+/* На телефоне таблица не помещается: строка превращается в карточку, а подписи
+   колонок берутся из data-label каждой ячейки. */
+@media (max-width: 759.98px) {
+  .tableWrap {
+    overflow: visible;
+    border: 0;
+    background: none;
+  }
+
+  .table {
+    display: block;
+    min-width: 0;
+  }
+
+  .table thead {
+    display: none;
+  }
+
+  .table tbody {
+    display: grid;
+    gap: var(--space-4);
+  }
+
+  .table tbody tr {
+    display: grid;
+    gap: var(--space-2);
+    padding: var(--space-4);
+    border: 1px solid var(--line);
+    background: var(--bg-card);
+  }
+
+  /* Ячейка без подписи — просто строка карточки: заголовок, действия. */
+  .table td {
+    display: block;
+    padding: 0;
+    border-bottom: 0;
+  }
+
+  .table td:first-child {
+    font-size: var(--fs-base);
+  }
+
+  /* Подписанные ячейки идут парами «колонка — значение». */
+  .table td[data-label] {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: var(--space-4);
+    text-align: right;
+  }
+
+  .table td[data-label]::before {
+    content: attr(data-label);
+    flex: none;
+    font-family: var(--font-mono);
+    font-size: var(--fs-xs);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    text-align: left;
+  }
+
+  /* Последняя без подписи — полоса действий под содержимым. */
+  .table td:last-child:not([data-label]) {
+    width: auto;
+    white-space: normal;
+    margin-top: var(--space-2);
+    padding-top: var(--space-3);
+    border-top: 1px solid var(--line);
+  }
+
+  .rowActions {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
 /* Статусные бейджи — только для отображения состояния, не для действий. */
 .chip {
   display: inline-flex;
@@ -504,6 +732,50 @@
   gap: var(--space-4);
   /* Подсказка под одним полем не должна растягивать соседнее. */
   align-items: start;
+}
+
+/* Раздел длинной формы. */
+.section {
+  border: 1px solid var(--line);
+  background: var(--bg-card);
+}
+
+.sectionSummary {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-height: 52px;
+  padding-inline: var(--space-4);
+  cursor: pointer;
+  list-style: none;
+  font-family: var(--font-accent);
+  font-size: var(--fs-xs);
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.sectionSummary::-webkit-details-marker {
+  display: none;
+}
+
+.sectionSummary::before {
+  content: "▸";
+  color: var(--ink-faint);
+}
+
+.section[open] .sectionSummary::before {
+  content: "▾";
+}
+
+.section[open] .sectionSummary {
+  border-bottom: 1px solid var(--line);
+}
+
+.sectionBody {
+  display: grid;
+  gap: var(--space-5);
+  padding: var(--space-5) var(--space-4);
 }
 
 @media (min-width: 760px) {
@@ -568,6 +840,21 @@
   transition:
     border-color var(--t-fast),
     box-shadow var(--t-fast);
+}
+
+/* Safari на iOS зумит страницу при фокусе в поле мельче 16px, и обратно
+   она уже не отъезжает. Кегль поднимаем только на узких экранах. */
+@media (max-width: 759.98px) {
+  .input,
+  .select,
+  .textarea {
+    font-size: 1rem;
+  }
+
+  .input,
+  .select {
+    height: 46px;
+  }
 }
 
 .input::placeholder,
@@ -644,6 +931,23 @@
 
 .spacer {
   flex: 1;
+}
+
+/* На телефоне кнопки действий занимают всю ширину: одиночная кнопка, прижатая
+   к левому краю липкой полосы, читается как случайно оставленная. */
+@media (max-width: 759.98px) {
+  .formActions {
+    display: grid;
+    gap: var(--space-3);
+  }
+
+  .formActions > .btn {
+    width: 100%;
+  }
+
+  .formActions > .spacer {
+    display: none;
+  }
 }
 
 /* --------------------------------------------------- Загрузка картинок -- */
@@ -759,6 +1063,28 @@
   width: 1px;
   margin-inline: var(--space-2);
   background: var(--line-strong);
+}
+
+/* На телефоне перенос кнопок съедал три строки над полем ввода — вместо этого
+   панель прокручивается вбок одной полосой, а сами кнопки крупнее. */
+@media (max-width: 759.98px) {
+  .editorToolbar {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    scrollbar-width: none;
+  }
+
+  .editorToolbar::-webkit-scrollbar {
+    display: none;
+  }
+
+  .editorButton {
+    flex: none;
+    min-width: 40px;
+    height: 40px;
+    font-size: var(--fs-sm);
+  }
 }
 
 .editorSurface {

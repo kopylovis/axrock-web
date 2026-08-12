@@ -131,15 +131,17 @@ export default function AdminReleasesList({ loaderData }: Route.ComponentProps) 
                       {release.title}
                     </Link>
                   </td>
-                  <td>
+                  <td data-label="Статус">
                     <StatusChip
                       status={release.published ? "PUBLISHED" : "DRAFT"}
                       label={release.published ? "Опубликован" : "Снят с публикации"}
                     />
                   </td>
-                  <td>{RELEASE_TYPE_LABELS[release.type]}</td>
-                  <td>{release.releaseDate ? formatDate(parseUtcSafe(release.releaseDate)) : "—"}</td>
-                  <td>{release.tracks?.length ?? 0}</td>
+                  <td data-label="Тип">{RELEASE_TYPE_LABELS[release.type]}</td>
+                  <td data-label="Дата">
+                    {release.releaseDate ? formatDate(parseUtcSafe(release.releaseDate)) : "—"}
+                  </td>
+                  <td data-label="Треков">{release.tracks?.length ?? 0}</td>
                   <td>
                     <div className={styles.rowActions}>
                       <Link

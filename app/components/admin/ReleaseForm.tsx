@@ -6,7 +6,7 @@ import { createRelease, updateRelease } from "~/api/admin-api";
 import type { ReleaseDetailDto } from "~/api/dto";
 import type { ReleaseType } from "~/types/content";
 import { fromDateInputValue, slugify, toDateInputValue } from "~/utils/admin-format";
-import { CheckboxField, ImageField, SelectField, StatusChip, TextAreaField, TextField, focusFirstInvalidField } from "./fields";
+import { CheckboxField, FormSection, ImageField, SelectField, StatusChip, TextAreaField, TextField, focusFirstInvalidField } from "./fields";
 import { SOCIAL_PLATFORMS, SocialIcon, hasSocialIcon } from "~/components/common/SocialIcon";
 import styles from "./admin.module.css";
 
@@ -160,205 +160,214 @@ export function ReleaseForm({ release }: { release: ReleaseDetailDto | null }) {
       ) : null}
 
       <div className={styles.form}>
-        <div className={`${styles.formGrid} ${styles.formGridTwo}`}>
-          <TextField
-            label="Название"
-            required
-            value={title}
-            error={errors.title}
-            onChange={(event) => {
-              setTitle(event.target.value);
-              if (!release) setSlug(slugify(event.target.value));
-            }}
-          />
-          <TextField
-            label="Slug"
-            required
-            value={slug}
-            error={errors.slug}
-            onChange={(event) => setSlug(event.target.value)}
-          />
-        </div>
-
-        <div className={`${styles.formGrid} ${styles.formGridTwo}`}>
-          <SelectField
-            label="Тип релиза"
-            value={type}
-            onChange={(event) => setType(event.target.value as ReleaseType)}
-            options={[
-              { value: "ALBUM", label: "Альбом" },
-              { value: "EP", label: "EP" },
-              { value: "SINGLE", label: "Сингл" },
-              { value: "LIVE", label: "Концертный" },
-              { value: "COMPILATION", label: "Сборник" },
-            ]}
-          />
-          <TextField
-            label="Дата релиза"
-            type="date"
-            value={releaseDate}
-            onChange={(event) => setReleaseDate(event.target.value)}
-          />
-        </div>
-
-        <ImageField label="Обложка" spec="releaseCover" value={coverImage} onChange={setCoverImage} />
-
-        <TextAreaField
-          label="Описание"
-          value={description}
-          onChange={(event) => setDescription(event.target.value)}
-        />
-
-        <div className={styles.field}>
-          <span className={styles.label}>Треклист</span>
-          <div className={styles.repeater}>
-            {tracks.map((track, index) => (
-              <div key={index} className={`${styles.repeaterRow} ${styles.repeaterRowFour}`}>
-                <TextField
-                  label="№"
-                  type="number"
-                  value={String(track.trackNumber)}
-                  onChange={(event) =>
-                    setTracks((prev) =>
-                      prev.map((item, i) =>
-                        i === index ? { ...item, trackNumber: Number(event.target.value) || 0 } : item,
-                      ),
-                    )
-                  }
-                />
-                <TextField
-                  label="Название трека"
-                  value={track.title}
-                  onChange={(event) =>
-                    setTracks((prev) =>
-                      prev.map((item, i) => (i === index ? { ...item, title: event.target.value } : item)),
-                    )
-                  }
-                />
-                <TextField
-                  label="Длительность"
-                  value={track.duration}
-                  placeholder="3:45"
-                  onChange={(event) =>
-                    setTracks((prev) =>
-                      prev.map((item, i) => (i === index ? { ...item, duration: event.target.value } : item)),
-                    )
-                  }
-                />
-                <button
-                  type="button"
-                  className={`${styles.btn} ${styles.btnSecondary} ${styles.btnSm}`}
-                  onClick={() => setTracks((prev) => prev.filter((_, i) => i !== index))}
-                >
-                  Убрать
-                </button>
-              </div>
-            ))}
-            <button
-              type="button"
-              className={`${styles.btn} ${styles.btnSecondary} ${styles.btnSm}`}
-              onClick={() =>
-                setTracks((prev) => [...prev, { title: "", duration: "", trackNumber: prev.length + 1 }])
-              }
-            >
-              + Трек
-            </button>
+        <FormSection title="Основное" openOnMobile>
+          <div className={`${styles.formGrid} ${styles.formGridTwo}`}>
+            <TextField
+              label="Название"
+              required
+              value={title}
+              error={errors.title}
+              onChange={(event) => {
+                setTitle(event.target.value);
+                if (!release) setSlug(slugify(event.target.value));
+              }}
+            />
+            <TextField
+              label="Slug"
+              required
+              value={slug}
+              error={errors.slug}
+              onChange={(event) => setSlug(event.target.value)}
+            />
           </div>
-        </div>
 
-        <div className={styles.field}>
-          <span className={styles.label}>Ссылки на площадки</span>
-          {errors.links ? (
-            <span className={styles.error} role="alert">
-              {errors.links}
-            </span>
-          ) : null}
-          <div className={styles.repeater}>
-            {links.map((link, index) => (
-              <div key={index} className={`${styles.repeaterRow} ${styles.repeaterRowThree}`}>
-                <div className={styles.fieldWithIcon}>
-                  <SocialIcon platform={link.platform} className={styles.iconGlyph} />
-                  <SelectField
-                    label="Площадка"
-                    value={link.platform}
-                    options={platformOptions(link.platform)}
+          <div className={`${styles.formGrid} ${styles.formGridTwo}`}>
+            <SelectField
+              label="Тип релиза"
+              value={type}
+              onChange={(event) => setType(event.target.value as ReleaseType)}
+              options={[
+                { value: "ALBUM", label: "Альбом" },
+                { value: "EP", label: "EP" },
+                { value: "SINGLE", label: "Сингл" },
+                { value: "LIVE", label: "Концертный" },
+                { value: "COMPILATION", label: "Сборник" },
+              ]}
+            />
+            <TextField
+              label="Дата релиза"
+              type="date"
+              value={releaseDate}
+              onChange={(event) => setReleaseDate(event.target.value)}
+            />
+          </div>
+
+          <ImageField label="Обложка" spec="releaseCover" value={coverImage} onChange={setCoverImage} />
+
+          <TextAreaField
+            label="Описание"
+            value={description}
+            onChange={(event) => setDescription(event.target.value)}
+          />
+        </FormSection>
+
+        <FormSection title="Треклист">
+          <div className={styles.field}>
+            <span className={styles.label}>Треклист</span>
+            <div className={styles.repeater}>
+              {tracks.map((track, index) => (
+                <div key={index} className={`${styles.repeaterRow} ${styles.repeaterRowFour}`}>
+                  <TextField
+                    label="№"
+                    type="number"
+                    value={String(track.trackNumber)}
+                    onChange={(event) =>
+                      setTracks((prev) =>
+                        prev.map((item, i) =>
+                          i === index ? { ...item, trackNumber: Number(event.target.value) || 0 } : item,
+                        ),
+                      )
+                    }
+                  />
+                  <TextField
+                    label="Название трека"
+                    value={track.title}
+                    onChange={(event) =>
+                      setTracks((prev) =>
+                        prev.map((item, i) => (i === index ? { ...item, title: event.target.value } : item)),
+                      )
+                    }
+                  />
+                  <TextField
+                    label="Длительность"
+                    value={track.duration}
+                    placeholder="3:45"
+                    onChange={(event) =>
+                      setTracks((prev) =>
+                        prev.map((item, i) => (i === index ? { ...item, duration: event.target.value } : item)),
+                      )
+                    }
+                  />
+                  <button
+                    type="button"
+                    className={`${styles.btn} ${styles.btnSecondary} ${styles.btnSm}`}
+                    onClick={() => setTracks((prev) => prev.filter((_, i) => i !== index))}
+                  >
+                    Убрать
+                  </button>
+                </div>
+              ))}
+              <button
+                type="button"
+                className={`${styles.btn} ${styles.btnSecondary} ${styles.btnSm}`}
+                onClick={() =>
+                  setTracks((prev) => [...prev, { title: "", duration: "", trackNumber: prev.length + 1 }])
+                }
+              >
+                + Трек
+              </button>
+            </div>
+          </div>
+        </FormSection>
+
+        <FormSection title="Ссылки на площадки">
+          <div className={styles.field}>
+            <span className={styles.label}>Ссылки на площадки</span>
+            {errors.links ? (
+              <span className={styles.error} role="alert">
+                {errors.links}
+              </span>
+            ) : null}
+            <div className={styles.repeater}>
+              {links.map((link, index) => (
+                <div key={index} className={`${styles.repeaterRow} ${styles.repeaterRowThree}`}>
+                  <div className={styles.fieldWithIcon}>
+                    <SocialIcon platform={link.platform} className={styles.iconGlyph} />
+                    <SelectField
+                      label="Площадка"
+                      value={link.platform}
+                      options={platformOptions(link.platform)}
+                      onChange={(event) =>
+                        setLinks((prev) =>
+                          prev.map((item, i) =>
+                            i === index ? { ...item, platform: event.target.value } : item,
+                          ),
+                        )
+                      }
+                    />
+                  </div>
+                  <TextField
+                    label="Ссылка"
+                    value={link.url}
+                    placeholder="https://"
+                    onChange={(event) =>
+                      setLinks((prev) =>
+                        prev.map((item, i) => (i === index ? { ...item, url: event.target.value } : item)),
+                      )
+                    }
+                  />
+                  <button
+                    type="button"
+                    className={`${styles.btn} ${styles.btnSecondary} ${styles.btnSm}`}
+                    onClick={() => setLinks((prev) => prev.filter((_, i) => i !== index))}
+                  >
+                    Убрать
+                  </button>
+                  <CheckboxField
+                    label="Только значок, без названия"
+                    checked={link.iconOnly}
+                    disabled={!hasSocialIcon(link.platform)}
+                    hint={
+                      hasSocialIcon(link.platform)
+                        ? undefined
+                        : "Доступно, когда у площадки есть значок."
+                    }
                     onChange={(event) =>
                       setLinks((prev) =>
                         prev.map((item, i) =>
-                          i === index ? { ...item, platform: event.target.value } : item,
+                          i === index ? { ...item, iconOnly: event.target.checked } : item,
                         ),
                       )
                     }
                   />
                 </div>
-                <TextField
-                  label="Ссылка"
-                  value={link.url}
-                  placeholder="https://"
-                  onChange={(event) =>
-                    setLinks((prev) =>
-                      prev.map((item, i) => (i === index ? { ...item, url: event.target.value } : item)),
-                    )
-                  }
-                />
-                <button
-                  type="button"
-                  className={`${styles.btn} ${styles.btnSecondary} ${styles.btnSm}`}
-                  onClick={() => setLinks((prev) => prev.filter((_, i) => i !== index))}
-                >
-                  Убрать
-                </button>
-                <CheckboxField
-                  label="Только значок, без названия"
-                  checked={link.iconOnly}
-                  disabled={!hasSocialIcon(link.platform)}
-                  hint={
-                    hasSocialIcon(link.platform)
-                      ? undefined
-                      : "Доступно, когда у площадки есть значок."
-                  }
-                  onChange={(event) =>
-                    setLinks((prev) =>
-                      prev.map((item, i) =>
-                        i === index ? { ...item, iconOnly: event.target.checked } : item,
-                      ),
-                    )
-                  }
-                />
-              </div>
-            ))}
-            <button
-              type="button"
-              className={`${styles.btn} ${styles.btnSecondary} ${styles.btnSm}`}
-              onClick={() => setLinks((prev) => [...prev, { platform: "", url: "", iconOnly: false }])}
-            >
-              + Площадка
-            </button>
+              ))}
+              <button
+                type="button"
+                className={`${styles.btn} ${styles.btnSecondary} ${styles.btnSm}`}
+                onClick={() => setLinks((prev) => [...prev, { platform: "", url: "", iconOnly: false }])}
+              >
+                + Площадка
+              </button>
+            </div>
           </div>
-        </div>
+        </FormSection>
 
-        <div className={`${styles.formGrid} ${styles.formGridTwo}`}>
-          <TextField
-            label="Порядок отображения"
-            type="number"
-            value={sortOrder}
-            onChange={(event) => setSortOrder(event.target.value)}
-          />
-          <SelectField
-            label="Статус"
-            value={published ? "PUBLISHED" : "DRAFT"}
-            hint={
-              published
-                ? "Релиз виден в разделе «Музыка» и на главной."
-                : "Снятый с публикации релиз остаётся в админке, но на сайте не показывается."
-            }
-            options={[
-              { value: "PUBLISHED", label: "Опубликован" },
-              { value: "DRAFT", label: "Снят с публикации" },
-            ]}
-            onChange={(event) => setPublished(event.target.value === "PUBLISHED")}
-          />
-        </div>
+        <FormSection title="Порядок и SEO">
+          <div className={`${styles.formGrid} ${styles.formGridTwo}`}>
+            <TextField
+              label="Порядок отображения"
+              type="number"
+              value={sortOrder}
+              onChange={(event) => setSortOrder(event.target.value)}
+            />
+            <SelectField
+              label="Статус"
+              value={published ? "PUBLISHED" : "DRAFT"}
+              hint={
+                published
+                  ? "Релиз виден в разделе «Музыка» и на главной."
+                  : "Снятый с публикации релиз остаётся в админке, но на сайте не показывается."
+              }
+              options={[
+                { value: "PUBLISHED", label: "Опубликован" },
+                { value: "DRAFT", label: "Снят с публикации" },
+              ]}
+              onChange={(event) => setPublished(event.target.value === "PUBLISHED")}
+            />
+          </div>
+
+        </FormSection>
 
         <div className={`${styles.formActions} ${styles.formActionsSticky}`}>
           <button

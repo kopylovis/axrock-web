@@ -173,7 +173,8 @@ export function ImageCropper({ file, spec, onCancel, onConfirm }: ImageCropperPr
           </label>
 
           <p className={styles.hint}>
-            Перетащите фотографию, чтобы выбрать область. Колесо мыши меняет масштаб.
+            Перетащите фотографию, чтобы выбрать область. Масштаб — колесом мыши, щипком двумя
+            пальцами или ползунком.
           </p>
         </div>
 

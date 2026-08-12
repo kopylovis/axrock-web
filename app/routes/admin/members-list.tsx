@@ -97,9 +97,9 @@ export default function AdminMembersList({ loaderData }: Route.ComponentProps) {
                       {member.name}
                     </Link>
                   </td>
-                  <td>{member.role}</td>
-                  <td>{member.sortOrder}</td>
-                  <td>{member.currentMember ? "Текущий" : "Бывший"}</td>
+                  <td data-label="Роль">{member.role}</td>
+                  <td data-label="Порядок">{member.sortOrder}</td>
+                  <td data-label="Состав">{member.currentMember ? "Текущий" : "Бывший"}</td>
                   <td>
                     <div className={styles.rowActions}>
                       <Link

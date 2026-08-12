@@ -189,8 +189,10 @@ export default function AdminMedia({ loaderData }: Route.ComponentProps) {
               {sorted.map((item) => (
                 <tr key={item.id}>
                   <td className={styles.rowTitle}>{item.title ?? "—"}</td>
-                  <td>{TYPES.find((entry) => entry.value === item.type)?.label ?? item.type}</td>
-                  <td>
+                  <td data-label="Тип">
+                    {TYPES.find((entry) => entry.value === item.type)?.label ?? item.type}
+                  </td>
+                  <td data-label="Ссылка">
                     {item.fileUrl || item.externalUrl ? (
                       <a
                         href={item.fileUrl ?? item.externalUrl ?? "#"}

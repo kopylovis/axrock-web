@@ -6,7 +6,7 @@ import { createNews, updateNews } from "~/api/admin-api";
 import type { NewsCategoryDto, NewsDetailDto } from "~/api/dto";
 import type { PublicationStatus, RichTextDoc } from "~/types/content";
 import { fromDateTimeLocalValue, slugify, toDateTimeLocalValue } from "~/utils/admin-format";
-import { CheckboxField, ImageField, SelectField, StatusChip, TextAreaField, TextField, focusFirstInvalidField } from "./fields";
+import { CheckboxField, FormSection, ImageField, SelectField, StatusChip, TextAreaField, TextField, focusFirstInvalidField } from "./fields";
 import { RichTextEditor } from "./RichTextEditor";
 import { publicSiteUrl } from "~/utils/site-url";
 import styles from "./admin.module.css";
@@ -138,93 +138,99 @@ export function NewsForm({ article, categories }: NewsFormProps) {
       ) : null}
 
       <div className={styles.form}>
-        <div className={`${styles.formGrid} ${styles.formGridTwo}`}>
-          <TextField
-            label="Заголовок"
-            required
-            value={title}
-            error={errors.title}
-            onChange={(event) => handleTitle(event.target.value)}
-          />
-          <TextField
-            label="Slug"
-            required
-            value={slug}
-            error={errors.slug}
-            hint="Часть адреса: /news/<slug>"
-            onChange={(event) => {
-              setSlugTouched(true);
-              setSlug(event.target.value);
-            }}
-          />
-        </div>
+        <FormSection title="Основное" openOnMobile>
+          <div className={`${styles.formGrid} ${styles.formGridTwo}`}>
+            <TextField
+              label="Заголовок"
+              required
+              value={title}
+              error={errors.title}
+              onChange={(event) => handleTitle(event.target.value)}
+            />
+            <TextField
+              label="Slug"
+              required
+              value={slug}
+              error={errors.slug}
+              hint="Часть адреса: /news/<slug>"
+              onChange={(event) => {
+                setSlugTouched(true);
+                setSlug(event.target.value);
+              }}
+            />
+          </div>
 
-        <TextAreaField
-          label="Краткое описание"
-          value={excerpt}
-          hint="Показывается в карточке и в превью ссылки. Если пусто — возьмётся начало текста."
-          onChange={(event) => setExcerpt(event.target.value)}
-        />
+          <TextAreaField
+            label="Краткое описание"
+            value={excerpt}
+            hint="Показывается в карточке и в превью ссылки. Если пусто — возьмётся начало текста."
+            onChange={(event) => setExcerpt(event.target.value)}
+          />
 
-        <ImageField label="Обложка" spec="newsCover" value={coverImage} onChange={setCoverImage} />
+          <ImageField label="Обложка" spec="newsCover" value={coverImage} onChange={setCoverImage} />
 
-        <RichTextEditor label="Текст новости" value={content} onChange={setContent} />
+          <RichTextEditor label="Текст новости" value={content} onChange={setContent} />
+        </FormSection>
 
-        <div className={`${styles.formGrid} ${styles.formGridTwo}`}>
-          <SelectField
-            label="Категория"
-            value={categoryId}
-            onChange={(event) => setCategoryId(event.target.value)}
-            options={[
-              { value: "", label: "Без категории" },
-              ...categories.map((category) => ({
-                value: String(category.id),
-                label: category.name,
-              })),
-            ]}
-          />
-          <SelectField
-            label="Статус"
-            value={status}
-            onChange={(event) => setStatus(event.target.value as PublicationStatus)}
-            options={[
-              { value: "DRAFT", label: "Черновик" },
-              { value: "PUBLISHED", label: "Опубликовано" },
-              { value: "ARCHIVED", label: "В архиве" },
-            ]}
-          />
-        </div>
+        <FormSection title="Публикация">
+          <div className={`${styles.formGrid} ${styles.formGridTwo}`}>
+            <SelectField
+              label="Категория"
+              value={categoryId}
+              onChange={(event) => setCategoryId(event.target.value)}
+              options={[
+                { value: "", label: "Без категории" },
+                ...categories.map((category) => ({
+                  value: String(category.id),
+                  label: category.name,
+                })),
+              ]}
+            />
+            <SelectField
+              label="Статус"
+              value={status}
+              onChange={(event) => setStatus(event.target.value as PublicationStatus)}
+              options={[
+                { value: "DRAFT", label: "Черновик" },
+                { value: "PUBLISHED", label: "Опубликовано" },
+                { value: "ARCHIVED", label: "В архиве" },
+              ]}
+            />
+          </div>
 
-        <div className={`${styles.formGrid} ${styles.formGridTwo}`}>
-          <TextField
-            label="Дата публикации"
-            type="datetime-local"
-            value={publishedAt}
-            hint="Если оставить пустым, дата проставится при публикации."
-            onChange={(event) => setPublishedAt(event.target.value)}
-          />
-          <CheckboxField
-            label="Выделенная новость"
-            hint="Помечается значком «Важное» и занимает всю ширину в списке новостей."
-            checked={featured}
-            onChange={(event) => setFeatured(event.target.checked)}
-          />
-        </div>
+          <div className={`${styles.formGrid} ${styles.formGridTwo}`}>
+            <TextField
+              label="Дата публикации"
+              type="datetime-local"
+              value={publishedAt}
+              hint="Если оставить пустым, дата проставится при публикации."
+              onChange={(event) => setPublishedAt(event.target.value)}
+            />
+            <CheckboxField
+              label="Выделенная новость"
+              hint="Помечается значком «Важное» и занимает всю ширину в списке новостей."
+              checked={featured}
+              onChange={(event) => setFeatured(event.target.checked)}
+            />
+          </div>
+        </FormSection>
 
-        <div className={`${styles.formGrid} ${styles.formGridTwo}`}>
-          <TextField
-            label="SEO-заголовок"
-            hint="Заголовок вкладки браузера и синяя ссылка в результатах поиска. Пусто — берётся обычный заголовок. До 60 символов."
-            value={seoTitle}
-            onChange={(event) => setSeoTitle(event.target.value)}
-          />
-          <TextField
-            label="SEO-описание"
-            hint="Серый текст под ссылкой в выдаче Яндекса и Google. Пусто — берётся описание из настроек сайта. 120–160 символов."
-            value={seoDescription}
-            onChange={(event) => setSeoDescription(event.target.value)}
-          />
-        </div>
+        <FormSection title="SEO">
+          <div className={`${styles.formGrid} ${styles.formGridTwo}`}>
+            <TextField
+              label="SEO-заголовок"
+              hint="Заголовок вкладки браузера и синяя ссылка в результатах поиска. Пусто — берётся обычный заголовок. До 60 символов."
+              value={seoTitle}
+              onChange={(event) => setSeoTitle(event.target.value)}
+            />
+            <TextField
+              label="SEO-описание"
+              hint="Серый текст под ссылкой в выдаче Яндекса и Google. Пусто — берётся описание из настроек сайта. 120–160 символов."
+              value={seoDescription}
+              onChange={(event) => setSeoDescription(event.target.value)}
+            />
+          </div>
+        </FormSection>
 
         {/* Набор действий зависит от статуса: у опубликованной записи «Опубликовать»
             и «Сохранить» делали бы одно и то же. */}

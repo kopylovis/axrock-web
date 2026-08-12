@@ -356,7 +356,7 @@ export default function AdminUsers({ loaderData }: Route.ComponentProps) {
                         <div className={styles.hint}>{user.username}</div>
                       ) : null}
                     </td>
-                    <td>
+                    <td data-label="Роль">
                       <span
                         className={`${styles.chip} ${
                           user.role === "OWNER" ? styles.chipPublished : styles.chipDraft
@@ -365,8 +365,8 @@ export default function AdminUsers({ loaderData }: Route.ComponentProps) {
                         {roleLabel(user.role)}
                       </span>
                     </td>
-                    <td>{formatDate(parseUtcDate(user.createdAt))}</td>
-                    <td>{formatDate(parseUtcDate(user.lastLoginAt))}</td>
+                    <td data-label="Создан">{formatDate(parseUtcDate(user.createdAt))}</td>
+                    <td data-label="Вход">{formatDate(parseUtcDate(user.lastLoginAt))}</td>
                     <td>
                       <div className={styles.rowActions}>
                         {locked ? (

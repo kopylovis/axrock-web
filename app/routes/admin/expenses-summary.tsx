@@ -215,7 +215,9 @@ export default function AdminExpensesSummary({ loaderData }: Route.ComponentProp
                           <span className={styles.rowTitle}>{entry.full ?? login}</span>
                           {entry.full ? <div className={styles.hint}>{login}</div> : null}
                         </td>
-                        <td>{formatMoney(entry.amount, summary.totals[0]?.currency ?? "RUB")}</td>
+                        <td data-label="Сумма">
+                          {formatMoney(entry.amount, summary.totals[0]?.currency ?? "RUB")}
+                        </td>
                       </tr>
                     ))}
                 </tbody>
@@ -273,9 +275,9 @@ export default function AdminExpensesSummary({ loaderData }: Route.ComponentProp
                         <span className={styles.rowTitle}>{item.title}</span>
                         {item.comment ? <div className={styles.hint}>{item.comment}</div> : null}
                       </td>
-                      <td>{item.tourTitle ?? "—"}</td>
-                      <td>{formatMoney(item.amountMinor, item.currency)}</td>
-                      <td>{formatDate(parseUtcSafe(item.spentOn))}</td>
+                      <td data-label="Тур">{item.tourTitle ?? "—"}</td>
+                      <td data-label="Сумма">{formatMoney(item.amountMinor, item.currency)}</td>
+                      <td data-label="Дата">{formatDate(parseUtcSafe(item.spentOn))}</td>
                     </tr>
                   ))}
                 </tbody>

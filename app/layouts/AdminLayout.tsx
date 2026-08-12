@@ -1,5 +1,5 @@
 import { NavLink, Outlet, redirect, useLocation, useNavigate } from "react-router";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type { Route } from "./+types/AdminLayout";
 import { logout, me } from "~/api/admin-api";
 import { PageSkeleton } from "~/components/common/PageSkeleton";
@@ -70,6 +70,15 @@ const NAV_GROUPS: Array<{
 
 const COLLAPSED_KEY = "axrock:admin-nav-collapsed";
 
+/** Название текущего раздела — им подписана мобильная шапка. */
+function currentSection(pathname: string): string {
+  for (const group of NAV_GROUPS) {
+    const item = group.items.find((entry) => pathname.startsWith(entry.to));
+    if (item) return item.label;
+  }
+  return pathname.startsWith("/admin/profile") ? "Профиль" : OVERVIEW.label;
+}
+
 function loadCollapsed(): string[] {
   try {
     const raw = localStorage.getItem(COLLAPSED_KEY);
@@ -107,6 +116,26 @@ export default function AdminLayout({ loaderData }: Route.ComponentProps) {
   const [leaving, setLeaving] = useState(false);
   // Состояние групп переживает переходы между страницами.
   const [collapsed, setCollapsed] = useState<string[]>(loadCollapsed);
+  // На узком экране меню выезжает поверх контента, иначе оно занимает первый
+  // экран на каждой странице.
+  const [menuOpen, setMenuOpen] = useState(false);
+
+  // Перешли в раздел — меню закрывается само, руками его убирать не нужно.
+  useEffect(() => setMenuOpen(false), [pathname]);
+
+  useEffect(() => {
+    if (!menuOpen) return;
+    const previous = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    const onKey = (event: KeyboardEvent) => {
+      if (event.key === "Escape") setMenuOpen(false);
+    };
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = previous;
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [menuOpen]);
 
   function toggleGroup(id: string) {
     setCollapsed((prev) => {
@@ -133,10 +162,44 @@ export default function AdminLayout({ loaderData }: Route.ComponentProps) {
 
   return (
     <div className={styles.shell}>
-      <aside className={styles.sidebar}>
+      <header className={styles.topbar}>
+        <button
+          type="button"
+          className={styles.burger}
+          onClick={() => setMenuOpen(true)}
+          aria-label="Открыть меню"
+          aria-expanded={menuOpen}
+          aria-controls="admin-nav"
+        >
+          <span className={styles.burgerIcon} aria-hidden="true" />
+        </button>
+        <span className={styles.topbarTitle}>{currentSection(pathname)}</span>
+      </header>
+
+      {menuOpen ? (
+        <button
+          type="button"
+          className={styles.scrim}
+          aria-label="Закрыть меню"
+          onClick={() => setMenuOpen(false)}
+        />
+      ) : null}
+
+      <aside
+        id="admin-nav"
+        className={[styles.sidebar, menuOpen ? styles.sidebarOpen : null].filter(Boolean).join(" ")}
+      >
         <div className={styles.brand}>
           <span className={styles.brandTitle}>Ангел-Хранитель</span>
           <span className={styles.brandSub}>Панель управления</span>
+          <button
+            type="button"
+            className={styles.sidebarClose}
+            onClick={() => setMenuOpen(false)}
+            aria-label="Закрыть меню"
+          >
+            ✕
+          </button>
         </div>
 
         <nav className={styles.nav} aria-label="Разделы админки">

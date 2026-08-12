@@ -150,12 +150,12 @@ export default function AdminConcertsList({ loaderData }: Route.ComponentProps) 
                     </Link>
                     <div className={styles.hint}>{item.venueName}</div>
                   </td>
-                  <td>{formatDateTime(parseUtcSafe(item.startsAt))}</td>
-                  <td>{item.city}</td>
-                  <td>
+                  <td data-label="Дата">{formatDateTime(parseUtcSafe(item.startsAt))}</td>
+                  <td data-label="Город">{item.city}</td>
+                  <td data-label="Публикация">
                     <StatusChip status={item.publicationStatus} />
                   </td>
-                  <td>{CONCERT_STATUS_LABELS[item.eventStatus]}</td>
+                  <td data-label="Статус">{CONCERT_STATUS_LABELS[item.eventStatus]}</td>
                   <td>
                     <div className={styles.rowActions}>
                       <RowMenu

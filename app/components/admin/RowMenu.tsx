@@ -46,6 +46,28 @@ export function RowMenu({ label, items }: RowMenuProps) {
     });
   }, [open, items.length]);
 
+  // Второй проход: кнопка может стоять у левого края (в карточках на телефоне
+  // она первая в строке), и меню, выровненное по её правому краю, уходит за
+  // экран. Ширину и высоту меню заранее не знаем — измеряем и подвигаем.
+  useLayoutEffect(() => {
+    if (!open || !menuRef.current) return;
+
+    const rect = menuRef.current.getBoundingClientRect();
+    let shiftRight = 0;
+    let shiftTop = 0;
+
+    if (rect.left < GAP) shiftRight = rect.left - GAP;
+    if (rect.bottom > window.innerHeight - GAP) {
+      shiftTop = window.innerHeight - GAP - rect.bottom;
+    }
+    if (rect.top + shiftTop < GAP) shiftTop = GAP - rect.top;
+
+    if (!shiftRight && !shiftTop) return;
+    setCoords((prev) =>
+      prev ? { top: prev.top + shiftTop, right: prev.right + shiftRight } : prev,
+    );
+  }, [open, coords]);
+
   useEffect(() => {
     if (!open) return;
 

@@ -252,8 +252,8 @@ export default function AdminExpenses({ loaderData }: Route.ComponentProps) {
                         {item.tourTitle ? <div className={styles.hint}>{item.tourTitle}</div> : null}
                         {item.comment ? <div className={styles.hint}>{item.comment}</div> : null}
                       </td>
-                      <td>{formatMoney(item.amountMinor, item.currency)}</td>
-                      <td>{formatDate(parseUtcSafe(item.spentOn))}</td>
+                      <td data-label="Сумма">{formatMoney(item.amountMinor, item.currency)}</td>
+                      <td data-label="Дата">{formatDate(parseUtcSafe(item.spentOn))}</td>
                       <td>
                         <div className={styles.rowActions}>
                           <RowMenu

@@ -158,11 +158,13 @@ export default function AdminNewsList({ loaderData }: Route.ComponentProps) {
                     </Link>
                     {item.featured ? " ★" : ""}
                   </td>
-                  <td>
+                  <td data-label="Статус">
                     <StatusChip status={item.status} />
                   </td>
-                  <td>{item.categoryName ?? "—"}</td>
-                  <td>{item.publishedAt ? formatDateTime(parseUtcSafe(item.publishedAt)) : "—"}</td>
+                  <td data-label="Категория">{item.categoryName ?? "—"}</td>
+                  <td data-label="Публикация">
+                    {item.publishedAt ? formatDateTime(parseUtcSafe(item.publishedAt)) : "—"}
+                  </td>
                   <td>
                     <div className={styles.rowActions}>
                       <RowMenu

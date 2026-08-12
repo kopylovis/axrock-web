@@ -270,7 +270,7 @@ export default function AdminSocialLinks({ loaderData }: Route.ComponentProps) {
                       <span className={styles.rowTitle}>{link.title}</span>
                     </span>
                   </td>
-                  <td>
+                  <td data-label="Тип">
                     <span
                       className={`${styles.chip} ${
                         kindOf(link) === "MUSIC" ? styles.chipPublished : styles.chipDraft
@@ -279,8 +279,8 @@ export default function AdminSocialLinks({ loaderData }: Route.ComponentProps) {
                       {KIND_LABELS[kindOf(link)]}
                     </span>
                   </td>
-                  <td>{link.platform}</td>
-                  <td>
+                  <td data-label="Площадка">{link.platform}</td>
+                  <td data-label="Ссылка">
                     <a href={link.url} target="_blank" rel="noreferrer">
                       {link.url}
                     </a>

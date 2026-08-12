@@ -136,7 +136,7 @@ export default function AdminDashboard({ loaderData }: Route.ComponentProps) {
                   const section = KIND_PATHS[item.kind];
                   return (
                     <tr key={`${item.kind}-${item.id}`} className={section ? styles.rowLinked : undefined}>
-                      <td>{KIND_LABELS[item.kind] ?? item.kind}</td>
+                      <td data-label="Тип">{KIND_LABELS[item.kind] ?? item.kind}</td>
                       <td>
                         {section ? (
                           <Link to={`/admin/${section}/${item.id}`} className={styles.rowLink}>
@@ -146,7 +146,7 @@ export default function AdminDashboard({ loaderData }: Route.ComponentProps) {
                           <span className={styles.rowTitle}>{item.title}</span>
                         )}
                       </td>
-                      <td>{formatDateTime(parseUtcSafe(item.updatedAt))}</td>
+                      <td data-label="Изменено">{formatDateTime(parseUtcSafe(item.updatedAt))}</td>
                     </tr>
                   );
                 })}

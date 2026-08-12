@@ -133,7 +133,7 @@ export default function AdminToursList({ loaderData }: Route.ComponentProps) {
                       {tour.title}
                     </Link>
                   </td>
-                  <td>
+                  <td data-label="Статус">
                     <span
                       className={`${styles.chip} ${
                         tour.status === "DONE" ? styles.chipArchived : styles.chipPublished
@@ -142,9 +142,9 @@ export default function AdminToursList({ loaderData }: Route.ComponentProps) {
                       {TOUR_STATUS_LABELS[tour.status]}
                     </span>
                   </td>
-                  <td>{period(tour.startsOn, tour.endsOn)}</td>
-                  <td>{tour.concerts}</td>
-                  <td>{tour.logisticsItems}</td>
+                  <td data-label="Даты">{period(tour.startsOn, tour.endsOn)}</td>
+                  <td data-label="Концертов">{tour.concerts}</td>
+                  <td data-label="Логистика">{tour.logisticsItems}</td>
                   <td>
                     <div className={styles.rowActions}>
                       <RowMenu

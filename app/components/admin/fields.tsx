@@ -15,10 +15,49 @@ export function focusFirstInvalidField() {
     const target = document.querySelector<HTMLElement>('[aria-invalid="true"]');
     if (!target) return;
 
+    // Поле может лежать в свёрнутом разделе — сначала раскрываем его.
+    for (let node = target.closest("details"); node; node = node.parentElement?.closest("details") ?? null) {
+      node.open = true;
+    }
+
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     target.scrollIntoView({ block: "center", behavior: reduced ? "auto" : "smooth" });
     target.focus({ preventScroll: true });
   });
+}
+
+/**
+ * Раздел длинной формы. На телефоне разделы закрыты — иначе форму концерта
+ * приходится листать целиком, чтобы добраться до нужного поля. Проверка формы
+ * раскрывает всё обратно: спрятанное поле с ошибкой невозможно ни увидеть,
+ * ни исправить.
+ */
+export function FormSection({
+  title,
+  openOnMobile = false,
+  children,
+}: {
+  title: string;
+  openOnMobile?: boolean;
+  children: ReactNode;
+}) {
+  const [open, setOpen] = useState(
+    () =>
+      openOnMobile ||
+      typeof window === "undefined" ||
+      !window.matchMedia("(max-width: 759.98px)").matches,
+  );
+
+  return (
+    <details
+      className={styles.section}
+      open={open}
+      onToggle={(event) => setOpen(event.currentTarget.open)}
+    >
+      <summary className={styles.sectionSummary}>{title}</summary>
+      <div className={styles.sectionBody}>{children}</div>
+    </details>
+  );
 }
 
 interface BaseFieldProps {
