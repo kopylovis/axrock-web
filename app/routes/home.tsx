@@ -118,6 +118,28 @@ export default function Home({ loaderData }: Route.ComponentProps) {
         </div>
       </AnimatedSection>
 
+      {news.length > 0 ? (
+        <AnimatedSection className="section" ariaLabelledby="news-heading">
+          <div className="container">
+            <SectionHeading
+              id="news-heading"
+              eyebrow="Новости"
+              title="Последние публикации"
+              action={
+                <ButtonLink to="/news" variant="quiet">
+                  Все новости
+                </ButtonLink>
+              }
+            />
+            <div className={styles.newsGrid}>
+              {news.map((item) => (
+                <NewsCard key={item.id} item={item} />
+              ))}
+            </div>
+          </div>
+        </AnimatedSection>
+      ) : null}
+
       {releases.length > 0 ? (
         <AnimatedSection className="section" ariaLabelledby="music-heading">
           <div className="container">
@@ -184,28 +206,6 @@ export default function Home({ loaderData }: Route.ComponentProps) {
                   </span>
                   <h3 className={styles.videoTitle}>{video.title ?? "Видео"}</h3>
                 </Link>
-              ))}
-            </div>
-          </div>
-        </AnimatedSection>
-      ) : null}
-
-      {news.length > 0 ? (
-        <AnimatedSection className="section" ariaLabelledby="news-heading">
-          <div className="container">
-            <SectionHeading
-              id="news-heading"
-              eyebrow="Новости"
-              title="Последние публикации"
-              action={
-                <ButtonLink to="/news" variant="quiet">
-                  Все новости
-                </ButtonLink>
-              }
-            />
-            <div className={styles.newsGrid}>
-              {news.map((item) => (
-                <NewsCard key={item.id} item={item} />
               ))}
             </div>
           </div>
