@@ -1,13 +1,13 @@
 import { useState } from "react";
 import { useRevalidator } from "react-router";
 import type { Route } from "./+types/social-links";
-import { createSocialLink, deleteSocialLink, listSocialLinks } from "~/api/admin-api";
+import { createSocialLink, deleteSocialLink, listSocialLinks, updateSocialLink } from "~/api/admin-api";
 import { GlassPanel } from "~/components/common/GlassPanel";
 import { PageSkeleton } from "~/components/common/PageSkeleton";
 import { EmptyState, ErrorState } from "~/components/common/States";
-import { SelectField, TextField } from "~/components/admin/fields";
-import type { LinkKind } from "~/api/dto";
-import { SOCIAL_PLATFORMS, SocialIcon } from "~/components/common/SocialIcon";
+import { CheckboxField, SelectField, TextField } from "~/components/admin/fields";
+import type { LinkKind, SocialLinkDto } from "~/api/dto";
+import { SOCIAL_PLATFORMS, SocialIcon, hasSocialIcon } from "~/components/common/SocialIcon";
 import { SortableTh, compareValues, useTableSort } from "~/components/admin/sortable-table";
 import styles from "~/components/admin/admin.module.css";
 
@@ -59,6 +59,7 @@ export default function AdminSocialLinks({ loaderData }: Route.ComponentProps) {
   const revalidator = useRevalidator();
 
   const [kind, setKind] = useState<LinkKind>("SOCIAL");
+  const [iconOnly, setIconOnly] = useState(false);
   const [platform, setPlatform] = useState("");
   const [title, setTitle] = useState("");
   const [url, setUrl] = useState("");
@@ -80,6 +81,7 @@ export default function AdminSocialLinks({ loaderData }: Route.ComponentProps) {
     try {
       await createSocialLink({
         kind,
+        iconOnly: iconOnly && hasSocialIcon(platform),
         platform: platform.trim(),
         title: title.trim(),
         url: url.trim(),
@@ -89,11 +91,31 @@ export default function AdminSocialLinks({ loaderData }: Route.ComponentProps) {
       setPlatform("");
       setTitle("");
       setUrl("");
+      setIconOnly(false);
       revalidator.revalidate();
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Не удалось добавить ссылку");
     } finally {
       setSaving(false);
+    }
+  }
+
+  // Правки ссылок в списке нет, поэтому вид кнопки переключаем прямо в строке.
+  async function toggleIconOnly(link: SocialLinkDto) {
+    setError(null);
+    try {
+      await updateSocialLink(link.id, {
+        kind: kindOf(link),
+        platform: link.platform,
+        title: link.title,
+        url: link.url,
+        sortOrder: link.sortOrder,
+        visible: link.visible ?? true,
+        iconOnly: !link.iconOnly,
+      });
+      revalidator.revalidate();
+    } catch (cause) {
+      setError(cause instanceof Error ? cause.message : "Не удалось изменить вид ссылки");
     }
   }
 
@@ -173,6 +195,17 @@ export default function AdminSocialLinks({ loaderData }: Route.ComponentProps) {
             value={url}
             placeholder="https://vk.com/..."
             onChange={(event) => setUrl(event.target.value)}
+          />
+          <CheckboxField
+            label="Только значок, без названия"
+            checked={iconOnly}
+            disabled={!hasSocialIcon(platform)}
+            hint={
+              hasSocialIcon(platform)
+                ? "Кнопка на сайте покажет один значок — название останется для читалок экрана."
+                : "Доступно, когда у площадки есть значок."
+            }
+            onChange={(event) => setIconOnly(event.target.checked)}
           />
           <div className={styles.formActions}>
             <button
@@ -254,6 +287,15 @@ export default function AdminSocialLinks({ loaderData }: Route.ComponentProps) {
                   </td>
                   <td>
                     <div className={styles.rowActions}>
+                      {hasSocialIcon(link.platform) ? (
+                        <button
+                          type="button"
+                          className={`${styles.btn} ${styles.btnSecondary} ${styles.btnSm}`}
+                          onClick={() => toggleIconOnly(link)}
+                        >
+                          {link.iconOnly ? "Показать название" : "Только значок"}
+                        </button>
+                      ) : null}
                       <button type="button" className={`${styles.btn} ${styles.btnDanger} ${styles.btnSm}`} onClick={() => remove(link.id)}>
                         Удалить
                       </button>

@@ -34,6 +34,13 @@
   color: var(--accent-ink);
 }
 
+/* Кнопка без подписи: квадрат под один значок. */
+.itemCompact {
+  padding-inline: 0;
+  width: 40px;
+  justify-content: center;
+}
+
 .icon {
   opacity: 0.6;
 }

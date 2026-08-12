@@ -157,7 +157,7 @@ export interface ReleaseInput {
   seoTitle: string | null;
   seoDescription: string | null;
   tracks: Array<{ title: string; duration: string | null; trackNumber: number }>;
-  links: Array<{ platform: string; url: string; sortOrder: number }>;
+  links: Array<{ platform: string; url: string; sortOrder: number; iconOnly: boolean }>;
 }
 
 export interface SocialLinkInput {
@@ -167,6 +167,7 @@ export interface SocialLinkInput {
   sortOrder: number;
   visible: boolean;
   kind: LinkKind;
+  iconOnly: boolean;
 }
 
 export interface MediaInput {

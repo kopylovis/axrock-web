@@ -99,6 +99,8 @@ export interface SocialLinkDto {
   url: string;
   sortOrder: number;
   kind?: LinkKind;
+  visible?: boolean;
+  iconOnly?: boolean;
 }
 
 export interface BandMemberDto {
@@ -126,6 +128,7 @@ export interface ReleaseLinkDto {
   platform: string;
   url: string;
   sortOrder: number;
+  iconOnly?: boolean;
 }
 
 export interface ReleaseSummaryDto {

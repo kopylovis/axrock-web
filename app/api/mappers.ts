@@ -145,6 +145,7 @@ export function mapSocialLink(dto: SocialLinkDto): SocialLink {
     title: dto.title,
     url: dto.url,
     sortOrder: dto.sortOrder,
+    iconOnly: dto.iconOnly ?? false,
   };
 }
 
@@ -173,7 +174,13 @@ function mapReleaseTrack(dto: ReleaseTrackDto): ReleaseTrack {
 }
 
 export function mapReleaseLink(dto: ReleaseLinkDto): ReleaseLink {
-  return { id: dto.id, platform: dto.platform, url: dto.url, sortOrder: dto.sortOrder };
+  return {
+    id: dto.id,
+    platform: dto.platform,
+    url: dto.url,
+    sortOrder: dto.sortOrder,
+    iconOnly: dto.iconOnly ?? false,
+  };
 }
 
 export function mapReleaseSummary(dto: ReleaseSummaryDto): ReleaseSummary {

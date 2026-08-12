@@ -1207,6 +1207,23 @@
   gap: var(--space-3);
 }
 
+/* Значок площадки рядом с выпадающим списком: поле тянется, значок держится
+   у самого поля ввода, а не у подписи над ним. */
+.fieldWithIcon {
+  display: flex;
+  align-items: end;
+  gap: var(--space-3);
+}
+
+.fieldWithIcon > :last-child {
+  flex: 1;
+  min-width: 0;
+}
+
+.fieldWithIcon .iconGlyph {
+  margin-bottom: 11px;
+}
+
 /* Экран для роли, которой веб-панель не положена. */
 .lockedScreen {
   display: grid;

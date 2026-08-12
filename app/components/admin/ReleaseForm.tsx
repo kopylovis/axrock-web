@@ -7,6 +7,7 @@ import type { ReleaseDetailDto } from "~/api/dto";
 import type { ReleaseType } from "~/types/content";
 import { fromDateInputValue, slugify, toDateInputValue } from "~/utils/admin-format";
 import { CheckboxField, ImageField, SelectField, TextAreaField, TextField, focusFirstInvalidField } from "./fields";
+import { SOCIAL_PLATFORMS, SocialIcon, hasSocialIcon } from "~/components/common/SocialIcon";
 import styles from "./admin.module.css";
 
 const schema = z.object({
@@ -26,6 +27,20 @@ interface Track {
 interface PlatformLink {
   platform: string;
   url: string;
+  iconOnly: boolean;
+}
+
+/**
+ * Список площадок для выпадающего меню. Записи, сделанные до значков, хранят
+ * в platform подпись вместо ключа — такую добавляем первым пунктом, иначе
+ * сохранение формы стёрло бы ссылку.
+ */
+function platformOptions(current: string) {
+  const known = SOCIAL_PLATFORMS.map((item) => ({ value: item.key, label: item.label }));
+  if (current && !SOCIAL_PLATFORMS.some((item) => item.key === current)) {
+    return [{ value: current, label: `${current} — без значка` }, ...known];
+  }
+  return known;
 }
 
 export function ReleaseForm({ release }: { release: ReleaseDetailDto | null }) {
@@ -47,7 +62,11 @@ export function ReleaseForm({ release }: { release: ReleaseDetailDto | null }) {
     })),
   );
   const [links, setLinks] = useState<PlatformLink[]>(
-    (release?.links ?? []).map((link) => ({ platform: link.platform, url: link.url })),
+    (release?.links ?? []).map((link) => ({
+      platform: link.platform,
+      url: link.url,
+      iconOnly: link.iconOnly ?? false,
+    })),
   );
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -101,6 +120,7 @@ export function ReleaseForm({ release }: { release: ReleaseDetailDto | null }) {
           platform: link.platform.trim(),
           url: link.url.trim(),
           sortOrder: index,
+          iconOnly: link.iconOnly,
         })),
     };
 
@@ -248,16 +268,21 @@ export function ReleaseForm({ release }: { release: ReleaseDetailDto | null }) {
           <div className={styles.repeater}>
             {links.map((link, index) => (
               <div key={index} className={`${styles.repeaterRow} ${styles.repeaterRowThree}`}>
-                <TextField
-                  label="Площадка"
-                  value={link.platform}
-                  placeholder="Яндекс Музыка"
-                  onChange={(event) =>
-                    setLinks((prev) =>
-                      prev.map((item, i) => (i === index ? { ...item, platform: event.target.value } : item)),
-                    )
-                  }
-                />
+                <div className={styles.fieldWithIcon}>
+                  <SocialIcon platform={link.platform} className={styles.iconGlyph} />
+                  <SelectField
+                    label="Площадка"
+                    value={link.platform}
+                    options={platformOptions(link.platform)}
+                    onChange={(event) =>
+                      setLinks((prev) =>
+                        prev.map((item, i) =>
+                          i === index ? { ...item, platform: event.target.value } : item,
+                        ),
+                      )
+                    }
+                  />
+                </div>
                 <TextField
                   label="Ссылка"
                   value={link.url}
@@ -275,12 +300,29 @@ export function ReleaseForm({ release }: { release: ReleaseDetailDto | null }) {
                 >
                   Убрать
                 </button>
+                <CheckboxField
+                  label="Только значок, без названия"
+                  checked={link.iconOnly}
+                  disabled={!hasSocialIcon(link.platform)}
+                  hint={
+                    hasSocialIcon(link.platform)
+                      ? undefined
+                      : "Доступно, когда у площадки есть значок."
+                  }
+                  onChange={(event) =>
+                    setLinks((prev) =>
+                      prev.map((item, i) =>
+                        i === index ? { ...item, iconOnly: event.target.checked } : item,
+                      ),
+                    )
+                  }
+                />
               </div>
             ))}
             <button
               type="button"
               className={`${styles.btn} ${styles.btnSecondary} ${styles.btnSm}`}
-              onClick={() => setLinks((prev) => [...prev, { platform: "", url: "" }])}
+              onClick={() => setLinks((prev) => [...prev, { platform: "", url: "", iconOnly: false }])}
             >
               + Площадка
             </button>

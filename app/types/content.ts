@@ -126,6 +126,7 @@ export interface ReleaseLink {
   platform: string;
   url: string;
   sortOrder: number;
+  iconOnly: boolean;
 }
 
 export interface ReleaseSummary {
@@ -165,6 +166,7 @@ export interface SocialLink {
   title: string;
   url: string;
   sortOrder: number;
+  iconOnly: boolean;
 }
 
 export interface SiteSettings {
