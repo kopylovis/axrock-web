@@ -251,35 +251,6 @@ export default function Home({ loaderData }: Route.ComponentProps) {
             </div>
           ) : null}
 
-          {settings.bookingEmail || settings.pressEmail || settings.contactEmail ? (
-            <div className={styles.contacts}>
-              {settings.bookingEmail ? (
-                <div className={styles.contactCard}>
-                  <span className={styles.contactLabel}>Организаторам</span>
-                  <a href={`mailto:${settings.bookingEmail}`} className={styles.contactValue}>
-                    {settings.bookingEmail}
-                  </a>
-                </div>
-              ) : null}
-              {settings.pressEmail ? (
-                <div className={styles.contactCard}>
-                  <span className={styles.contactLabel}>Прессе</span>
-                  <a href={`mailto:${settings.pressEmail}`} className={styles.contactValue}>
-                    {settings.pressEmail}
-                  </a>
-                </div>
-              ) : null}
-              {settings.contactEmail ? (
-                <div className={styles.contactCard}>
-                  <span className={styles.contactLabel}>Общая почта</span>
-                  <a href={`mailto:${settings.contactEmail}`} className={styles.contactValue}>
-                    {settings.contactEmail}
-                  </a>
-                </div>
-              ) : null}
-            </div>
-          ) : null}
-
           <div className={styles.sectionFooter}>
             <ButtonLink to="/contacts" variant="ghost">
               Все контакты

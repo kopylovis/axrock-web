@@ -153,42 +153,6 @@
   color: var(--ink-faint);
 }
 
-.contacts {
-  display: grid;
-  gap: var(--space-4);
-  grid-template-columns: repeat(auto-fit, minmax(min(100%, 260px), 1fr));
-}
-
-.contactCard {
-  display: grid;
-  gap: var(--space-2);
-  align-content: start;
-  padding: var(--space-5);
-  border: 1px solid var(--line);
-  transition: border-color var(--t-fast);
-}
-
-.contactCard:hover {
-  border-color: var(--line-strong);
-}
-
-.contactLabel {
-  font-family: var(--font-accent);
-  font-size: var(--fs-xs);
-  letter-spacing: var(--track-caps);
-  text-transform: uppercase;
-  color: var(--ink-faint);
-}
-
-.contactValue {
-  font-size: var(--fs-lg);
-  font-weight: 700;
-}
-
-.contactValue:hover {
-  color: var(--accent-bright);
-}
-
 .sectionFooter {
   display: flex;
   flex-wrap: wrap;
