@@ -1,20 +1,13 @@
 import { ResponsiveImage } from "~/components/common/ResponsiveImage";
 import { MusicPlatformLinks } from "~/components/layout/LinkLists";
-import type { ReleaseDetail, ReleaseType } from "~/types/content";
+import type { ReleaseDetail } from "~/types/content";
 import { formatDate } from "~/utils/format";
+import { RELEASE_TYPE_LABELS, releaseAnchor } from "~/utils/release-categories";
 import styles from "./ReleaseCard.module.css";
-
-export const RELEASE_TYPE_LABELS: Record<ReleaseType, string> = {
-  ALBUM: "Альбом",
-  EP: "EP",
-  SINGLE: "Сингл",
-  LIVE: "Концертный",
-  COMPILATION: "Сборник",
-};
 
 export function ReleaseCard({ release }: { release: ReleaseDetail }) {
   return (
-    <article className={styles.card}>
+    <article className={styles.card} id={releaseAnchor(release.slug)}>
       <ResponsiveImage
         src={release.coverImage}
         spec="releaseCover"

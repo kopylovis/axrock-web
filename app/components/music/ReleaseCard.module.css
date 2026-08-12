@@ -9,6 +9,13 @@
   gap: var(--space-5);
   padding-block: var(--space-7);
   border-bottom: 1px solid var(--line);
+  /* Приходим сюда по якорю с плитки — липкая шапка не должна накрыть карточку. */
+  scroll-margin-top: calc(var(--header-height) + var(--space-5));
+}
+
+/* Карточка, к которой перешли по ссылке, подсвечена — видно, куда попал. */
+.card:target .title {
+  color: var(--accent-bright);
 }
 
 @media (min-width: 820px) {
@@ -106,16 +113,30 @@
 }
 
 /* Плитка для компактных сеток на главной и в разделе «О группе». */
+.tileGrid {
+  display: grid;
+  gap: var(--space-5);
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, 210px), 1fr));
+}
+
+/* Кликабельна вся плитка, а не только обложка. */
 .tile {
   display: grid;
   gap: var(--space-3);
   align-content: start;
+  color: inherit;
 }
 
 .tileCoverWrap {
+  display: block;
   overflow: hidden;
   border: 1px solid var(--line);
   background: var(--bg-elev);
+  transition: border-color var(--t-fast);
+}
+
+.tile:hover .tileCoverWrap {
+  border-color: var(--accent);
 }
 
 .tileCover {
@@ -129,14 +150,21 @@
 }
 
 .tileTitle {
+  display: block;
+  font-family: var(--font-display);
+  font-weight: 400;
   font-size: var(--fs-base);
-  font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: -0.01em;
   line-height: var(--lh-snug);
+  transition: color var(--t-fast);
+}
+
+.tile:hover .tileTitle {
+  color: var(--accent-bright);
 }
 
 .tileMeta {
+  display: block;
   font-family: var(--font-mono);
   font-size: var(--fs-xs);
   letter-spacing: 0.06em;

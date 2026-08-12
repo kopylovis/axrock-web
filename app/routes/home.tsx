@@ -12,10 +12,11 @@ import { ResponsiveImage } from "~/components/common/ResponsiveImage";
 import { NewsCard } from "~/components/news/NewsCard";
 import { EventsStrip } from "~/components/concerts/EventsStrip";
 import { MusicPlatformLinks, SocialLinks } from "~/components/layout/LinkLists";
-import { RELEASE_TYPE_LABELS } from "~/components/music/ReleaseCard";
+import { ReleaseTile } from "~/components/music/ReleaseTile";
 import { fetchMedia, fetchNews, fetchReleases, fetchUpcomingConcerts } from "~/api/public-api";
 import { buildMeta, jsonLd, ogImageFrom } from "~/lib/seo";
 import { SITE_URL } from "~/lib/config";
+import releaseStyles from "~/components/music/ReleaseCard.module.css";
 import styles from "~/components/home/home.module.css";
 
 const ABOUT_ANCHOR = "events";
@@ -131,27 +132,13 @@ export default function Home({ loaderData }: Route.ComponentProps) {
               }
             />
 
-            <div className={styles.releaseGrid}>
+            <div className={releaseStyles.tileGrid}>
               {releases.map((release) => (
-                <article key={release.id} className={styles.releaseTile}>
-                  <Link to="/music" className={styles.releaseCoverWrap}>
-                    <ResponsiveImage
-                      src={release.coverImage}
-                      spec="releaseCover"
-                      alt={`Обложка: ${release.title}`}
-                      className={styles.releaseCover}
-                      sizes="(max-width: 720px) 50vw, 210px"
-                      compactPlaceholder
-                    />
-                  </Link>
-                  <div>
-                    <h3 className={styles.releaseTitle}>{release.title}</h3>
-                    <p className={styles.releaseMeta}>
-                      {RELEASE_TYPE_LABELS[release.type]}
-                      {release.releaseDate ? ` · ${release.releaseDate.getUTCFullYear()}` : ""}
-                    </p>
-                  </div>
-                </article>
+                <ReleaseTile
+                  key={release.id}
+                  release={release}
+                  sizes="(max-width: 720px) 50vw, 210px"
+                />
               ))}
             </div>
 

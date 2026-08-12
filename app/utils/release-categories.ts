@@ -41,6 +41,25 @@ export const RELEASE_CATEGORIES: ReleaseCategory[] = [
   },
 ];
 
+export const RELEASE_TYPE_LABELS: Record<ReleaseType, string> = {
+  ALBUM: "Альбом",
+  EP: "EP",
+  SINGLE: "Сингл",
+  LIVE: "Концертный",
+  COMPILATION: "Сборник",
+};
+
+/** Якорь релиза внутри раздела: по нему прокручиваем к нужной карточке. */
+export function releaseAnchor(slug: string): string {
+  return `release-${slug}`;
+}
+
+/** Плитка релиза ведёт сразу в его раздел, к самой карточке. */
+export function releaseHref(release: { slug: string; type: ReleaseType }): string {
+  const category = categoryOfType(release.type);
+  return category ? `/music/${category.slug}#${releaseAnchor(release.slug)}` : "/music";
+}
+
 export function categoryBySlug(slug: string | undefined): ReleaseCategory | null {
   return RELEASE_CATEGORIES.find((category) => category.slug === slug) ?? null;
 }

@@ -7,10 +7,11 @@ import { RichText } from "~/components/common/RichText";
 import { EmptyState } from "~/components/common/States";
 import { PageSkeleton } from "~/components/common/PageSkeleton";
 import { MemberCard } from "~/components/members/MemberCard";
-import { RELEASE_TYPE_LABELS } from "~/components/music/ReleaseCard";
+import { ReleaseTile } from "~/components/music/ReleaseTile";
 import { fetchMembers, fetchReleases } from "~/api/public-api";
 import { breadcrumbs, buildMeta, jsonLd, ogImageFrom } from "~/lib/seo";
 import memberStyles from "~/components/members/MemberCard.module.css";
+import releaseStyles from "~/components/music/ReleaseCard.module.css";
 import styles from "~/styles/page.module.css";
 import homeStyles from "~/components/home/home.module.css";
 
@@ -120,27 +121,9 @@ export default function About({ loaderData }: Route.ComponentProps) {
         {releases.length > 0 ? (
           <AnimatedSection className={styles.block}>
             <h2 className={styles.blockTitle}>Релизы</h2>
-            <div className={homeStyles.releaseGrid}>
+            <div className={releaseStyles.tileGrid}>
               {releases.map((release) => (
-                <article key={release.id} className={homeStyles.releaseTile}>
-                  <div className={homeStyles.releaseCoverWrap}>
-                    <ResponsiveImage
-                      src={release.coverImage}
-                      spec="releaseCover"
-                      alt={`Обложка: ${release.title}`}
-                      className={homeStyles.releaseCover}
-                      sizes="210px"
-                      compactPlaceholder
-                    />
-                  </div>
-                  <div>
-                    <p className={homeStyles.releaseTitle}>{release.title}</p>
-                    <p className={homeStyles.releaseMeta}>
-                      {RELEASE_TYPE_LABELS[release.type]}
-                      {release.releaseDate ? ` · ${release.releaseDate.getUTCFullYear()}` : ""}
-                    </p>
-                  </div>
-                </article>
+                <ReleaseTile key={release.id} release={release} />
               ))}
             </div>
             <div>

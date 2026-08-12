@@ -1,4 +1,5 @@
-import { data } from "react-router";
+import { useEffect } from "react";
+import { data, useLocation } from "react-router";
 import type { Route } from "./+types/music-category";
 import { useSiteData } from "~/layouts/PublicLayout";
 import { AnimatedSection } from "~/components/common/AnimatedSection";
@@ -82,6 +83,14 @@ export function meta({ loaderData, location, matches }: Route.MetaArgs) {
 export default function MusicCategory({ loaderData }: Route.ComponentProps) {
   const { category, releases } = loaderData;
   const { musicLinks } = useSiteData();
+  const { hash } = useLocation();
+
+  // При заходе прямо по ссылке карточек ещё нет в DOM, и браузер сам к якорю
+  // не прокрутит — доводим до неё, когда релизы отрисованы.
+  useEffect(() => {
+    if (!hash) return;
+    document.getElementById(decodeURIComponent(hash.slice(1)))?.scrollIntoView({ block: "start" });
+  }, [hash, releases]);
 
   if (!category) return null;
 
