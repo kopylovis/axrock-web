@@ -17,6 +17,8 @@ const NAV_GROUPS: Array<{
   requiresUserManager?: boolean;
   /** Скрыто от музыканта: он в панели только смотрит свой выезд и траты. */
   requiresEditor?: boolean;
+  /** Раздел готов, но пока не используется — убран из меню до востребования. */
+  hidden?: boolean;
   items: Array<{ to: string; label: string }>;
 }> = [
   {
@@ -35,6 +37,7 @@ const NAV_GROUPS: Array<{
   {
     id: "crew",
     label: "Для группы",
+    hidden: true,
     items: [
       { to: "/admin/tours", label: "Туры/Концерты" },
       { to: "/admin/expenses", label: "Мои расходы" },
@@ -54,6 +57,7 @@ const NAV_GROUPS: Array<{
     id: "money",
     label: "Финансы",
     requiresUserManager: true,
+    hidden: true,
     items: [{ to: "/admin/expenses-summary", label: "Общие расходы" }],
   },
   {
@@ -150,6 +154,7 @@ export default function AdminLayout({ loaderData }: Route.ComponentProps) {
 
           {NAV_GROUPS.filter(
             (group) =>
+              !group.hidden &&
               (!group.requiresUserManager || canManageUsers(admin.role)) &&
               (!group.requiresEditor || canEdit),
           ).map((group) => {

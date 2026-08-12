@@ -112,11 +112,6 @@ export default function Home({ loaderData }: Route.ComponentProps) {
             <EmptyState
               title="Новые даты скоро появятся"
               description="Следите за новостями и соцсетями — мы объявим их первыми."
-              action={
-                <ButtonLink to="/concerts" variant="ghost">
-                  Архив концертов
-                </ButtonLink>
-              }
             />
           )}
         </div>
