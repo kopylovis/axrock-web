@@ -1,4 +1,3 @@
-import { Link } from "react-router";
 import type { Route } from "./+types/home";
 import { useSiteData } from "~/layouts/PublicLayout";
 import { Hero } from "~/components/home/Hero";
@@ -8,14 +7,13 @@ import { ButtonLink } from "~/components/common/Button";
 import { EmptyState } from "~/components/common/States";
 import { PageSkeleton } from "~/components/common/PageSkeleton";
 import { Marquee } from "~/components/common/Marquee";
-import { ResponsiveImage } from "~/components/common/ResponsiveImage";
 import { NewsCard } from "~/components/news/NewsCard";
 import { EventsStrip } from "~/components/concerts/EventsStrip";
 import { MusicPlatformLinks, SocialLinks } from "~/components/layout/LinkLists";
 import { ReleaseTile } from "~/components/music/ReleaseTile";
-import { fetchMedia, fetchNews, fetchReleases, fetchUpcomingConcerts } from "~/api/public-api";
+import { fetchNews, fetchReleases, fetchUpcomingConcerts } from "~/api/public-api";
 import { buildMeta, jsonLd, ogImageFrom } from "~/lib/seo";
-import { langFromPath, strings, useLocalPath, useT } from "~/i18n";
+import { langFromPath, strings, useT } from "~/i18n";
 import { SITE_URL } from "~/lib/config";
 import releaseStyles from "~/components/music/ReleaseCard.module.css";
 import styles from "~/components/home/home.module.css";
@@ -24,18 +22,16 @@ const ABOUT_ANCHOR = "events";
 
 async function load(request: Request) {
   const lang = langFromPath(new URL(request.url).pathname);
-  const [concerts, news, releases, media] = await Promise.all([
+  const [concerts, news, releases] = await Promise.all([
     fetchUpcomingConcerts(5, lang).catch(() => []),
     fetchNews({ page: 1, pageSize: 3 }, lang).catch(() => null),
     fetchReleases(lang).catch(() => []),
-    fetchMedia(null, lang).catch(() => []),
   ]);
 
   return {
     concerts,
     news: news?.items ?? [],
     releases: releases.slice(0, 5),
-    videos: media.filter((item) => item.type === "VIDEO").slice(0, 3),
   };
 }
 
@@ -72,19 +68,10 @@ export function meta({ location, matches }: Route.MetaArgs) {
   ];
 }
 
-function PlayIcon() {
-  return (
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
-      <path d="M8 5v14l11-7z" />
-    </svg>
-  );
-}
-
 export default function Home({ loaderData }: Route.ComponentProps) {
-  const { concerts, news, releases, videos } = loaderData;
+  const { concerts, news, releases } = loaderData;
   const { settings, socialLinks, musicLinks } = useSiteData();
   const t = useT();
-  const lp = useLocalPath();
 
   // Даты перемежаются короткими фразами: при двух концертах лента иначе
   // выглядит как повтор одного и того же.
@@ -172,45 +159,6 @@ export default function Home({ loaderData }: Route.ComponentProps) {
                 <MusicPlatformLinks links={musicLinks} />
               </div>
             ) : null}
-          </div>
-        </AnimatedSection>
-      ) : null}
-
-      {videos.length > 0 ? (
-        <AnimatedSection className="section" ariaLabelledby="video-heading">
-          <div className="container">
-            <SectionHeading
-              id="video-heading"
-              eyebrow={t.home.videoEyebrow}
-              title={t.home.videoTitle}
-              action={
-                <ButtonLink to="/media" variant="quiet">
-                  {t.home.videoAll}
-                </ButtonLink>
-              }
-            />
-
-            <div className={styles.videoGrid}>
-              {videos.map((video) => (
-                <Link key={video.id} to={lp("/media")} className={styles.videoTile}>
-                  <span className={styles.videoThumbWrap}>
-                    <ResponsiveImage
-                      src={video.previewImageUrl ?? video.fileUrl}
-                      spec="video"
-                      alt=""
-                      className={styles.videoThumb}
-                      sizes="(max-width: 720px) 100vw, 320px"
-                    />
-                    <span className={styles.videoPlay} aria-hidden="true">
-                      <span className={styles.videoPlayIcon}>
-                        <PlayIcon />
-                      </span>
-                    </span>
-                  </span>
-                  <h3 className={styles.videoTitle}>{video.title ?? t.home.videoFallback}</h3>
-                </Link>
-              ))}
-            </div>
           </div>
         </AnimatedSection>
       ) : null}
