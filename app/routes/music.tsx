@@ -87,6 +87,9 @@ function SectionCover({ image, covers }: { image: string | null; covers: string[
           alt=""
           className={styles.tileCollageItem}
           sizes="160px"
+          /* Форму задаёт ячейка сетки, а не пропорции обложки: со своим
+             соотношением сторон третья картинка растягивала плитку вдвое. */
+          aspectRatio="auto"
           compactPlaceholder
         />
       ))}
