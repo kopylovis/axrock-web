@@ -26,6 +26,7 @@ export function MemberForm({ member }: { member: BandMemberDto | null }) {
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
   const [serverError, setServerError] = useState<string | null>(null);
+  const [savedMessage, setSavedMessage] = useState<string | null>(null);
 
   async function submit() {
     const next: Record<string, string> = {};
@@ -39,6 +40,7 @@ export function MemberForm({ member }: { member: BandMemberDto | null }) {
 
     setSaving(true);
     setServerError(null);
+    setSavedMessage(null);
 
     const payload: MemberInput = {
       name: name.trim(),
@@ -57,8 +59,15 @@ export function MemberForm({ member }: { member: BandMemberDto | null }) {
     };
 
     try {
-      const saved = member ? await updateMember(member.id, payload) : await createMember(payload);
-      navigate(`/admin/members/${saved.id}`, { replace: true });
+      // У существующей записи переход никуда не ведёт: адрес тот же, зато
+      // страница прыгает наверх и кажется, что ничего не произошло.
+      if (member) {
+        await updateMember(member.id, payload);
+        setSavedMessage("Сохранено. Изменения появятся на сайте после пересборки.");
+      } else {
+        const saved = await createMember(payload);
+        navigate(`/admin/members/${saved.id}`, { replace: true });
+      }
     } catch (cause) {
       setServerError(cause instanceof Error ? cause.message : "Не удалось сохранить участника");
     } finally {
@@ -80,6 +89,11 @@ export function MemberForm({ member }: { member: BandMemberDto | null }) {
       {serverError ? (
         <p className={styles.alert} role="alert">
           {serverError}
+        </p>
+      ) : null}
+      {savedMessage ? (
+        <p className={styles.success} role="status">
+          {savedMessage}
         </p>
       ) : null}
 
