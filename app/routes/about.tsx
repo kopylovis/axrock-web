@@ -14,7 +14,6 @@ import { langFromPath, strings, useT } from "~/i18n";
 import memberStyles from "~/components/members/MemberCard.module.css";
 import releaseStyles from "~/components/music/ReleaseCard.module.css";
 import styles from "~/styles/page.module.css";
-import homeStyles from "~/components/home/home.module.css";
 
 async function load(request: Request) {
   const lang = langFromPath(new URL(request.url).pathname);
@@ -143,7 +142,8 @@ export default function About({ loaderData }: Route.ComponentProps) {
         ) : null}
 
         <AnimatedSection className={styles.block}>
-          <div className={homeStyles.sectionFooter}>
+          <h2 className={styles.blockTitle}>{t.about.more}</h2>
+          <div className={styles.actions}>
             <ButtonLink to="/news" variant="quiet">
               {t.about.bandNews}
             </ButtonLink>

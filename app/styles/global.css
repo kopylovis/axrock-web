@@ -143,6 +143,11 @@ a {
   padding-block: var(--space-9);
 }
 
+/* Та же причина, что и у .page: у последней секции нижнее поле лишнее. */
+.section:last-child {
+  padding-bottom: 0;
+}
+
 @media (max-width: 768px) {
   .section {
     padding-block: var(--space-7);

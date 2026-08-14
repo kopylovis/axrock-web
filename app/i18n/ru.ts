@@ -89,6 +89,7 @@ export const ru = {
     formerMembers: "Бывшие участники",
     releases: "Релизы",
     allReleases: "Вся дискография",
+    more: "Смотрите также",
     bandNews: "Новости группы",
     concertPoster: "Афиша концертов",
   },

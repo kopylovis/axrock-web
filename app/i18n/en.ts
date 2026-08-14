@@ -93,6 +93,7 @@ export const en: Strings = {
     formerMembers: "Former members",
     releases: "Releases",
     allReleases: "Full discography",
+    more: "See also",
     bandNews: "Band news",
     concertPoster: "Tour dates",
   },
