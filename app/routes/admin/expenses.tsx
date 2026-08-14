@@ -16,6 +16,7 @@ import { EmptyState, ErrorState } from "~/components/common/States";
 import { SelectField, TextAreaField, TextField } from "~/components/admin/fields";
 import { RowMenu } from "~/components/admin/RowMenu";
 import { SortableTh, compareValues, useTableSort } from "~/components/admin/sortable-table";
+import { useFlash } from "~/components/admin/flash";
 import { parseUtcSafe } from "~/utils/admin-format";
 import { formatDate } from "~/utils/format";
 import { formatMoney, formatMoneyInput, parseMoneyToMinor } from "~/utils/crew-format";
@@ -58,6 +59,7 @@ export default function AdminExpenses({ loaderData }: Route.ComponentProps) {
   const [comment, setComment] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const { message: notice, flash } = useFlash();
 
   function resetForm() {
     setEditingId(null);
@@ -100,6 +102,7 @@ export default function AdminExpenses({ loaderData }: Route.ComponentProps) {
     try {
       if (editingId === null) await createExpense(payload);
       else await updateExpense(editingId, payload);
+      flash(editingId === null ? "Расход добавлен — он в списке ниже." : "Изменения сохранены.");
       resetForm();
       revalidator.revalidate();
     } catch (cause) {
@@ -160,6 +163,11 @@ export default function AdminExpenses({ loaderData }: Route.ComponentProps) {
         {error ? (
           <p className={styles.alert} role="alert">
             {error}
+          </p>
+        ) : null}
+        {notice ? (
+          <p className={styles.success} role="status">
+            {notice}
           </p>
         ) : null}
 

@@ -9,6 +9,7 @@ import { BilingualTextField, CheckboxField, SelectField, TextField } from "~/com
 import type { LinkKind, SocialLinkDto } from "~/api/dto";
 import { SOCIAL_PLATFORMS, SocialIcon, hasSocialIcon } from "~/components/common/SocialIcon";
 import { SortableTh, compareValues, useTableSort } from "~/components/admin/sortable-table";
+import { useFlash } from "~/components/admin/flash";
 import styles from "~/components/admin/admin.module.css";
 
 export async function clientLoader() {
@@ -66,6 +67,7 @@ export default function AdminSocialLinks({ loaderData }: Route.ComponentProps) {
   const [url, setUrl] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
+  const { message: notice, flash } = useFlash();
 
   async function add() {
     if (!platform.trim() || !title.trim()) {
@@ -95,6 +97,7 @@ export default function AdminSocialLinks({ loaderData }: Route.ComponentProps) {
       setTitleEn("");
       setUrl("");
       setIconOnly(false);
+      flash("Ссылка добавлена — она в списке ниже.");
       revalidator.revalidate();
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Не удалось добавить ссылку");
@@ -141,6 +144,11 @@ export default function AdminSocialLinks({ loaderData }: Route.ComponentProps) {
         {error ? (
           <p className={styles.alert} role="alert">
             {error}
+          </p>
+        ) : null}
+        {notice ? (
+          <p className={styles.success} role="status">
+            {notice}
           </p>
         ) : null}
 

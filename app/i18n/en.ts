@@ -186,6 +186,8 @@ export const en: Strings = {
     poster: "Posters",
     cover: "Artwork",
     photoAlt: "Band photo",
+    openOn: "Open on",
+    external: "Watch on an external site",
     viewer: "Media viewer",
     previous: "Previous",
     next: "Next",

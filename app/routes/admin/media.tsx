@@ -1,14 +1,17 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useRevalidator } from "react-router";
 import type { Route } from "./+types/media";
 import type { MediaInput } from "~/api/admin-api";
+import type { MediaItemDto } from "~/api/dto";
 import { createMedia, deleteMedia, listMedia } from "~/api/admin-api";
+import { parseVideoEmbed } from "~/utils/video-embed";
 import { GlassPanel } from "~/components/common/GlassPanel";
 import { PageSkeleton } from "~/components/common/PageSkeleton";
 import { EmptyState, ErrorState } from "~/components/common/States";
 import { BilingualTextField, ImageField, SelectField, TextField } from "~/components/admin/fields";
 import type { MediaType, PublicationStatus } from "~/types/content";
 import { SortableTh, compareValues, useTableSort } from "~/components/admin/sortable-table";
+import { useFlash } from "~/components/admin/flash";
 import styles from "~/components/admin/admin.module.css";
 
 export async function clientLoader() {
@@ -31,6 +34,47 @@ const TYPES = [
   { value: "BACKSTAGE", label: "Backstage" },
 ];
 
+/**
+ * Превью строки. Свой файл важнее всего, для ссылки на площадку берётся кадр
+ * ролика — иначе в списке не отличить одно видео от другого.
+ */
+function RowThumb({ item }: { item: MediaItemDto }) {
+  const embed = parseVideoEmbed(item.externalUrl);
+  const primary = item.previewImageUrl ?? item.fileUrl ?? embed?.posterUrl ?? null;
+  const [failed, setFailed] = useState(false);
+
+  useEffect(() => setFailed(false), [primary]);
+
+  const src = failed ? embed?.posterFallbackUrl ?? null : primary;
+
+  if (!src) {
+    return (
+      <span className={`${styles.rowThumb} ${styles.rowThumbEmpty}`} aria-hidden="true">
+        {item.type === "VIDEO" ? "▶" : "—"}
+      </span>
+    );
+  }
+
+  return (
+    <span className={styles.rowThumbBox}>
+      <img
+        className={styles.rowThumb}
+        src={src}
+        alt=""
+        loading="lazy"
+        decoding="async"
+        referrerPolicy="no-referrer"
+        onError={() => setFailed(true)}
+      />
+      {item.type === "VIDEO" ? (
+        <span className={styles.rowThumbPlay} aria-hidden="true">
+          ▶
+        </span>
+      ) : null}
+    </span>
+  );
+}
+
 export default function AdminMedia({ loaderData }: Route.ComponentProps) {
   const { items, failed } = loaderData;
   const { sort, toggle } = useTableSort<"title" | "type" | "url">({ key: "title", direction: "asc" });
@@ -50,6 +94,7 @@ export default function AdminMedia({ loaderData }: Route.ComponentProps) {
   const [titleEn, setTitleEn] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const { message: notice, flash } = useFlash();
 
   async function add() {
     if (!fileUrl && !externalUrl.trim()) {
@@ -77,8 +122,15 @@ export default function AdminMedia({ loaderData }: Route.ComponentProps) {
     try {
       await createMedia(payload);
       setTitle("");
+      setTitleEn("");
       setFileUrl(null);
       setExternalUrl("");
+      // Тип и статус оставляем: материалы обычно загружаются пачкой.
+      flash(
+        status === "PUBLISHED"
+          ? "Материал добавлен — он в списке ниже."
+          : "Материал сохранён как черновик — на сайте не отображается.",
+      );
       revalidator.revalidate();
     } catch (cause) {
       setError(cause instanceof Error ? cause.message : "Не удалось добавить материал");
@@ -105,6 +157,11 @@ export default function AdminMedia({ loaderData }: Route.ComponentProps) {
         {error ? (
           <p className={styles.alert} role="alert">
             {error}
+          </p>
+        ) : null}
+        {notice ? (
+          <p className={styles.success} role="status">
+            {notice}
           </p>
         ) : null}
 
@@ -169,6 +226,7 @@ export default function AdminMedia({ loaderData }: Route.ComponentProps) {
           <table className={styles.table}>
             <thead>
               <tr>
+                <th className={styles.rowThumbCell}>Превью</th>
                 <SortableTh
                       label="Подпись"
                       sortKey="title"
@@ -193,6 +251,9 @@ export default function AdminMedia({ loaderData }: Route.ComponentProps) {
             <tbody>
               {sorted.map((item) => (
                 <tr key={item.id}>
+                  <td className={styles.rowThumbCell}>
+                    <RowThumb item={item} />
+                  </td>
                   <td className={styles.rowTitle}>{item.title ?? "—"}</td>
                   <td data-label="Тип">
                     {TYPES.find((entry) => entry.value === item.type)?.label ?? item.type}

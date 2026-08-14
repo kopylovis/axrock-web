@@ -8,6 +8,7 @@
 .filter {
   display: inline-flex;
   align-items: center;
+  gap: var(--space-2);
   min-height: 38px;
   padding-inline: var(--space-4);
   border: 1px solid var(--line-strong);
@@ -34,10 +35,21 @@
   font-weight: 600;
 }
 
+/* Счётчик набран моноширинным: цифры не пляшут при переключении вкладок. */
+.filterCount {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  letter-spacing: 0;
+  opacity: 0.6;
+}
+
+/* auto-fit, а не auto-fill: пока материалов мало, плитки растягиваются вместо
+   того, чтобы жаться слева и оставлять полосу пустоты. Верхняя граница держит
+   единственную плитку в разумном размере. */
 .grid {
   display: grid;
   gap: var(--space-4);
-  grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 320px), 560px));
 }
 
 .item {
@@ -54,7 +66,15 @@
   border-color: var(--accent);
 }
 
+/* Отдельная обёртка кадра: обрезка увеличения не должна задевать подпись. */
+.itemFrame {
+  position: relative;
+  display: block;
+  overflow: hidden;
+}
+
 .itemImage {
+  display: block;
   width: 100%;
   object-fit: cover;
   transition: transform var(--t-slow);
@@ -64,28 +84,65 @@
   transform: scale(1.05);
 }
 
-.itemCaption {
+/* Подпись поверх кадра: так плитки остаются одной высоты независимо от того,
+   у кого из них есть название. */
+.itemOverlay {
   position: absolute;
   inset: auto 0 0 0;
-  padding: var(--space-5) var(--space-3) var(--space-3);
-  background: linear-gradient(to top, rgba(11, 10, 9, 0.92), transparent);
-  color: var(--ink);
-  font-size: var(--fs-sm);
+  display: grid;
+  gap: var(--space-1);
+  padding: var(--space-6) var(--space-4) var(--space-4);
+  background: linear-gradient(to top, rgba(11, 10, 9, 0.94) 35%, transparent);
   text-align: left;
+  pointer-events: none;
 }
 
+.itemType {
+  font-family: var(--font-accent);
+  font-size: var(--fs-xs);
+  letter-spacing: var(--track-caps);
+  text-transform: uppercase;
+  color: var(--accent);
+}
+
+.itemCaption {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  color: var(--ink);
+  font-size: var(--fs-sm);
+  line-height: var(--lh-snug);
+}
+
+/* Кнопка проигрывания по центру кадра — так плитка читается как видео. */
 .playBadge {
   position: absolute;
-  top: var(--space-3);
-  right: var(--space-3);
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
   display: grid;
   place-items: center;
-  width: 34px;
-  height: 34px;
+  width: 68px;
+  height: 68px;
+  padding-left: 4px;
   border-radius: 50%;
-  background: var(--bg-overlay);
-  border: 1px solid var(--line-strong);
+  background: rgba(11, 10, 9, 0.55);
+  -webkit-backdrop-filter: blur(var(--blur-small));
+  backdrop-filter: blur(var(--blur-small));
+  border: 1px solid rgba(255, 255, 255, 0.35);
   color: var(--ink);
+  transition:
+    background var(--t-fast),
+    color var(--t-fast),
+    border-color var(--t-fast);
+}
+
+.item:hover .playBadge {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--accent-ink);
 }
 
 .overlay {
@@ -137,7 +194,8 @@
 
 .stage {
   display: grid;
-  place-items: center;
+  align-content: center;
+  justify-items: center;
   gap: var(--space-4);
   min-height: 0;
 }
@@ -146,12 +204,30 @@
   max-width: 100%;
   max-height: 78vh;
   object-fit: contain;
-  }
+}
 
 .stageVideo {
   max-width: 100%;
   max-height: 78vh;
-  }
+}
+
+/* Плеер площадки. Ширину ограничивает и высота экрана: 16/9 при 78vh —
+   это примерно 139vh по ширине, иначе на широком мониторе кадр вылезал бы. */
+.stageFrame {
+  position: relative;
+  width: min(100%, var(--container), 138vh);
+  aspect-ratio: 16 / 9;
+  background: #000;
+  border: 1px solid var(--line);
+}
+
+.stageEmbed {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
 
 .stageFallback {
   display: grid;
@@ -160,7 +236,8 @@
   width: min(560px, 80vw);
 }
 
-.stageLink {
+.stageLink,
+.stageSource {
   display: inline-flex;
   align-items: center;
   min-height: 44px;
@@ -171,12 +248,21 @@
   font-size: var(--fs-xs);
   letter-spacing: var(--track-caps);
   text-transform: uppercase;
-  transition: border-color var(--t-fast), color var(--t-fast);
+  transition:
+    border-color var(--t-fast),
+    color var(--t-fast);
 }
 
-.stageLink:hover {
+.stageLink:hover,
+.stageSource:hover {
   border-color: var(--accent);
   color: var(--accent-bright);
+}
+
+.stageFooter {
+  display: grid;
+  justify-items: center;
+  gap: var(--space-3);
 }
 
 .stageCaption {
@@ -184,4 +270,16 @@
   text-align: center;
   color: var(--ink-mute);
   font-size: var(--fs-sm);
+}
+
+/* На узком экране ссылка на площадку занимает место, которого нет под кадром. */
+@media (max-width: 559px) {
+  .stageSource {
+    display: none;
+  }
+
+  .playBadge {
+    width: 56px;
+    height: 56px;
+  }
 }

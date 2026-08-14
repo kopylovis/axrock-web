@@ -73,12 +73,15 @@ export default function AdminDashboard({ loaderData }: Route.ComponentProps) {
       <div className={styles.pageHead}>
         <h1 className={styles.pageTitle}>Обзор</h1>
         <div className={styles.pageActions}>
-          <Link to="/admin/news/new" className={`${styles.btn} ${styles.btnPrimary}`}>
-            + Новость
-          </Link>
-          <Link to="/admin/concerts/new" className={`${styles.btn} ${styles.btnPrimary}`}>
-            + Концерт
-          </Link>
+          {/* Адрес берём из базового пути сборки: на стенде откроется стенд, а не боевой сайт. */}
+          <a
+            href={import.meta.env.BASE_URL}
+            className={`${styles.btn} ${styles.btnPrimary}`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            Открыть сайт ↗
+          </a>
           <RebuildButton />
         </div>
       </div>
