@@ -138,33 +138,36 @@ export function Header({
         </div>
       </header>
 
-      {open ? (
-        <div className={styles.drawer} id="mobile-nav">
-          <nav className={styles.drawerNav} aria-label="Мобильная навигация">
-            {NAV_ITEMS.map((item, index) => (
-              <NavLink
-                key={item.to}
-                to={item.to}
-                className={drawerLinkClass}
-                /* Пункты проявляются по очереди — задержка своя у каждого. */
-                style={{ "--stagger": `${index * 45}ms` } as React.CSSProperties}
-              >
-                <span className={styles.drawerIndex} aria-hidden="true">
-                  {String(index + 1).padStart(2, "0")}
-                </span>
-                {item.label}
-              </NavLink>
-            ))}
-          </nav>
+      {/* Панель всегда в разметке: если убирать её из дерева, закрытие происходит
+          мгновенно — анимировать нечего. Скрытая, она не ловит фокус. */}
+      <div
+        className={[styles.drawer, open ? styles.drawerOpen : null].filter(Boolean).join(" ")}
+        id="mobile-nav"
+      >
+        <nav className={styles.drawerNav} aria-label="Мобильная навигация">
+          {NAV_ITEMS.map((item, index) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              className={drawerLinkClass}
+              /* Пункты проявляются по очереди — задержка своя у каждого. */
+              style={{ "--stagger": `${index * 45}ms` } as React.CSSProperties}
+            >
+              <span className={styles.drawerIndex} aria-hidden="true">
+                {String(index + 1).padStart(2, "0")}
+              </span>
+              {item.label}
+            </NavLink>
+          ))}
+        </nav>
 
-          {socialLinks.length > 0 ? (
-            <div className={styles.drawerFooter}>
-              <span className={styles.drawerFooterLabel}>Мы в сети</span>
-              <SocialLinks links={socialLinks} />
-            </div>
-          ) : null}
-        </div>
-      ) : null}
+        {socialLinks.length > 0 ? (
+          <div className={styles.drawerFooter}>
+            <span className={styles.drawerFooterLabel}>Мы в сети</span>
+            <SocialLinks links={socialLinks} />
+          </div>
+        ) : null}
+      </div>
     </>
   );
 }

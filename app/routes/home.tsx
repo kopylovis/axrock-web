@@ -212,28 +212,27 @@ export default function Home({ loaderData }: Route.ComponentProps) {
         </AnimatedSection>
       ) : null}
 
-      <AnimatedSection className="section" ariaLabelledby="connect-heading">
-        <div className="container">
-          <SectionHeading id="connect-heading" eyebrow="Связь" title="Слушать и подписаться" />
+      {/* Соцсети и площадки — соседи по смыслу: у каждого свой заголовок, но
+          между ними обычный отступ, а не расстояние между разделами страницы. */}
+      {socialLinks.length > 0 || musicLinks.length > 0 ? (
+        <AnimatedSection className="section" as="div">
+          <div className={`container ${styles.linksStack}`}>
+            {socialLinks.length > 0 ? (
+              <section aria-labelledby="social-heading">
+                <SectionHeading id="social-heading" eyebrow="Связь" title="Соцсети" />
+                <SocialLinks links={socialLinks} />
+              </section>
+            ) : null}
 
-          {socialLinks.length > 0 || musicLinks.length > 0 ? (
-            <div className={styles.linksBand}>
-              {socialLinks.length > 0 ? (
-                <div className={styles.linksGroup}>
-                  <p className={styles.linksTitle}>Соцсети</p>
-                  <SocialLinks links={socialLinks} />
-                </div>
-              ) : null}
-              {musicLinks.length > 0 ? (
-                <div className={styles.linksGroup}>
-                  <p className={styles.linksTitle}>Площадки</p>
-                  <MusicPlatformLinks links={musicLinks} />
-                </div>
-              ) : null}
-            </div>
-          ) : null}
-        </div>
-      </AnimatedSection>
+            {musicLinks.length > 0 ? (
+              <section aria-labelledby="listen-heading">
+                <SectionHeading id="listen-heading" eyebrow="Площадки" title="Слушать" />
+                <MusicPlatformLinks links={musicLinks} />
+              </section>
+            ) : null}
+          </div>
+        </AnimatedSection>
+      ) : null}
     </>
   );
 }

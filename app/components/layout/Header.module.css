@@ -237,15 +237,18 @@
   overflow-y: auto;
   overscroll-behavior: contain;
   background: var(--bg);
-  /* Токены --t-* несут в себе кривую, поэтому в animation идёт голая
-     длительность: вторая функция сглаживания сделала бы правило неверным. */
-  animation: drawerIn 200ms var(--ease-out) both;
+  /* Закрытое меню держим в разметке, но гасим: иначе закрывать нечего —
+     размонтирование мгновенно. visibility убирает его из порядка фокуса. */
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity 200ms var(--ease),
+    visibility 200ms var(--ease);
 }
 
-@keyframes drawerIn {
-  from {
-    opacity: 0;
-  }
+.drawerOpen {
+  opacity: 1;
+  visibility: visible;
 }
 
 .drawerNav {
@@ -268,6 +271,10 @@
   line-height: var(--lh-snug);
   text-transform: uppercase;
   transition: color var(--t-fast);
+}
+
+/* Каскад запускается классом открытия — значит, повторяется на каждом показе. */
+.drawerOpen .drawerLink {
   animation: drawerLinkIn 340ms var(--ease-out) both;
   animation-delay: var(--stagger, 0ms);
 }
@@ -308,6 +315,9 @@
   margin-inline: auto;
   margin-top: auto;
   padding-top: var(--space-7);
+}
+
+.drawerOpen .drawerFooter {
   animation: drawerLinkIn 340ms var(--ease-out) both;
   animation-delay: 300ms;
 }

@@ -2,6 +2,7 @@ import type { Route } from "./+types/contacts";
 import { useSiteData } from "~/layouts/PublicLayout";
 import { AnimatedSection } from "~/components/common/AnimatedSection";
 import { EmptyState } from "~/components/common/States";
+import { MusicPlatformLinks, SocialLinks } from "~/components/layout/LinkLists";
 import { breadcrumbs, buildMeta, jsonLd, ogImageFrom } from "~/lib/seo";
 import styles from "~/styles/page.module.css";
 
@@ -11,7 +12,7 @@ export function meta({ location, matches }: Route.MetaArgs) {
       title: "Контакты",
       image: ogImageFrom(matches),
       description:
-        "Контакты группы «Ангел-Хранитель»: менеджмент и организация концертов, телефон, Telegram и почта.",
+        "Контакты группы «Ангел-Хранитель»: менеджмент и организация концертов, телефон, Telegram и почта, соцсети и музыкальные площадки.",
       pathname: location.pathname,
     }),
     jsonLd(
@@ -38,7 +39,7 @@ function vkHref(value: string): string {
 }
 
 export default function Contacts() {
-  const { settings } = useSiteData();
+  const { settings, socialLinks, musicLinks } = useSiteData();
 
   const rows = [
     settings.contactPhone
@@ -106,6 +107,24 @@ export default function Contacts() {
             description="Раздел заполняется через административную панель сайта."
           />
         )}
+
+        {socialLinks.length > 0 ? (
+          <AnimatedSection className={styles.block} ariaLabelledby="social-heading">
+            <h2 id="social-heading" className={styles.blockTitle}>
+              Соцсети
+            </h2>
+            <SocialLinks links={socialLinks} />
+          </AnimatedSection>
+        ) : null}
+
+        {musicLinks.length > 0 ? (
+          <AnimatedSection className={styles.block} ariaLabelledby="listen-heading">
+            <h2 id="listen-heading" className={styles.blockTitle}>
+              Слушать
+            </h2>
+            <MusicPlatformLinks links={musicLinks} />
+          </AnimatedSection>
+        ) : null}
       </div>
     </div>
   );
