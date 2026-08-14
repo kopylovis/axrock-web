@@ -106,6 +106,10 @@
     inset: auto;
     z-index: auto;
     grid-row: 1;
+    /* Кадр идёт от края до края экрана — растворять бока не во что, а маска
+       только съедала бы крайних участников. Верх и низ гасятся отдельно. */
+    mask-image: none;
+    -webkit-mask-image: none;
   }
 
   .mediaImage,
