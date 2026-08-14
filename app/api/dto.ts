@@ -115,6 +115,7 @@ export interface SocialLinkDto {
   kind?: LinkKind;
   visible?: boolean;
   iconOnly?: boolean;
+  titleEn?: string | null;
 }
 
 export interface BandMemberDto {
@@ -199,6 +200,8 @@ export interface MusicSectionDto {
 export interface SiteSettingsDto {
   siteName: string;
   bandName: string;
+  siteNameEn?: string | null;
+  bandNameEn?: string | null;
   heroTitle: string;
   heroSubtitle: string;
   heroImage: string | null;
@@ -210,6 +213,7 @@ export interface SiteSettingsDto {
   bookingEmail: string | null;
   pressEmail: string | null;
   managerName: string | null;
+  managerNameEn?: string | null;
   managerTelegram: string | null;
   managerMaxPhone: string | null;
   managerVkUrl: string | null;

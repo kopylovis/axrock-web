@@ -1,7 +1,7 @@
 import type { ReleaseLink, SocialLink } from "~/types/content";
 import { hasSocialIcon, platformLabel, SocialIcon } from "~/components/common/SocialIcon";
 import { isSafeExternalUrl } from "~/utils/url";
-import { useT } from "~/i18n";
+import { useLang, useT } from "~/i18n";
 import styles from "./LinkLists.module.css";
 
 function ArrowIcon() {
@@ -75,13 +75,16 @@ function ExternalList({ items, label, accent }: ExternalListProps) {
 
 export function SocialLinks({ links }: { links: SocialLink[] }) {
   const t = useT();
+  const lang = useLang();
 
   return (
     <ExternalList
       label={t.common.socialLinks}
       items={links.map((link) => ({
         id: link.id,
-        title: link.title || platformLabel(link.platform),
+        // Подпись приходит уже на нужном языке; если её не задали — берём
+        // название площадки.
+        title: link.title || platformLabel(link.platform, lang),
         url: link.url,
         platform: link.platform,
         iconOnly: link.iconOnly,
@@ -92,6 +95,7 @@ export function SocialLinks({ links }: { links: SocialLink[] }) {
 
 export function MusicPlatformLinks({ links }: { links: ReleaseLink[] }) {
   const t = useT();
+  const lang = useLang();
 
   return (
     <ExternalList
@@ -99,7 +103,7 @@ export function MusicPlatformLinks({ links }: { links: ReleaseLink[] }) {
       label={t.common.musicLinks}
       items={links.map((link) => ({
         id: link.id,
-        title: platformLabel(link.platform),
+        title: platformLabel(link.platform, lang),
         url: link.url,
         platform: link.platform,
         iconOnly: link.iconOnly,

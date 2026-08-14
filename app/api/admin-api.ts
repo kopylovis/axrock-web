@@ -186,6 +186,7 @@ export interface ReleaseInput {
 export interface SocialLinkInput {
   platform: string;
   title: string;
+  titleEn: string | null;
   url: string;
   sortOrder: number;
   visible: boolean;

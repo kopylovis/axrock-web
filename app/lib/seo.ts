@@ -1,5 +1,5 @@
 import { SITE_URL, canonicalUrl } from "./config";
-import { BAND_NAME } from "./site-defaults";
+import { BAND_NAME, BAND_NAME_EN } from "./site-defaults";
 import { DEFAULT_LANG, LANGS, OG_LOCALES, langFromPath, withLang, type Lang } from "~/i18n/config";
 
 export interface SeoInput {
@@ -20,7 +20,8 @@ type MetaDescriptor = Record<string, unknown>;
 export function buildMeta(input: SeoInput): MetaDescriptor[] {
   const lang = input.lang ?? langFromPath(input.pathname);
   const url = canonicalUrl(input.pathname);
-  const title = input.title.includes(BAND_NAME) ? input.title : `${input.title} — ${BAND_NAME}`;
+  const band = lang === "en" ? BAND_NAME_EN : BAND_NAME;
+  const title = input.title.includes(band) ? input.title : `${input.title} — ${band}`;
   const description = input.description ?? undefined;
   const image = input.image
     ? input.image.startsWith("http")
@@ -34,7 +35,7 @@ export function buildMeta(input: SeoInput): MetaDescriptor[] {
     { property: "og:title", content: title },
     { property: "og:url", content: url },
     { property: "og:type", content: input.type ?? "website" },
-    { property: "og:site_name", content: `${BAND_NAME} — официальный сайт` },
+    { property: "og:site_name", content: lang === "en" ? `${band} — official site` : `${band} — официальный сайт` },
     { property: "og:locale", content: OG_LOCALES[lang] },
     { name: "twitter:card", content: image ? "summary_large_image" : "summary" },
     { name: "twitter:title", content: title },

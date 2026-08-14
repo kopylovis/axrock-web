@@ -6,6 +6,8 @@
  * Ключ хранится в поле platform у ссылки. Незнакомый ключ — не ошибка:
  * ссылка просто останется текстовой.
  */
+import { DEFAULT_LANG, type Lang } from "~/i18n/config";
+
 
 interface IconProps {
   className?: string;
@@ -159,40 +161,54 @@ const ICONS: Record<string, (props: IconProps) => React.ReactElement> = {
 };
 
 /** Список для выбора в админке: ключ и подпись. */
-export const SOCIAL_PLATFORMS: Array<{ key: string; label: string }> = [
-  { key: "vk", label: "ВКонтакте" },
+export const SOCIAL_PLATFORMS: Array<{ key: string; label: string; labelEn?: string }> = [
+  { key: "vk", label: "ВКонтакте", labelEn: "VKontakte" },
   { key: "telegram", label: "Telegram" },
   { key: "youtube", label: "YouTube" },
   { key: "rutube", label: "Rutube" },
-  { key: "dzen", label: "Дзен" },
-  { key: "ok", label: "Одноклассники" },
+  { key: "dzen", label: "Дзен", labelEn: "Dzen" },
+  { key: "ok", label: "Одноклассники", labelEn: "Odnoklassniki" },
   { key: "instagram", label: "Instagram" },
   { key: "tiktok", label: "TikTok" },
-  { key: "vk-music", label: "VK Музыка" },
-  { key: "yandex-music", label: "Яндекс Музыка" },
-  { key: "zvuk", label: "Звук" },
+  { key: "vk-music", label: "VK Музыка", labelEn: "VK Music" },
+  { key: "yandex-music", label: "Яндекс Музыка", labelEn: "Yandex Music" },
+  { key: "zvuk", label: "Звук", labelEn: "Zvuk" },
   { key: "spotify", label: "Spotify" },
   { key: "apple-music", label: "Apple Music" },
   { key: "itunes", label: "iTunes" },
-  { key: "kion", label: "КИОН Музыка" },
-  { key: "wink", label: "Wink Музыка" },
+  { key: "kion", label: "КИОН Музыка", labelEn: "KION Music" },
+  { key: "wink", label: "Wink Музыка", labelEn: "Wink Music" },
   { key: "soundcloud", label: "SoundCloud" },
   { key: "bandcamp", label: "Bandcamp" },
   { key: "boosty", label: "Boosty" },
   { key: "facebook", label: "Facebook" },
   { key: "x", label: "X" },
-  { key: "website", label: "Сайт" },
+  { key: "website", label: "Сайт", labelEn: "Website" },
 ];
+
+function findPlatform(platform: string | null | undefined) {
+  if (!platform) return undefined;
+  return SOCIAL_PLATFORMS.find((item) => item.key === platform.toLowerCase());
+}
+
+/** Площадка есть в справочнике — значит, у неё есть и английское название. */
+export function isKnownPlatform(platform: string | null | undefined): boolean {
+  return Boolean(findPlatform(platform));
+}
 
 /**
  * Подпись площадки по ключу. Ссылки релизов хранят только ключ, а показывать
  * нужно человеческое название; незнакомое значение выводим как есть — так
  * переживают переезд старые записи с подписью вместо ключа.
  */
-export function platformLabel(platform: string | null | undefined): string {
+export function platformLabel(
+  platform: string | null | undefined,
+  lang: Lang = DEFAULT_LANG,
+): string {
   if (!platform) return "";
-  const known = SOCIAL_PLATFORMS.find((item) => item.key === platform.toLowerCase());
-  return known ? known.label : platform;
+  const known = findPlatform(platform);
+  if (!known) return platform;
+  return lang === "en" ? (known.labelEn ?? known.label) : known.label;
 }
 
 export function hasSocialIcon(platform: string | null | undefined): boolean {

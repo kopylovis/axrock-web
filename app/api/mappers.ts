@@ -144,11 +144,11 @@ export function mapConcertDetail(dto: ConcertDetailDto, lang: Lang = DEFAULT_LAN
   };
 }
 
-export function mapSocialLink(dto: SocialLinkDto): SocialLink {
+export function mapSocialLink(dto: SocialLinkDto, lang: Lang = DEFAULT_LANG): SocialLink {
   return {
     id: dto.id,
     platform: dto.platform,
-    title: dto.title,
+    title: pickText(lang, dto.title, dto.titleEn),
     url: dto.url,
     sortOrder: dto.sortOrder,
     iconOnly: dto.iconOnly ?? false,
@@ -166,7 +166,7 @@ export function mapBandMember(dto: BandMemberDto, lang: Lang = DEFAULT_LANG): Ba
     photo: dto.photo,
     currentMember: dto.currentMember,
     sortOrder: dto.sortOrder,
-    links: (dto.links ?? []).map(mapSocialLink),
+    links: (dto.links ?? []).map((link) => mapSocialLink(link, lang)),
   };
 }
 
@@ -229,8 +229,8 @@ export function mapMediaItem(dto: MediaItemDto, lang: Lang = DEFAULT_LANG): Medi
 
 export function mapSiteSettings(dto: SiteSettingsDto, lang: Lang = DEFAULT_LANG): SiteSettings {
   return {
-    siteName: dto.siteName,
-    bandName: dto.bandName,
+    siteName: pickText(lang, dto.siteName, dto.siteNameEn),
+    bandName: pickText(lang, dto.bandName, dto.bandNameEn),
     heroTitle: pickText(lang, dto.heroTitle, dto.heroTitleEn),
     heroSubtitle: pickText(lang, dto.heroSubtitle, dto.heroSubtitleEn),
     heroImage: dto.heroImage,
@@ -241,7 +241,7 @@ export function mapSiteSettings(dto: SiteSettingsDto, lang: Lang = DEFAULT_LANG)
     contactPhone: dto.contactPhone,
     bookingEmail: dto.bookingEmail,
     pressEmail: dto.pressEmail,
-    managerName: dto.managerName ?? null,
+    managerName: pick(lang, dto.managerName, dto.managerNameEn),
     managerTelegram: dto.managerTelegram ?? null,
     managerMaxPhone: dto.managerMaxPhone ?? null,
     managerVkUrl: dto.managerVkUrl ?? null,
@@ -254,7 +254,7 @@ export function mapSiteSettings(dto: SiteSettingsDto, lang: Lang = DEFAULT_LANG)
 export function mapSiteData(dto: SiteDataDto, lang: Lang = DEFAULT_LANG): SiteData {
   return {
     settings: mapSiteSettings(dto.settings, lang),
-    socialLinks: (dto.socialLinks ?? []).map(mapSocialLink),
+    socialLinks: (dto.socialLinks ?? []).map((link) => mapSocialLink(link, lang)),
     musicLinks: (dto.musicLinks ?? []).map(mapReleaseLink),
   };
 }

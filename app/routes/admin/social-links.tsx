@@ -5,7 +5,7 @@ import { createSocialLink, deleteSocialLink, listSocialLinks, updateSocialLink }
 import { GlassPanel } from "~/components/common/GlassPanel";
 import { PageSkeleton } from "~/components/common/PageSkeleton";
 import { EmptyState, ErrorState } from "~/components/common/States";
-import { CheckboxField, SelectField, TextField } from "~/components/admin/fields";
+import { BilingualTextField, CheckboxField, SelectField, TextField } from "~/components/admin/fields";
 import type { LinkKind, SocialLinkDto } from "~/api/dto";
 import { SOCIAL_PLATFORMS, SocialIcon, hasSocialIcon } from "~/components/common/SocialIcon";
 import { SortableTh, compareValues, useTableSort } from "~/components/admin/sortable-table";
@@ -62,6 +62,7 @@ export default function AdminSocialLinks({ loaderData }: Route.ComponentProps) {
   const [iconOnly, setIconOnly] = useState(false);
   const [platform, setPlatform] = useState("");
   const [title, setTitle] = useState("");
+  const [titleEn, setTitleEn] = useState("");
   const [url, setUrl] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
@@ -84,12 +85,14 @@ export default function AdminSocialLinks({ loaderData }: Route.ComponentProps) {
         iconOnly: iconOnly && hasSocialIcon(platform),
         platform: platform.trim(),
         title: title.trim(),
+        titleEn: titleEn.trim() || null,
         url: url.trim(),
         sortOrder: links.length,
         visible: true,
       });
       setPlatform("");
       setTitle("");
+      setTitleEn("");
       setUrl("");
       setIconOnly(false);
       revalidator.revalidate();
@@ -108,6 +111,7 @@ export default function AdminSocialLinks({ loaderData }: Route.ComponentProps) {
         kind: kindOf(link),
         platform: link.platform,
         title: link.title,
+        titleEn: link.titleEn ?? null,
         url: link.url,
         sortOrder: link.sortOrder,
         visible: link.visible ?? true,
@@ -183,11 +187,13 @@ export default function AdminSocialLinks({ loaderData }: Route.ComponentProps) {
               placeholder="vk"
               onChange={(event) => setPlatform(event.target.value)}
             />
-            <TextField
+            <BilingualTextField
               label="Подпись"
               value={title}
+              valueEn={titleEn}
               placeholder="ВКонтакте"
-              onChange={(event) => setTitle(event.target.value)}
+              onChange={setTitle}
+              onChangeEn={setTitleEn}
             />
           </div>
           <TextField

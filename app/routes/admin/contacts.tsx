@@ -5,7 +5,7 @@ import type { SiteSettingsDto } from "~/api/dto";
 import { GlassPanel } from "~/components/common/GlassPanel";
 import { PageSkeleton } from "~/components/common/PageSkeleton";
 import { ErrorState } from "~/components/common/States";
-import { TextField } from "~/components/admin/fields";
+import { BilingualTextField, TextField } from "~/components/admin/fields";
 import { publicSiteUrl } from "~/utils/site-url";
 import styles from "~/components/admin/admin.module.css";
 
@@ -35,6 +35,7 @@ export default function AdminContacts({ loaderData }: Route.ComponentProps) {
 function ContactsForm({ initial }: { initial: SiteSettingsDto }) {
   const [form, setForm] = useState({
     managerName: initial.managerName ?? "",
+    managerNameEn: initial.managerNameEn ?? "",
     managerTelegram: initial.managerTelegram ?? "",
     managerMaxPhone: initial.managerMaxPhone ?? "",
     managerVkUrl: initial.managerVkUrl ?? "",
@@ -61,6 +62,7 @@ function ContactsForm({ initial }: { initial: SiteSettingsDto }) {
       await updateSettings({
         ...initial,
         managerName: form.managerName.trim() || null,
+        managerNameEn: form.managerNameEn.trim() || null,
         managerTelegram: form.managerTelegram.trim() || null,
         managerMaxPhone: form.managerMaxPhone.trim() || null,
         managerVkUrl: form.managerVkUrl.trim() || null,
@@ -110,11 +112,13 @@ function ContactsForm({ initial }: { initial: SiteSettingsDto }) {
 
         <div className={styles.form}>
           <div className={`${styles.formGrid} ${styles.formGridTwo}`}>
-            <TextField
+            <BilingualTextField
               label="Имя менеджера"
               value={form.managerName}
+              valueEn={form.managerNameEn}
               placeholder="Даниил Коровайный"
-              onChange={(event) => update("managerName")(event.target.value)}
+              onChange={update("managerName")}
+              onChangeEn={update("managerNameEn")}
             />
             <TextField
               label="Телефон"

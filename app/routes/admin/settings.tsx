@@ -4,7 +4,7 @@ import { getSettings, updateSettings } from "~/api/admin-api";
 import type { SiteSettingsDto } from "~/api/dto";
 import { PageSkeleton } from "~/components/common/PageSkeleton";
 import { ErrorState } from "~/components/common/States";
-import { BilingualTextField, ImageField, TextField, VectorField } from "~/components/admin/fields";
+import { BilingualTextField, ImageField, VectorField } from "~/components/admin/fields";
 import styles from "~/components/admin/admin.module.css";
 
 export async function clientLoader() {
@@ -31,6 +31,8 @@ function SettingsForm({ initial }: { initial: SiteSettingsDto }) {
   const [form, setForm] = useState({
     siteName: initial.siteName,
     bandName: initial.bandName,
+    siteNameEn: initial.siteNameEn ?? "",
+    bandNameEn: initial.bandNameEn ?? "",
     heroTitle: initial.heroTitle,
     contactEmail: initial.contactEmail ?? "",
     contactPhone: initial.contactPhone ?? "",
@@ -65,6 +67,8 @@ function SettingsForm({ initial }: { initial: SiteSettingsDto }) {
         ...initial,
         siteName: form.siteName.trim(),
         bandName: form.bandName.trim(),
+        siteNameEn: form.siteNameEn.trim() || null,
+        bandNameEn: form.bandNameEn.trim() || null,
         heroTitle: form.heroTitle.trim(),
         heroSubtitle: "",
         heroImage,
@@ -103,15 +107,21 @@ function SettingsForm({ initial }: { initial: SiteSettingsDto }) {
 
       <div className={styles.form}>
         <div className={`${styles.formGrid} ${styles.formGridTwo}`}>
-          <TextField
+          <BilingualTextField
             label="Название сайта"
             value={form.siteName}
-            onChange={(event) => update("siteName")(event.target.value)}
+            valueEn={form.siteNameEn}
+            hint="Подпись сайта в превью ссылки — например в Telegram и WhatsApp."
+            onChange={update("siteName")}
+            onChangeEn={update("siteNameEn")}
           />
-          <TextField
+          <BilingualTextField
             label="Название группы"
             value={form.bandName}
-            onChange={(event) => update("bandName")(event.target.value)}
+            valueEn={form.bandNameEn}
+            hint="Заголовок страницы «О группе», подпись в подвале и копирайт. Для английской версии — транслитерация."
+            onChange={update("bandName")}
+            onChangeEn={update("bandNameEn")}
           />
         </div>
 

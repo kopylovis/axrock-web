@@ -2,6 +2,10 @@ import type { SiteData } from "~/types/content";
 
 export const BAND_NAME = "Ангел-Хранитель";
 
+/** Транслитерация для английской версии: кириллица в заголовке вкладки и в
+    превью ссылки ничего не говорит иностранному читателю. */
+export const BAND_NAME_EN = "Angel-Hranitel";
+
 /** Используется только когда backend недоступен — чтобы шапка и подвал всё равно отрисовались. */
 export const FALLBACK_SITE_DATA: SiteData = {
   settings: {
