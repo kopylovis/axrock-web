@@ -3,6 +3,7 @@ import { NavLink, useLocation } from "react-router";
 import { SocialLinks } from "./LinkLists";
 import type { SocialLink } from "~/types/content";
 import { useLang, useLocalPath, useT, withLang, type Strings } from "~/i18n";
+import { trackLanguageSwitch } from "~/utils/analytics";
 import styles from "./Header.module.css";
 
 const NAV_ITEMS: Array<{ to: string; key: keyof Strings["nav"] }> = [
@@ -128,6 +129,7 @@ export function Header({
             aria-label={t.header.switchTo}
             viewTransition
             preventScrollReset
+            onClick={() => trackLanguageSwitch(otherLang)}
           >
             {t.header.langShort}
           </NavLink>

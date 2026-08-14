@@ -9,6 +9,24 @@ export const API_BASE_URL = (
 
 export const IS_BROWSER = typeof document !== "undefined";
 
+/**
+ * Счётчик Яндекс.Метрики. Номер не секрет — он всё равно виден в исходном коде
+ * страницы, поэтому лежит рядом с остальными адресами, а не в переменных сборки.
+ */
+export const METRIKA_ID = 111610948;
+
+/**
+ * Локальная разработка. Сравнивать с каноническим адресом нельзя: сайт может
+ * отдаваться и с адреса GitHub Pages, пока свой домен не подключён, — счётчик
+ * тогда не включился бы вовсе. Свои визиты со стейджа отсекаются фильтром
+ * по IP в самой Метрике.
+ */
+export function isLocalHost(): boolean {
+  if (!IS_BROWSER) return false;
+  const host = window.location.hostname;
+  return host === "localhost" || host === "127.0.0.1" || host.endsWith(".local");
+}
+
 export function canonicalUrl(pathname: string): string {
   if (pathname === "/") return `${SITE_URL}/`;
   return `${SITE_URL}${pathname.replace(/\/$/, "")}`;

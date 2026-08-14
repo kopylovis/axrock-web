@@ -1,0 +1,91 @@
+/* Полоса внизу экрана. Поверх кнопки «наверх», но ниже выдвижного меню. */
+.notice {
+  position: fixed;
+  inset-inline: var(--space-4);
+  bottom: calc(var(--space-4) + env(safe-area-inset-bottom));
+  z-index: 44;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-4);
+  /* Ширина по содержимому: на просторном экране текст встаёт в строку,
+     на узком плашка упирается в края и переносит его. */
+  width: fit-content;
+  max-width: 100%;
+  margin-inline: auto;
+  padding: var(--space-4) var(--space-5);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--r-xl);
+  /* Подложка полупрозрачная: с прежним --bg-overlay (94%) размытие под ней
+     было, но увидеть его было нельзя. */
+  background: rgba(11, 10, 9, 0.55);
+  -webkit-backdrop-filter: saturate(140%) blur(var(--blur-large));
+  backdrop-filter: saturate(140%) blur(var(--blur-large));
+  box-shadow: var(--shadow-lift);
+  animation: noticeIn 320ms var(--ease-out) both;
+}
+
+@keyframes noticeIn {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+}
+
+.text {
+  flex: 1 1 240px;
+  font-size: var(--fs-sm);
+  line-height: var(--lh-body);
+  color: var(--ink-mute);
+  text-align: center;
+}
+
+.link {
+  color: var(--accent-bright);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+}
+
+.button {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding-inline: var(--space-5);
+  border-radius: var(--r-lg);
+  background: var(--accent);
+  color: var(--accent-ink);
+  font-family: var(--font-accent);
+  font-size: var(--fs-xs);
+  letter-spacing: var(--track-label);
+  text-transform: uppercase;
+  transition: filter var(--t-fast);
+}
+
+@media (hover: hover) {
+  .button:hover {
+    filter: brightness(1.07);
+  }
+}
+
+/* На узком экране кнопка занимает всю ширину — так в неё проще попасть.
+   Поля ужимаем: каждый лишний пиксель здесь — это риск третьей строки. */
+@media (max-width: 559px) {
+  .notice {
+    inset-inline: var(--space-3);
+    padding: var(--space-4);
+  }
+
+  .button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+/* Без поддержки размытия подложка должна быть плотной, иначе текст ляжет
+   прямо на содержимое страницы. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .notice {
+    background: var(--bg-overlay);
+  }
+}

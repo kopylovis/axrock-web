@@ -2,6 +2,7 @@ import type { ReleaseLink, SocialLink } from "~/types/content";
 import { hasSocialIcon, platformLabel, SocialIcon } from "~/components/common/SocialIcon";
 import { isSafeExternalUrl } from "~/utils/url";
 import { useLang, useT } from "~/i18n";
+import { trackPlatformClick } from "~/utils/analytics";
 import styles from "./LinkLists.module.css";
 
 function ArrowIcon() {
@@ -24,6 +25,8 @@ function ArrowIcon() {
 }
 
 interface ExternalListProps {
+  /** Разводит цели в Метрике: профиль в стриминге и соцсеть — разные события. */
+  kind: "music" | "social";
   items: Array<{
     id: number;
     title: string;
@@ -35,7 +38,7 @@ interface ExternalListProps {
   accent?: boolean;
 }
 
-function ExternalList({ items, label, accent }: ExternalListProps) {
+function ExternalList({ items, label, accent, kind }: ExternalListProps) {
   const t = useT();
   const safe = items.filter((item) => isSafeExternalUrl(item.url));
   if (safe.length === 0) return null;
@@ -53,6 +56,7 @@ function ExternalList({ items, label, accent }: ExternalListProps) {
               target="_blank"
               rel="noopener noreferrer"
               title={compact ? item.title : undefined}
+              onClick={() => trackPlatformClick(item.platform, kind)}
               className={[
                 styles.item,
                 accent ? styles.itemAccent : null,
@@ -79,6 +83,7 @@ export function SocialLinks({ links }: { links: SocialLink[] }) {
 
   return (
     <ExternalList
+      kind="social"
       label={t.common.socialLinks}
       items={links.map((link) => ({
         id: link.id,
@@ -100,6 +105,7 @@ export function MusicPlatformLinks({ links }: { links: ReleaseLink[] }) {
   return (
     <ExternalList
       accent
+      kind="music"
       label={t.common.musicLinks}
       items={links.map((link) => ({
         id: link.id,

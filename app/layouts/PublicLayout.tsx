@@ -3,6 +3,8 @@ import type { Route } from "./+types/PublicLayout";
 import { Header } from "~/components/layout/Header";
 import { Footer } from "~/components/layout/Footer";
 import { ScrollToTopButton } from "~/components/common/ScrollButtons";
+import { Analytics } from "~/components/common/Analytics";
+import { CookieNotice } from "~/components/common/CookieNotice";
 import { fetchSiteData } from "~/api/public-api";
 import { FALLBACK_SITE_DATA } from "~/lib/site-defaults";
 import type { SiteData } from "~/types/content";
@@ -49,6 +51,8 @@ export default function PublicLayout({ loaderData }: Route.ComponentProps) {
       </main>
       <Footer site={site} />
       <ScrollToTopButton />
+      <CookieNotice />
+      <Analytics />
     </>
   );
 }

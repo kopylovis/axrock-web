@@ -258,6 +258,13 @@ export const en: Strings = {
     toHome: "Back home",
   },
 
+  cookies: {
+    label: "Cookie notice",
+    text: "This site uses cookies for visit statistics.",
+    policy: "Privacy policy",
+    accept: "Got it",
+  },
+
   legal: {
     eyebrow: "Legal",
   },
@@ -281,7 +288,7 @@ export const en: Strings = {
       "The site does not sell tickets and does not take payments. We neither request nor store bank card data, payment details or order information. Ticket purchases happen via an external link to the promoter's site, where its own data policy applies.",
     cookiesTitle: "Cookies",
     cookiesText:
-      "Cookies are used to keep the site working and, where present, for web analytics. The admin area uses a technical session cookie available only to a signed-in administrator. You can disable cookies in your browser settings, but this may affect parts of the site.",
+      "Cookies and similar technologies keep the site working and power web analytics: a Yandex.Metrica counter collects anonymised statistics — referral source, pages viewed, device and browser type. The admin area stores its sign-in marker in the browser local storage and is available only to the band staff. You can disable cookies in your browser settings, but this may affect parts of the site.",
     thirdPartiesTitle: "Sharing with third parties",
     thirdPartiesText:
       "We do not share personal data with third parties except where required by law. When you follow external links to streaming platforms, social networks and ticket agents, our site passes no personal data to them.",
