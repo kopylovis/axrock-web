@@ -1607,6 +1607,51 @@
   gap: var(--space-3);
 }
 
+/* Выпадающий список внутри строки таблицы. Рамки в покое нет: это одна ячейка
+   среди текстовых, и коробка вокруг неё выбивалась бы из строки. Системную
+   стрелку убираем — она рисуется своим блоком и ломает высоту. */
+.rowSelect {
+  max-width: 220px;
+  height: 32px;
+  padding: 0 26px 0 var(--space-2);
+  border: 1px solid transparent;
+  border-radius: var(--r-sm);
+  background:
+    transparent
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8' fill='none' stroke='%23e7e3da' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M1 1.5 6 6.5 11 1.5'/%3E%3C/svg%3E")
+    no-repeat right 9px center / 10px;
+  color: var(--ink-mute);
+  font: inherit;
+  font-size: var(--fs-sm);
+  text-overflow: ellipsis;
+  appearance: none;
+  -webkit-appearance: none;
+  transition:
+    border-color var(--t-fast),
+    color var(--t-fast);
+}
+
+/* Только для мыши: на тач-экране :hover залипает после тапа. */
+@media (hover: hover) {
+  .rowSelect:hover {
+    border-color: var(--line-strong);
+    color: var(--ink);
+  }
+}
+
+/* data-pointer-focus ставит разметка, когда список открыли указателем:
+   :focus-visible у <select> срабатывает и от мыши, и подсветка оставалась
+   висеть после закрытия списка. */
+.rowSelect:focus-visible:not([data-pointer-focus]) {
+  outline: none;
+  border-color: var(--accent);
+  color: var(--ink);
+}
+
+.rowSelect:focus {
+  outline: none;
+}
+
 /* Колонка превью не тянется: ширину задаёт сама картинка. */
 .rowThumbCell {
   width: 1%;

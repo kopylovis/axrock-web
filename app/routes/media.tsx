@@ -2,7 +2,7 @@ import type { Route } from "./+types/media";
 import { ErrorState } from "~/components/common/States";
 import { PageSkeleton } from "~/components/common/PageSkeleton";
 import { MediaGallery } from "~/components/media/MediaGallery";
-import { fetchMedia } from "~/api/public-api";
+import { fetchMedia, fetchMediaAlbums } from "~/api/public-api";
 import { breadcrumbs, buildMeta, jsonLd, ogImageFrom } from "~/lib/seo";
 import { langFromPath, strings, useT } from "~/i18n";
 import styles from "~/styles/page.module.css";
@@ -10,9 +10,14 @@ import styles from "~/styles/page.module.css";
 async function load(request: Request) {
   const lang = langFromPath(new URL(request.url).pathname);
   try {
-    return { items: await fetchMedia(null, lang), failed: false };
+    // Альбомы необязательны: пока их нет, страница остаётся общей лентой.
+    const [items, albums] = await Promise.all([
+      fetchMedia(null, lang),
+      fetchMediaAlbums(lang).catch(() => []),
+    ]);
+    return { items, albums, failed: false };
   } catch {
-    return { items: [], failed: true };
+    return { items: [], albums: [], failed: true };
   }
 }
 
@@ -52,7 +57,7 @@ export function meta({ location, matches }: Route.MetaArgs) {
 }
 
 export default function Media({ loaderData }: Route.ComponentProps) {
-  const { items, failed } = loaderData;
+  const { items, albums, failed } = loaderData;
   const t = useT();
 
   return (
@@ -64,7 +69,7 @@ export default function Media({ loaderData }: Route.ComponentProps) {
           <p className={styles.lead}>{t.media.lead}</p>
         </header>
 
-        {failed ? <ErrorState /> : <MediaGallery items={items} />}
+        {failed ? <ErrorState /> : <MediaGallery items={items} albums={albums} />}
       </div>
     </div>
   );

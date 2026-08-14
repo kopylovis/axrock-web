@@ -43,6 +43,42 @@
   opacity: 0.6;
 }
 
+/* Раздел — альбом либо общая лента. Промежуток между ними крупный: заголовок
+   должен читаться как начало нового блока, а не как подпись к сетке выше. */
+.section + .section {
+  margin-top: var(--space-8);
+}
+
+.sectionHead {
+  display: grid;
+  gap: var(--space-2);
+  margin-bottom: var(--space-5);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--line);
+}
+
+.sectionTitle {
+  font-family: var(--font-display);
+  font-weight: 400;
+  font-size: var(--fs-h2);
+  line-height: var(--lh-snug);
+  text-transform: uppercase;
+}
+
+.sectionDate {
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  letter-spacing: 0.06em;
+  color: var(--ink-faint);
+}
+
+.sectionLead {
+  max-width: 70ch;
+  color: var(--ink-mute);
+  font-size: var(--fs-sm);
+  line-height: var(--lh-body);
+}
+
 /* auto-fit, а не auto-fill: пока материалов мало, плитки растягиваются вместо
    того, чтобы жаться слева и оставлять полосу пустоты. Верхняя граница держит
    единственную плитку в разумном размере. */

@@ -186,10 +186,23 @@ export interface MediaItemDto {
   previewImageUrl: string | null;
   externalUrl: string | null;
   concertId: number | null;
+  albumId?: number | null;
   publishedAt: string | null;
   sortOrder: number;
   titleEn?: string | null;
   descriptionEn?: string | null;
+}
+
+export interface MediaAlbumDto {
+  id: number;
+  title: string;
+  titleEn?: string | null;
+  description?: string | null;
+  descriptionEn?: string | null;
+  happenedOn?: string | null;
+  coverImageUrl?: string | null;
+  sortOrder: number;
+  published?: boolean;
 }
 
 export interface MusicSectionDto {

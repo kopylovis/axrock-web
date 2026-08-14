@@ -3,6 +3,7 @@ import type {
   BandMemberDto,
   ConcertDetailDto,
   ConcertSummaryDto,
+  MediaAlbumDto,
   MediaItemDto,
   MusicSectionDto,
   NewsCategoryDto,
@@ -16,6 +17,7 @@ import {
   mapBandMember,
   mapConcertDetail,
   mapConcertSummary,
+  mapMediaAlbum,
   mapMediaItem,
   mapNewsCategory,
   mapNewsDetail,
@@ -28,6 +30,7 @@ import type {
   BandMember,
   ConcertDetail,
   ConcertSummary,
+  MediaAlbum,
   MediaItem,
   MediaType,
   NewsCategory,
@@ -151,6 +154,11 @@ export async function fetchMedia(
 ): Promise<MediaItem[]> {
   const dto = await apiFetch<MediaItemDto[]>(`${PREFIX}/media${buildQuery({ type })}`);
   return dto.map((item) => mapMediaItem(item, lang));
+}
+
+export async function fetchMediaAlbums(lang: Lang = DEFAULT_LANG): Promise<MediaAlbum[]> {
+  const dto = await apiFetch<MediaAlbumDto[]>(`${PREFIX}/media-albums`);
+  return dto.map((album) => mapMediaAlbum(album, lang));
 }
 
 export async function fetchSitemapEntries(): Promise<SitemapEntry[]> {

@@ -4,6 +4,7 @@ import type {
   BandMemberDto,
   ConcertDetailDto,
   LinkKind,
+  MediaAlbumDto,
   MediaItemDto,
   MusicSectionDto,
   NewsCategoryDto,
@@ -202,10 +203,23 @@ export interface MediaInput {
   previewImageUrl: string | null;
   externalUrl: string | null;
   concertId: number | null;
+  albumId: number | null;
   status: PublicationStatus;
   sortOrder: number;
   titleEn: string | null;
   descriptionEn: string | null;
+}
+
+export interface MediaAlbumInput {
+  title: string;
+  titleEn: string | null;
+  description: string | null;
+  descriptionEn: string | null;
+  /** ISO-дата события либо null. */
+  happenedOn: string | null;
+  coverImageUrl: string | null;
+  status: PublicationStatus;
+  sortOrder: number;
 }
 
 export interface UploadResult {
@@ -607,8 +621,39 @@ export async function createMedia(input: MediaInput): Promise<MediaItemDto> {
   return apiFetch<MediaItemDto>(`${PREFIX}/media`, { method: "POST", body: input, auth: true });
 }
 
+export async function updateMedia(id: number, input: MediaInput): Promise<MediaItemDto> {
+  return apiFetch<MediaItemDto>(`${PREFIX}/media/${id}`, { method: "PUT", body: input, auth: true });
+}
+
 export async function deleteMedia(id: number): Promise<void> {
   await apiFetch<void>(`${PREFIX}/media/${id}`, { method: "DELETE", auth: true });
+}
+
+export async function listMediaAlbums(): Promise<MediaAlbumDto[]> {
+  return apiFetch<MediaAlbumDto[]>(`${PREFIX}/media-albums`, { auth: true });
+}
+
+export async function createMediaAlbum(input: MediaAlbumInput): Promise<MediaAlbumDto> {
+  return apiFetch<MediaAlbumDto>(`${PREFIX}/media-albums`, {
+    method: "POST",
+    body: input,
+    auth: true,
+  });
+}
+
+export async function updateMediaAlbum(
+  id: number,
+  input: MediaAlbumInput,
+): Promise<MediaAlbumDto> {
+  return apiFetch<MediaAlbumDto>(`${PREFIX}/media-albums/${id}`, {
+    method: "PUT",
+    body: input,
+    auth: true,
+  });
+}
+
+export async function deleteMediaAlbum(id: number): Promise<void> {
+  await apiFetch<void>(`${PREFIX}/media-albums/${id}`, { method: "DELETE", auth: true });
 }
 
 export interface UploadItem {

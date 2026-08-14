@@ -196,6 +196,7 @@ export const ru = {
     poster: "Афиши",
     cover: "Обложки",
     photoAlt: "Фотография группы",
+    allMaterials: "Все материалы",
     openOn: "Открыть на",
     external: "Смотреть на стороннем сайте",
     viewer: "Просмотр медиа",

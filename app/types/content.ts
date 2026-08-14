@@ -156,7 +156,18 @@ export interface MediaItem {
   previewImageUrl: string | null;
   externalUrl: string | null;
   concertId: number | null;
+  albumId: number | null;
   publishedAt: Date | null;
+  sortOrder: number;
+}
+
+/** Подборка снимков и роликов с одного события. */
+export interface MediaAlbum {
+  id: number;
+  title: string;
+  description: string | null;
+  happenedOn: Date | null;
+  coverImageUrl: string | null;
   sortOrder: number;
 }
 

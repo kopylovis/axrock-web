@@ -4,8 +4,9 @@ import { ResponsiveImage } from "~/components/common/ResponsiveImage";
 import { isSafeExternalUrl } from "~/utils/url";
 import { parseVideoEmbed, type VideoEmbed } from "~/utils/video-embed";
 import { EmptyState } from "~/components/common/States";
-import type { MediaItem, MediaType } from "~/types/content";
-import { useT, type Strings } from "~/i18n";
+import { formatDate } from "~/utils/format";
+import type { MediaAlbum, MediaItem, MediaType } from "~/types/content";
+import { useLang, useT, type Strings } from "~/i18n";
 import styles from "./MediaGallery.module.css";
 
 /** Порядок вкладок фиксирован: он не должен зависеть от порядка записей в базе. */
@@ -260,8 +261,69 @@ function Lightbox({
   );
 }
 
-export function MediaGallery({ items }: { items: MediaItem[] }) {
+/** Раздел страницы: альбом со своими материалами либо общая лента. */
+interface Section {
+  key: string;
+  title: string | null;
+  description: string | null;
+  date: Date | null;
+  tiles: Tile[];
+}
+
+function Grid({
+  tiles,
+  labels,
+  offset,
+  onOpen,
+}: {
+  tiles: Tile[];
+  labels: Record<MediaType, string>;
+  /** Сдвиг до начала раздела: окно просмотра листает всю страницу подряд. */
+  offset: number;
+  onOpen: (index: number) => void;
+}) {
+  return (
+    <div className={styles.grid}>
+      {tiles.map((tile, index) => (
+        <button
+          key={tile.item.id}
+          type="button"
+          className={styles.item}
+          onClick={() => onOpen(offset + index)}
+          aria-label={tile.item.title ?? labels[tile.item.type]}
+        >
+          <span className={styles.itemFrame}>
+            <Thumbnail tile={tile} alt={tile.item.title ?? ""} />
+            {tile.item.type === "VIDEO" ? (
+              <span className={styles.playBadge} aria-hidden="true">
+                <PlayIcon />
+              </span>
+            ) : null}
+          </span>
+          <span className={styles.itemOverlay}>
+            <span className={styles.itemType}>
+              {labels[tile.item.type]}
+              {tile.embed ? ` · ${tile.embed.title}` : ""}
+            </span>
+            {tile.item.title ? (
+              <span className={styles.itemCaption}>{tile.item.title}</span>
+            ) : null}
+          </span>
+        </button>
+      ))}
+    </div>
+  );
+}
+
+export function MediaGallery({
+  items,
+  albums = [],
+}: {
+  items: MediaItem[];
+  albums?: MediaAlbum[];
+}) {
   const t = useT();
+  const lang = useLang();
   const labels = typeLabels(t);
   const [activeType, setActiveType] = useState<MediaType | null>(null);
   const [openIndex, setOpenIndex] = useState<number | null>(null);
@@ -273,6 +335,41 @@ export function MediaGallery({ items }: { items: MediaItem[] }) {
 
   const availableTypes = TYPE_ORDER.filter((type) => items.some((item) => item.type === type));
   const filtered = activeType ? tiles.filter((tile) => tile.item.type === activeType) : tiles;
+
+  const sections = useMemo<Section[]>(() => {
+    const known = new Set(albums.map((album) => album.id));
+    const result: Section[] = albums
+      .map((album) => ({
+        key: `album-${album.id}`,
+        title: album.title,
+        description: album.description,
+        date: album.happenedOn,
+        tiles: filtered.filter((tile) => tile.item.albumId === album.id),
+      }))
+      // Пустой альбом на сайте не показывается: заголовок без материалов — брак.
+      .filter((section) => section.tiles.length > 0);
+
+    // Всё, что не разложено по альбомам, идёт общей лентой от свежего к старому.
+    const loose = filtered
+      .filter((tile) => tile.item.albumId === null || !known.has(tile.item.albumId))
+      .sort((a, b) => (b.item.publishedAt?.getTime() ?? 0) - (a.item.publishedAt?.getTime() ?? 0));
+
+    if (loose.length > 0) {
+      result.push({
+        key: "loose",
+        // Пока альбомов нет, лента остаётся единственным разделом — заголовок ей не нужен.
+        title: result.length > 0 ? t.media.allMaterials : null,
+        description: null,
+        date: null,
+        tiles: loose,
+      });
+    }
+
+    return result;
+  }, [albums, filtered, t.media.allMaterials]);
+
+  // Плоский список в порядке показа: по нему листают стрелки в окне просмотра.
+  const visible = useMemo(() => sections.flatMap((section) => section.tiles), [sections]);
 
   const handleClose = useCallback(() => setOpenIndex(null), []);
   const handleNavigate = useCallback((next: number) => setOpenIndex(next), []);
@@ -319,39 +416,31 @@ export function MediaGallery({ items }: { items: MediaItem[] }) {
         </div>
       ) : null}
 
-      <div className={styles.grid}>
-        {filtered.map((tile, index) => (
-          <button
-            key={tile.item.id}
-            type="button"
-            className={styles.item}
-            onClick={() => setOpenIndex(index)}
-            aria-label={tile.item.title ?? labels[tile.item.type]}
-          >
-            <span className={styles.itemFrame}>
-              <Thumbnail tile={tile} alt={tile.item.title ?? ""} />
-              {tile.item.type === "VIDEO" ? (
-                <span className={styles.playBadge} aria-hidden="true">
-                  <PlayIcon />
-                </span>
+      {sections.map((section, sectionIndex) => (
+        <section key={section.key} className={styles.section}>
+          {section.title ? (
+            <header className={styles.sectionHead}>
+              <h2 className={styles.sectionTitle}>{section.title}</h2>
+              {section.date ? (
+                <span className={styles.sectionDate}>{formatDate(section.date, undefined, lang)}</span>
               ) : null}
-            </span>
-            <span className={styles.itemOverlay}>
-              <span className={styles.itemType}>
-                {labels[tile.item.type]}
-                {tile.embed ? ` · ${tile.embed.title}` : ""}
-              </span>
-              {tile.item.title ? (
-                <span className={styles.itemCaption}>{tile.item.title}</span>
+              {section.description ? (
+                <p className={styles.sectionLead}>{section.description}</p>
               ) : null}
-            </span>
-          </button>
-        ))}
-      </div>
+            </header>
+          ) : null}
+          <Grid
+            tiles={section.tiles}
+            labels={labels}
+            offset={sections.slice(0, sectionIndex).reduce((sum, item) => sum + item.tiles.length, 0)}
+            onOpen={setOpenIndex}
+          />
+        </section>
+      ))}
 
       {openIndex !== null ? (
         <Lightbox
-          tiles={filtered}
+          tiles={visible}
           index={openIndex}
           onClose={handleClose}
           onNavigate={handleNavigate}

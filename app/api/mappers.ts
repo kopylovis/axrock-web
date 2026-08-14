@@ -4,6 +4,7 @@ import type {
   ConcertDetail,
   ConcertParticipant,
   ConcertSummary,
+  MediaAlbum,
   MediaItem,
   NewsCategory,
   NewsDetail,
@@ -23,6 +24,7 @@ import type {
   ConcertDetailDto,
   ConcertParticipantDto,
   ConcertSummaryDto,
+  MediaAlbumDto,
   MediaItemDto,
   NewsCategoryDto,
   NewsDetailDto,
@@ -222,7 +224,19 @@ export function mapMediaItem(dto: MediaItemDto, lang: Lang = DEFAULT_LANG): Medi
     previewImageUrl: dto.previewImageUrl,
     externalUrl: dto.externalUrl,
     concertId: dto.concertId,
+    albumId: dto.albumId ?? null,
     publishedAt: parseUtcDate(dto.publishedAt),
+    sortOrder: dto.sortOrder,
+  };
+}
+
+export function mapMediaAlbum(dto: MediaAlbumDto, lang: Lang = DEFAULT_LANG): MediaAlbum {
+  return {
+    id: dto.id,
+    title: pickText(lang, dto.title, dto.titleEn),
+    description: pick(lang, dto.description ?? null, dto.descriptionEn),
+    happenedOn: parseUtcDate(dto.happenedOn ?? null),
+    coverImageUrl: dto.coverImageUrl ?? null,
     sortOrder: dto.sortOrder,
   };
 }
