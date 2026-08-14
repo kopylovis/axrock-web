@@ -364,9 +364,14 @@
     border-color var(--t-fast);
 }
 
-.langSwitch:hover {
-  color: var(--accent-bright);
-  border-color: var(--accent);
+/* Только для мыши. На тач-экране :hover залипает после тапа, и кнопка
+   остаётся подсвеченной — а она никуда не исчезает при смене языка,
+   поэтому подсветка так и висит на новой странице. */
+@media (hover: hover) {
+  .langSwitch:hover {
+    color: var(--accent-bright);
+    border-color: var(--accent);
+  }
 }
 
 @media (min-width: 980px) {

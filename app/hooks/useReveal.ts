@@ -6,8 +6,17 @@ interface UseRevealOptions {
   once?: boolean;
 }
 
+/**
+ * Появление блока при прокрутке.
+ *
+ * Порог держим нулевым, а задержку задаём отрицательным полем снизу: доля
+ * считается от площади самого блока, и для блока выше экрана нужную долю
+ * бывает невозможно набрать в принципе. Список релизов на телефоне такой и
+ * есть — он оставался невидимым, сколько ни прокручивай. Отступ же меряется
+ * от экрана и одинаково работает при любой высоте содержимого.
+ */
 export function useReveal<T extends HTMLElement = HTMLDivElement>(options: UseRevealOptions = {}) {
-  const { threshold = 0.12, rootMargin = "0px 0px -8% 0px", once = true } = options;
+  const { threshold = 0, rootMargin = "0px 0px -12% 0px", once = true } = options;
   const ref = useRef<T | null>(null);
   const [visible, setVisible] = useState(false);
 
