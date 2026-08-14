@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useReducer } from "react";
 import { EditorContent, useEditor } from "@tiptap/react";
 import StarterKit from "@tiptap/starter-kit";
 import Link from "@tiptap/extension-link";
@@ -52,6 +52,7 @@ interface RichTextEditorProps {
 }
 
 export function RichTextEditor({ value, onChange, label }: RichTextEditorProps) {
+  const [, forceRender] = useReducer((tick: number) => tick + 1, 0);
   const editor = useEditor({
     extensions: [
       // Ссылки в StarterKit уже есть — отключаем, иначе расширение регистрируется дважды.
@@ -67,13 +68,39 @@ export function RichTextEditor({ value, onChange, label }: RichTextEditorProps) 
     },
   });
 
+  /**
+   * Содержимое задаётся редактору при создании, поэтому смену value нужно
+   * переносить в него вручную — иначе переключение вкладки RU/EN меняло проп,
+   * а на экране оставался прежний текст.
+   *
+   * Пока пользователь печатает, значение приходит от самого редактора и
+   * совпадает с его состоянием — сравнение это отсекает, и курсор не прыгает.
+   * emitUpdate: false не даёт программной подстановке вызвать onChange.
+   */
+  /**
+   * Подсветка кнопок панели читается из состояния редактора прямо при отрисовке,
+   * но сам по себе он её не вызывает: в третьей версии TipTap перерисовка на
+   * каждое действие отключена ради скорости. Без подписки кнопка «Ж» оставалась
+   * зажатой после того, как курсор уходил из жирного текста.
+   */
   useEffect(() => {
-    if (!editor || !value) return;
-    const current = JSON.stringify(editor.getJSON());
-    if (current !== JSON.stringify(value)) editor.commands.setContent(value);
-    // Синхронизируем только при смене редактируемой записи.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (!editor) return;
+    const sync = () => forceRender();
+    editor.on("selectionUpdate", sync);
+    editor.on("transaction", sync);
+    return () => {
+      editor.off("selectionUpdate", sync);
+      editor.off("transaction", sync);
+    };
   }, [editor]);
+
+  useEffect(() => {
+    if (!editor) return;
+    const current = JSON.stringify(editor.getJSON());
+    if (value && JSON.stringify(value) === current) return;
+    if (!value && editor.isEmpty) return;
+    editor.commands.setContent(value ?? "", { emitUpdate: false });
+  }, [editor, value]);
 
   if (!editor) {
     return (

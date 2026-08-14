@@ -1,4 +1,4 @@
-import { Outlet, useRouteLoaderData } from "react-router";
+import { Outlet, useRouteLoaderData, type ShouldRevalidateFunctionArgs } from "react-router";
 import type { Route } from "./+types/PublicLayout";
 import { Header } from "~/components/layout/Header";
 import { Footer } from "~/components/layout/Footer";
@@ -25,6 +25,21 @@ export async function loader({ request }: Route.LoaderArgs) {
 
 export async function clientLoader({ request }: Route.ClientLoaderArgs) {
   return load(request);
+}
+
+/**
+ * Макет общий для русской и английской версий, поэтому при переходе между ними
+ * React Router считает его уже загруженным и данные не перезапрашивает: адрес
+ * этого маршрута не изменился, параметров у него нет. В итоге название группы,
+ * подвал и контакты оставались на прежнем языке до перезагрузки страницы.
+ */
+export function shouldRevalidate({
+  currentUrl,
+  nextUrl,
+  defaultShouldRevalidate,
+}: ShouldRevalidateFunctionArgs) {
+  if (langFromPath(currentUrl.pathname) !== langFromPath(nextUrl.pathname)) return true;
+  return defaultShouldRevalidate;
 }
 
 export function useSiteData(): SiteData {

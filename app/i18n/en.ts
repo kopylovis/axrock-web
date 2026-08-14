@@ -260,7 +260,7 @@ export const en: Strings = {
 
   cookies: {
     label: "Cookie notice",
-    text: "This site uses cookies for visit statistics.",
+    text: "This site uses cookies.",
     policy: "Privacy policy",
     accept: "Got it",
   },

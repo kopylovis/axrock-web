@@ -981,7 +981,11 @@
   position: sticky;
   bottom: 0;
   z-index: 5;
-  padding: var(--space-4) 0;
+  /* Подложка тянется до краёв панели, а кнопки остаются на одной вертикали с
+     полями формы: отрицательные поля компенсируют padding панели, внутренние
+     возвращают отступ содержимому. Тем же приёмом сделана липкая шапка. */
+  margin-inline: calc(var(--space-5) * -1);
+  padding: var(--space-4) var(--space-5);
   border-top: 1px solid var(--line);
   background: rgba(11, 10, 9, 0.72);
   -webkit-backdrop-filter: blur(var(--blur-medium));
