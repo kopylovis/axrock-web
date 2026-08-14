@@ -7,8 +7,24 @@ export const DEFAULT_LANG: Lang = "ru";
 /** Префикс английской версии. Русская живёт в корне — она основная. */
 const EN_PREFIX = "/en";
 
+/**
+ * Базовый путь сборки. На своём домене это «/», но на GitHub Pages сайт может
+ * отдаваться из подпапки, и тогда адрес выглядит как /axrock-web/en/about.
+ */
+const BASE_PATH = import.meta.env.BASE_URL || "/";
+
+/**
+ * Убирает подпапку сборки. В компоненты React Router отдаёт путь уже без неё,
+ * а в загрузчик приходит полный адрес запроса — вместе с подпапкой.
+ */
+function withoutBase(pathname: string): string {
+  if (BASE_PATH === "/" || !pathname.startsWith(BASE_PATH)) return pathname;
+  return `/${pathname.slice(BASE_PATH.length)}`;
+}
+
 export function langFromPath(pathname: string): Lang {
-  return pathname === EN_PREFIX || pathname.startsWith(`${EN_PREFIX}/`) ? "en" : "ru";
+  const path = withoutBase(pathname);
+  return path === EN_PREFIX || path.startsWith(`${EN_PREFIX}/`) ? "en" : "ru";
 }
 
 /** Путь без языкового префикса: /en/music → /music. */
