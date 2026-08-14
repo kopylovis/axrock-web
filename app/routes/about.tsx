@@ -10,25 +10,27 @@ import { MemberCard } from "~/components/members/MemberCard";
 import { ReleaseTile } from "~/components/music/ReleaseTile";
 import { fetchMembers, fetchReleases } from "~/api/public-api";
 import { breadcrumbs, buildMeta, jsonLd, ogImageFrom } from "~/lib/seo";
+import { langFromPath, strings, useT } from "~/i18n";
 import memberStyles from "~/components/members/MemberCard.module.css";
 import releaseStyles from "~/components/music/ReleaseCard.module.css";
 import styles from "~/styles/page.module.css";
 import homeStyles from "~/components/home/home.module.css";
 
-async function load() {
+async function load(request: Request) {
+  const lang = langFromPath(new URL(request.url).pathname);
   const [releases, members] = await Promise.all([
-    fetchReleases().catch(() => []),
-    fetchMembers().catch(() => []),
+    fetchReleases(lang).catch(() => []),
+    fetchMembers(lang).catch(() => []),
   ]);
   return { releases, members };
 }
 
-export async function loader() {
-  return load();
+export async function loader({ request }: Route.LoaderArgs) {
+  return load(request);
 }
 
-export async function clientLoader() {
-  return load();
+export async function clientLoader({ request }: Route.ClientLoaderArgs) {
+  return load(request);
 }
 
 export function HydrateFallback() {
@@ -36,19 +38,24 @@ export function HydrateFallback() {
 }
 
 export function meta({ location, matches }: Route.MetaArgs) {
+  const lang = langFromPath(location.pathname);
+  const t = strings(lang);
+
   return [
     ...buildMeta({
-      title: "О группе",
+      title: t.about.metaTitle,
       image: ogImageFrom(matches),
-      description:
-        "История рок-группы «Ангел-Хранитель», состав музыкантов, музыкальное направление и релизы.",
+      description: t.about.metaDescription,
       pathname: location.pathname,
     }),
     jsonLd(
-      breadcrumbs([
-        { name: "Главная", path: "/" },
-        { name: "О группе", path: "/about" },
-      ]),
+      breadcrumbs(
+        [
+          { name: t.breadcrumbs.home, path: "/" },
+          { name: t.nav.about, path: "/about" },
+        ],
+        lang,
+      ),
     ),
   ];
 }
@@ -56,6 +63,7 @@ export function meta({ location, matches }: Route.MetaArgs) {
 export default function About({ loaderData }: Route.ComponentProps) {
   const { releases, members } = loaderData;
   const { settings } = useSiteData();
+  const t = useT();
   const currentMembers = members.filter((member) => member.currentMember);
   const formerMembers = members.filter((member) => !member.currentMember);
 
@@ -63,7 +71,7 @@ export default function About({ loaderData }: Route.ComponentProps) {
     <div className={styles.page}>
       <div className="container">
         <header className={`${styles.header} ${styles.headerWide}`}>
-          <span className={styles.eyebrow}>О группе</span>
+          <span className={styles.eyebrow}>{t.about.eyebrow}</span>
           <div className={styles.titleFit}>
             <h1 className={styles.title}>{settings.bandName}</h1>
           </div>
@@ -75,7 +83,7 @@ export default function About({ loaderData }: Route.ComponentProps) {
             <ResponsiveImage
               src={settings.heroImage}
               spec="hero"
-              alt={`Группа ${settings.bandName}`}
+              alt={t.about.photoAlt(settings.bandName)}
               aspectRatio="21 / 9"
               sizes="(max-width: 1180px) 100vw, 1180px"
               className={styles.wideImage}
@@ -90,15 +98,15 @@ export default function About({ loaderData }: Route.ComponentProps) {
             </div>
           ) : (
             <EmptyState
-              title="Биография скоро появится"
-              description="Раздел наполняется через административную панель сайта."
+              title={t.about.bioEmptyTitle}
+              description={t.about.bioEmptyDescription}
             />
           )}
         </AnimatedSection>
 
         {currentMembers.length > 0 ? (
           <AnimatedSection className={styles.block} id="lineup">
-            <h2 className={styles.blockTitle}>Состав</h2>
+            <h2 className={styles.blockTitle}>{t.about.lineup}</h2>
             <div className={memberStyles.grid}>
               {currentMembers.map((member) => (
                 <MemberCard key={member.id} member={member} />
@@ -109,7 +117,7 @@ export default function About({ loaderData }: Route.ComponentProps) {
 
         {formerMembers.length > 0 ? (
           <AnimatedSection className={styles.block}>
-            <h2 className={styles.blockTitle}>Бывшие участники</h2>
+            <h2 className={styles.blockTitle}>{t.about.formerMembers}</h2>
             <div className={memberStyles.grid}>
               {formerMembers.map((member) => (
                 <MemberCard key={member.id} member={member} />
@@ -120,7 +128,7 @@ export default function About({ loaderData }: Route.ComponentProps) {
 
         {releases.length > 0 ? (
           <AnimatedSection className={styles.block}>
-            <h2 className={styles.blockTitle}>Релизы</h2>
+            <h2 className={styles.blockTitle}>{t.about.releases}</h2>
             <div className={releaseStyles.tileGrid}>
               {releases.map((release) => (
                 <ReleaseTile key={release.id} release={release} />
@@ -128,7 +136,7 @@ export default function About({ loaderData }: Route.ComponentProps) {
             </div>
             <div>
               <ButtonLink to="/music" variant="ghost">
-                Вся дискография
+                {t.about.allReleases}
               </ButtonLink>
             </div>
           </AnimatedSection>
@@ -137,10 +145,10 @@ export default function About({ loaderData }: Route.ComponentProps) {
         <AnimatedSection className={styles.block}>
           <div className={homeStyles.sectionFooter}>
             <ButtonLink to="/news" variant="quiet">
-              Новости группы
+              {t.about.bandNews}
             </ButtonLink>
             <ButtonLink to="/concerts" variant="quiet">
-              Афиша концертов
+              {t.about.concertPoster}
             </ButtonLink>
           </div>
         </AnimatedSection>

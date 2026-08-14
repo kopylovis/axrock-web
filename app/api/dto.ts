@@ -19,6 +19,7 @@ export interface NewsCategoryDto {
   name: string;
   slug: string;
   sortOrder: number;
+  nameEn?: string | null;
 }
 
 export interface NewsSummaryDto {
@@ -30,6 +31,8 @@ export interface NewsSummaryDto {
   category: NewsCategoryDto | null;
   publishedAt: string | null;
   featured: boolean;
+  titleEn?: string | null;
+  excerptEn?: string | null;
 }
 
 export interface NewsNeighbourDto {
@@ -44,6 +47,9 @@ export interface NewsDetailDto extends NewsSummaryDto {
   updatedAt: string | null;
   seoTitle: string | null;
   seoDescription: string | null;
+  contentEn?: RichTextDoc | null;
+  seoTitleEn?: string | null;
+  seoDescriptionEn?: string | null;
   previous: NewsNeighbourDto | null;
   next: NewsNeighbourDto | null;
   related: NewsSummaryDto[];
@@ -72,6 +78,11 @@ export interface ConcertSummaryDto {
   ageRestriction: string | null;
   ticketUrl: string | null;
   featured: boolean;
+  titleEn?: string | null;
+  shortDescriptionEn?: string | null;
+  cityEn?: string | null;
+  countryEn?: string | null;
+  venueNameEn?: string | null;
 }
 
 export interface ConcertDetailDto extends ConcertSummaryDto {
@@ -87,6 +98,9 @@ export interface ConcertDetailDto extends ConcertSummaryDto {
   cancellationReason: string | null;
   seoTitle: string | null;
   seoDescription: string | null;
+  descriptionEn?: RichTextDoc | null;
+  seoTitleEn?: string | null;
+  seoDescriptionEn?: string | null;
   participants: ConcertParticipantDto[];
 }
 
@@ -106,6 +120,10 @@ export interface SocialLinkDto {
 export interface BandMemberDto {
   id: number;
   name: string;
+  nameEn?: string | null;
+  roleEn?: string | null;
+  instrumentEn?: string | null;
+  biographyEn?: string | null;
   stageName: string | null;
   role: string;
   instrument: string | null;
@@ -123,6 +141,7 @@ export interface ReleaseTrackDto {
   title: string;
   duration: string | null;
   trackNumber: number;
+  titleEn?: string | null;
 }
 
 export interface ReleaseLinkDto {
@@ -136,6 +155,7 @@ export interface ReleaseLinkDto {
 export interface ReleaseSummaryDto {
   id: number;
   title: string;
+  titleEn?: string | null;
   slug: string;
   type: ReleaseType;
   coverImage: string | null;
@@ -149,6 +169,9 @@ export interface ReleaseDetailDto extends ReleaseSummaryDto {
   description: string | null;
   seoTitle: string | null;
   seoDescription: string | null;
+  descriptionEn?: string | null;
+  seoTitleEn?: string | null;
+  seoDescriptionEn?: string | null;
   tracks: ReleaseTrackDto[];
   links: ReleaseLinkDto[];
 }
@@ -164,6 +187,8 @@ export interface MediaItemDto {
   concertId: number | null;
   publishedAt: string | null;
   sortOrder: number;
+  titleEn?: string | null;
+  descriptionEn?: string | null;
 }
 
 export interface MusicSectionDto {
@@ -191,6 +216,12 @@ export interface SiteSettingsDto {
   defaultSeoTitle: string | null;
   defaultSeoDescription: string | null;
   defaultOgImage: string | null;
+  heroTitleEn?: string | null;
+  heroSubtitleEn?: string | null;
+  shortBiographyEn?: string | null;
+  fullBiographyEn?: RichTextDoc | null;
+  defaultSeoTitleEn?: string | null;
+  defaultSeoDescriptionEn?: string | null;
 }
 
 export interface SiteDataDto {

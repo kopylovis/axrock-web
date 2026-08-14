@@ -6,21 +6,23 @@ import { ScrollToTopButton } from "~/components/common/ScrollButtons";
 import { fetchSiteData } from "~/api/public-api";
 import { FALLBACK_SITE_DATA } from "~/lib/site-defaults";
 import type { SiteData } from "~/types/content";
+import { langFromPath, useT } from "~/i18n";
 
-async function load() {
+async function load(request: Request) {
+  const lang = langFromPath(new URL(request.url).pathname);
   try {
-    return { site: await fetchSiteData() };
+    return { site: await fetchSiteData(lang) };
   } catch {
     return { site: FALLBACK_SITE_DATA };
   }
 }
 
-export async function loader() {
-  return load();
+export async function loader({ request }: Route.LoaderArgs) {
+  return load(request);
 }
 
-export async function clientLoader() {
-  return load();
+export async function clientLoader({ request }: Route.ClientLoaderArgs) {
+  return load(request);
 }
 
 export function useSiteData(): SiteData {
@@ -30,11 +32,12 @@ export function useSiteData(): SiteData {
 
 export default function PublicLayout({ loaderData }: Route.ComponentProps) {
   const site = loaderData?.site ?? FALLBACK_SITE_DATA;
+  const t = useT();
 
   return (
     <>
       <a href="#main" className="skip-link">
-        Перейти к содержимому
+        {t.common.skipToContent}
       </a>
       <Header
         bandName={site.settings.bandName}

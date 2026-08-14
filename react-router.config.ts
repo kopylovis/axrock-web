@@ -68,7 +68,13 @@ async function collectPrerenderPaths(): Promise<string[]> {
     }
   }
 
-  return [...new Set([...STATIC_PATHS, ...dynamic])];
+  const russian = [...new Set([...STATIC_PATHS, ...dynamic])];
+
+  // Английская версия — те же страницы под /en. Пропустить её нельзя: при
+  // ssr:false маршрут с loader обязан попасть в пререндер.
+  const english = russian.map((path) => (path === "/" ? "/en" : `/en${path}`));
+
+  return [...russian, ...english];
 }
 
 export default {

@@ -4,15 +4,18 @@ import { ResponsiveImage } from "~/components/common/ResponsiveImage";
 import { isSafeExternalUrl } from "~/utils/url";
 import { EmptyState } from "~/components/common/States";
 import type { MediaItem, MediaType } from "~/types/content";
+import { useT, type Strings } from "~/i18n";
 import styles from "./MediaGallery.module.css";
 
-const TYPE_LABELS: Record<MediaType, string> = {
-  PHOTO: "Фото",
-  VIDEO: "Видео",
-  POSTER: "Афиши",
-  COVER: "Обложки",
-  BACKSTAGE: "Backstage",
-};
+function typeLabels(t: Strings): Record<MediaType, string> {
+  return {
+    PHOTO: t.media.photo,
+    VIDEO: t.media.video,
+    POSTER: t.media.poster,
+    COVER: t.media.cover,
+    BACKSTAGE: "Backstage",
+  };
+}
 
 function PlayIcon() {
   return (
@@ -26,7 +29,7 @@ function PlayIcon() {
  * Пустой src у <img> браузер разрешает в адрес текущей страницы и показывает
  * «битую» картинку, поэтому каждый случай разбирается отдельно.
  */
-function renderStage(item: MediaItem) {
+function renderStage(item: MediaItem, t: Strings) {
   const imageUrl = item.fileUrl ?? item.previewImageUrl;
 
   if (item.type === "VIDEO" && item.fileUrl) {
@@ -47,7 +50,7 @@ function renderStage(item: MediaItem) {
       <img
         className={styles.stageImage}
         src={imageUrl}
-        alt={item.title ?? "Фотография группы"}
+        alt={item.title ?? t.media.photoAlt}
       />
     );
   }
@@ -83,6 +86,7 @@ function Lightbox({
 }) {
   const closeRef = useRef<HTMLButtonElement>(null);
   const item = items[index];
+  const t = useT();
 
   useEffect(() => {
     closeRef.current?.focus();
@@ -115,7 +119,7 @@ function Lightbox({
   const caption = item.title ?? item.description ?? "";
 
   return (
-    <div className={styles.overlay} role="dialog" aria-modal="true" aria-label={caption || "Просмотр медиа"}>
+    <div className={styles.overlay} role="dialog" aria-modal="true" aria-label={caption || t.media.viewer}>
       <div className={styles.overlayBar}>
         <span>
           {index + 1} / {items.length}
@@ -126,7 +130,7 @@ function Lightbox({
             className={styles.controlButton}
             onClick={() => onNavigate(index - 1)}
             disabled={index === 0}
-            aria-label="Предыдущее"
+            aria-label={t.media.previous}
           >
             ←
           </button>
@@ -135,7 +139,7 @@ function Lightbox({
             className={styles.controlButton}
             onClick={() => onNavigate(index + 1)}
             disabled={index === items.length - 1}
-            aria-label="Следующее"
+            aria-label={t.media.next}
           >
             →
           </button>
@@ -144,7 +148,7 @@ function Lightbox({
             type="button"
             className={styles.controlButton}
             onClick={onClose}
-            aria-label="Закрыть просмотр"
+            aria-label={t.media.close}
           >
             ✕
           </button>
@@ -152,7 +156,7 @@ function Lightbox({
       </div>
 
       <div className={styles.stage}>
-        {renderStage(item)}
+        {renderStage(item, t)}
         {caption ? <p className={styles.stageCaption}>{caption}</p> : null}
       </div>
     </div>
@@ -160,6 +164,8 @@ function Lightbox({
 }
 
 export function MediaGallery({ items }: { items: MediaItem[] }) {
+  const t = useT();
+  const labels = typeLabels(t);
   const [activeType, setActiveType] = useState<MediaType | null>(null);
   const [openIndex, setOpenIndex] = useState<number | null>(null);
 
@@ -172,8 +178,8 @@ export function MediaGallery({ items }: { items: MediaItem[] }) {
   if (items.length === 0) {
     return (
       <EmptyState
-        title="Медиа пока не добавлены"
-        description="Фотографии и видео появятся здесь после ближайших концертов."
+        title={t.media.emptyTitle}
+        description={t.media.emptyDescription}
       />
     );
   }
@@ -188,7 +194,7 @@ export function MediaGallery({ items }: { items: MediaItem[] }) {
             onClick={() => setActiveType(null)}
             aria-pressed={activeType === null}
           >
-            Всё
+            {t.media.allTypes}
           </button>
           {availableTypes.map((type) => (
             <button
@@ -198,7 +204,7 @@ export function MediaGallery({ items }: { items: MediaItem[] }) {
               onClick={() => setActiveType(type)}
               aria-pressed={activeType === type}
             >
-              {TYPE_LABELS[type]}
+              {labels[type]}
             </button>
           ))}
         </div>
@@ -211,7 +217,7 @@ export function MediaGallery({ items }: { items: MediaItem[] }) {
             type="button"
             className={styles.item}
             onClick={() => setOpenIndex(index)}
-            aria-label={`Открыть: ${item.title ?? TYPE_LABELS[item.type]}`}
+            aria-label={`${item.title ?? labels[item.type]}`}
           >
             <ResponsiveImage
               src={item.previewImageUrl ?? item.fileUrl}

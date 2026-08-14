@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useT } from "~/i18n";
 import styles from "./ScrollButtons.module.css";
 
 function prefersReducedMotion(): boolean {
@@ -10,6 +11,7 @@ function prefersReducedMotion(): boolean {
 
 export function ScrollToTopButton() {
   const [visible, setVisible] = useState(false);
+  const t = useT();
 
   useEffect(() => {
     const update = () => setVisible(window.scrollY > window.innerHeight * 0.8);
@@ -23,7 +25,7 @@ export function ScrollToTopButton() {
       type="button"
       className={`${styles.toTop} ${visible ? styles.toTopVisible : ""}`}
       onClick={() => window.scrollTo({ top: 0, behavior: prefersReducedMotion() ? "auto" : "smooth" })}
-      aria-label="Наверх страницы"
+      aria-label={t.common.toTop}
       tabIndex={visible ? 0 : -1}
       aria-hidden={!visible}
     >

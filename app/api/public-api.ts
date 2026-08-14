@@ -37,21 +37,27 @@ import type {
   ReleaseDetail,
   SiteData,
 } from "~/types/content";
+import { DEFAULT_LANG, type Lang } from "~/i18n/config";
 
 const PREFIX = "/public";
+
+/**
+ * Язык — параметр загрузки, а не отдельная ручка API: бэкенд отдаёт оба
+ * варианта текста сразу, а выбор между ними делает маппер.
+ */
 
 export interface SitemapEntry {
   path: string;
   lastModified: string | null;
 }
 
-export async function fetchSiteData(): Promise<SiteData> {
-  return mapSiteData(await apiFetch<SiteDataDto>(`${PREFIX}/site`));
+export async function fetchSiteData(lang: Lang = DEFAULT_LANG): Promise<SiteData> {
+  return mapSiteData(await apiFetch<SiteDataDto>(`${PREFIX}/site`), lang);
 }
 
-export async function fetchMembers(): Promise<BandMember[]> {
+export async function fetchMembers(lang: Lang = DEFAULT_LANG): Promise<BandMember[]> {
   const dto = await apiFetch<BandMemberDto[]>(`${PREFIX}/members`);
-  return dto.map(mapBandMember);
+  return dto.map((item) => mapBandMember(item, lang));
 }
 
 export interface NewsQuery {
@@ -61,7 +67,10 @@ export interface NewsQuery {
   featured?: boolean | null;
 }
 
-export async function fetchNews(query: NewsQuery = {}): Promise<Page<NewsSummary>> {
+export async function fetchNews(
+  query: NewsQuery = {},
+  lang: Lang = DEFAULT_LANG,
+): Promise<Page<NewsSummary>> {
   const search = buildQuery({
     page: query.page ?? 1,
     pageSize: query.pageSize ?? 9,
@@ -69,24 +78,27 @@ export async function fetchNews(query: NewsQuery = {}): Promise<Page<NewsSummary
     featured: query.featured,
   });
   const dto = await apiFetch<PageDto<NewsSummaryDto>>(`${PREFIX}/news${search}`);
-  return mapPage(dto, mapNewsSummary);
+  return mapPage(dto, (item) => mapNewsSummary(item, lang));
 }
 
-export async function fetchNewsCategories(): Promise<NewsCategory[]> {
+export async function fetchNewsCategories(lang: Lang = DEFAULT_LANG): Promise<NewsCategory[]> {
   const dto = await apiFetch<NewsCategoryDto[]>(`${PREFIX}/news/categories`);
-  return dto.map(mapNewsCategory);
+  return dto.map((item) => mapNewsCategory(item, lang));
 }
 
-export async function fetchNewsBySlug(slug: string): Promise<NewsDetail> {
+export async function fetchNewsBySlug(slug: string, lang: Lang = DEFAULT_LANG): Promise<NewsDetail> {
   const dto = await apiFetch<NewsDetailDto>(`${PREFIX}/news/${encodeURIComponent(slug)}`);
-  return mapNewsDetail(dto);
+  return mapNewsDetail(dto, lang);
 }
 
-export async function fetchUpcomingConcerts(limit = 20): Promise<ConcertSummary[]> {
+export async function fetchUpcomingConcerts(
+  limit = 20,
+  lang: Lang = DEFAULT_LANG,
+): Promise<ConcertSummary[]> {
   const dto = await apiFetch<ConcertSummaryDto[]>(
     `${PREFIX}/concerts/upcoming${buildQuery({ limit })}`,
   );
-  return dto.map(mapConcertSummary);
+  return dto.map((item) => mapConcertSummary(item, lang));
 }
 
 export interface PastConcertsQuery {
@@ -95,38 +107,50 @@ export interface PastConcertsQuery {
   city?: string | null;
 }
 
-export async function fetchPastConcerts(query: PastConcertsQuery = {}): Promise<Page<ConcertSummary>> {
+export async function fetchPastConcerts(
+  query: PastConcertsQuery = {},
+  lang: Lang = DEFAULT_LANG,
+): Promise<Page<ConcertSummary>> {
   const search = buildQuery({
     page: query.page ?? 1,
     pageSize: query.pageSize ?? 12,
     city: query.city,
   });
   const dto = await apiFetch<PageDto<ConcertSummaryDto>>(`${PREFIX}/concerts/past${search}`);
-  return mapPage(dto, mapConcertSummary);
+  return mapPage(dto, (item) => mapConcertSummary(item, lang));
 }
 
-export async function fetchConcertBySlug(slug: string): Promise<ConcertDetail> {
+export async function fetchConcertBySlug(
+  slug: string,
+  lang: Lang = DEFAULT_LANG,
+): Promise<ConcertDetail> {
   const dto = await apiFetch<ConcertDetailDto>(`${PREFIX}/concerts/${encodeURIComponent(slug)}`);
-  return mapConcertDetail(dto);
+  return mapConcertDetail(dto, lang);
 }
 
-export async function fetchReleases(): Promise<ReleaseDetail[]> {
+export async function fetchReleases(lang: Lang = DEFAULT_LANG): Promise<ReleaseDetail[]> {
   const dto = await apiFetch<ReleaseDetailDto[]>(`${PREFIX}/releases`);
-  return dto.map(mapReleaseDetail);
+  return dto.map((item) => mapReleaseDetail(item, lang));
 }
 
 export async function fetchMusicSections(): Promise<MusicSectionDto[]> {
   return apiFetch<MusicSectionDto[]>(`${PREFIX}/music-sections`);
 }
 
-export async function fetchReleaseBySlug(slug: string): Promise<ReleaseDetail> {
+export async function fetchReleaseBySlug(
+  slug: string,
+  lang: Lang = DEFAULT_LANG,
+): Promise<ReleaseDetail> {
   const dto = await apiFetch<ReleaseDetailDto>(`${PREFIX}/releases/${encodeURIComponent(slug)}`);
-  return mapReleaseDetail(dto);
+  return mapReleaseDetail(dto, lang);
 }
 
-export async function fetchMedia(type?: MediaType | null): Promise<MediaItem[]> {
+export async function fetchMedia(
+  type?: MediaType | null,
+  lang: Lang = DEFAULT_LANG,
+): Promise<MediaItem[]> {
   const dto = await apiFetch<MediaItemDto[]>(`${PREFIX}/media${buildQuery({ type })}`);
-  return dto.map(mapMediaItem);
+  return dto.map((item) => mapMediaItem(item, lang));
 }
 
 export async function fetchSitemapEntries(): Promise<SitemapEntry[]> {

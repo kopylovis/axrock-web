@@ -8,14 +8,16 @@ import { ResponsiveImage } from "~/components/common/ResponsiveImage";
 import { MusicPlatformLinks } from "~/components/layout/LinkLists";
 import { fetchMusicSections, fetchReleases } from "~/api/public-api";
 import { breadcrumbs, buildMeta, jsonLd, ogImageFrom } from "~/lib/seo";
-import { RELEASE_CATEGORIES, releaseCountLabel } from "~/utils/release-categories";
+import { RELEASE_CATEGORIES } from "~/utils/release-categories";
+import { langFromPath, strings, useLocalPath, useT } from "~/i18n";
 import homeStyles from "~/components/home/home.module.css";
 import styles from "~/styles/page.module.css";
 
-async function load() {
+async function load(request: Request) {
+  const lang = langFromPath(new URL(request.url).pathname);
   try {
     const [releases, sections] = await Promise.all([
-      fetchReleases(),
+      fetchReleases(lang),
       // Обложка раздела необязательна — без неё соберём коллаж из релизов.
       fetchMusicSections().catch(() => []),
     ]);
@@ -25,12 +27,12 @@ async function load() {
   }
 }
 
-export async function loader() {
-  return load();
+export async function loader({ request }: Route.LoaderArgs) {
+  return load(request);
 }
 
-export async function clientLoader() {
-  return load();
+export async function clientLoader({ request }: Route.ClientLoaderArgs) {
+  return load(request);
 }
 
 export function HydrateFallback() {
@@ -38,19 +40,24 @@ export function HydrateFallback() {
 }
 
 export function meta({ location, matches }: Route.MetaArgs) {
+  const lang = langFromPath(location.pathname);
+  const t = strings(lang);
+
   return [
     ...buildMeta({
-      title: "Музыка и дискография",
+      title: t.music.metaTitle,
       image: ogImageFrom(matches),
-      description:
-        "Дискография группы «Ангел-Хранитель»: альбомы, концертные записи и синглы, треклисты и ссылки на музыкальные площадки.",
+      description: t.music.metaDescription,
       pathname: location.pathname,
     }),
     jsonLd(
-      breadcrumbs([
-        { name: "Главная", path: "/" },
-        { name: "Музыка", path: "/music" },
-      ]),
+      breadcrumbs(
+        [
+          { name: t.breadcrumbs.home, path: "/" },
+          { name: t.nav.music, path: "/music" },
+        ],
+        lang,
+      ),
     ),
   ];
 }
@@ -90,6 +97,8 @@ function SectionCover({ image, covers }: { image: string | null; covers: string[
 export default function Music({ loaderData }: Route.ComponentProps) {
   const { releases, sections: covers, failed } = loaderData;
   const { musicLinks } = useSiteData();
+  const t = useT();
+  const lp = useLocalPath();
 
   // Пустые разделы не показываем: заходить в них не за чем.
   const sections = RELEASE_CATEGORIES.map((category) => {
@@ -102,10 +111,10 @@ export default function Music({ loaderData }: Route.ComponentProps) {
     <div className={styles.page}>
       <div className="container">
         <header className={`${styles.header} ${styles.headerWide}`}>
-          <span className={styles.eyebrow}>Дискография</span>
-          <h1 className={styles.title}>Музыка</h1>
+          <span className={styles.eyebrow}>{t.music.eyebrow}</span>
+          <h1 className={styles.title}>{t.music.title}</h1>
           <p className={styles.lead}>
-            Альбомы, концертные записи и синглы группы. Слушайте на любой удобной площадке.
+            {t.music.lead}
           </p>
         </header>
 
@@ -119,8 +128,8 @@ export default function Music({ loaderData }: Route.ComponentProps) {
 
         {!failed && sections.length === 0 ? (
           <EmptyState
-            title="Релизы скоро появятся"
-            description="Дискография наполняется через административную панель."
+            title={t.music.emptyTitle}
+            description={t.music.emptyDescription}
           />
         ) : null}
 
@@ -134,12 +143,12 @@ export default function Music({ loaderData }: Route.ComponentProps) {
                 .filter((cover): cover is string => Boolean(cover));
 
               return (
-                <Link key={category.slug} to={`/music/${category.slug}`} className={styles.tile}>
+                <Link key={category.slug} to={lp(`/music/${category.slug}`)} className={styles.tile}>
                   <SectionCover image={image} covers={releaseCovers} />
                   <div className={styles.tileBody}>
-                    <h2 className={styles.tileTitle}>{category.title}</h2>
-                    <p className={styles.tileText}>{category.description}</p>
-                    <span className={styles.tileCount}>{releaseCountLabel(items.length)}</span>
+                    <h2 className={styles.tileTitle}>{t.releaseCategories[category.slug].title}</h2>
+                    <p className={styles.tileText}>{t.releaseCategories[category.slug].description}</p>
+                    <span className={styles.tileCount}>{t.music.releaseCount(items.length)}</span>
                   </div>
                 </Link>
               );

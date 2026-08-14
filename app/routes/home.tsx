@@ -15,18 +15,20 @@ import { MusicPlatformLinks, SocialLinks } from "~/components/layout/LinkLists";
 import { ReleaseTile } from "~/components/music/ReleaseTile";
 import { fetchMedia, fetchNews, fetchReleases, fetchUpcomingConcerts } from "~/api/public-api";
 import { buildMeta, jsonLd, ogImageFrom } from "~/lib/seo";
+import { langFromPath, strings, useLocalPath, useT } from "~/i18n";
 import { SITE_URL } from "~/lib/config";
 import releaseStyles from "~/components/music/ReleaseCard.module.css";
 import styles from "~/components/home/home.module.css";
 
 const ABOUT_ANCHOR = "events";
 
-async function load() {
+async function load(request: Request) {
+  const lang = langFromPath(new URL(request.url).pathname);
   const [concerts, news, releases, media] = await Promise.all([
-    fetchUpcomingConcerts(5).catch(() => []),
-    fetchNews({ page: 1, pageSize: 3 }).catch(() => null),
-    fetchReleases().catch(() => []),
-    fetchMedia(null).catch(() => []),
+    fetchUpcomingConcerts(5, lang).catch(() => []),
+    fetchNews({ page: 1, pageSize: 3 }, lang).catch(() => null),
+    fetchReleases(lang).catch(() => []),
+    fetchMedia(null, lang).catch(() => []),
   ]);
 
   return {
@@ -37,12 +39,12 @@ async function load() {
   };
 }
 
-export async function loader() {
-  return load();
+export async function loader({ request }: Route.LoaderArgs) {
+  return load(request);
 }
 
-export async function clientLoader() {
-  return load();
+export async function clientLoader({ request }: Route.ClientLoaderArgs) {
+  return load(request);
 }
 
 export function HydrateFallback() {
@@ -50,12 +52,14 @@ export function HydrateFallback() {
 }
 
 export function meta({ location, matches }: Route.MetaArgs) {
+  const t = strings(langFromPath(location.pathname));
+
   return [
     ...buildMeta({
-      title: "Ангел-Хранитель — официальный сайт группы",
+      title: t.home.metaTitle,
       image: ogImageFrom(matches),
       description:
-        "Официальный сайт рок-группы «Ангел-Хранитель»: афиша концертов, новости, дискография, фотографии и видео.",
+        t.home.metaDescription,
       pathname: location.pathname,
     }),
     jsonLd({
@@ -79,14 +83,13 @@ function PlayIcon() {
 export default function Home({ loaderData }: Route.ComponentProps) {
   const { concerts, news, releases, videos } = loaderData;
   const { settings, socialLinks, musicLinks } = useSiteData();
+  const t = useT();
+  const lp = useLocalPath();
 
   // Даты перемежаются короткими фразами: при двух концертах лента иначе
   // выглядит как повтор одного и того же.
   // Девиз вместо дат: афиша и так идёт следующей секцией, дублировать её незачем.
-  const marqueeItems = [
-    "Создатели мистической лирики и хоррор историй",
-    "Амбассадоры мрачного фэнтезийного повествования под сопровождение перегруженных гитар",
-  ];
+  const marqueeItems = t.home.marquee;
 
   return (
     <>
@@ -98,11 +101,11 @@ export default function Home({ loaderData }: Route.ComponentProps) {
         <div className="container">
           <SectionHeading
             id="events-heading"
-            eyebrow="Афиша"
-            title="Ближайшие концерты"
+            eyebrow={t.home.eventsEyebrow}
+            title={t.home.eventsTitle}
             action={
               <ButtonLink to="/concerts" variant="quiet">
-                Все даты
+                {t.home.eventsAll}
               </ButtonLink>
             }
           />
@@ -111,8 +114,8 @@ export default function Home({ loaderData }: Route.ComponentProps) {
             <EventsStrip concerts={concerts} />
           ) : (
             <EmptyState
-              title="Новые даты скоро появятся"
-              description="Следите за новостями и соцсетями — мы объявим их первыми."
+              title={t.home.eventsEmptyTitle}
+              description={t.home.eventsEmptyDescription}
             />
           )}
         </div>
@@ -123,11 +126,11 @@ export default function Home({ loaderData }: Route.ComponentProps) {
           <div className="container">
             <SectionHeading
               id="news-heading"
-              eyebrow="Новости"
-              title="Последние публикации"
+              eyebrow={t.home.newsEyebrow}
+              title={t.home.newsTitle}
               action={
                 <ButtonLink to="/news" variant="quiet">
-                  Все новости
+                  {t.home.newsAll}
                 </ButtonLink>
               }
             />
@@ -145,11 +148,11 @@ export default function Home({ loaderData }: Route.ComponentProps) {
           <div className="container">
             <SectionHeading
               id="music-heading"
-              eyebrow="Музыка"
-              title="Дискография"
+              eyebrow={t.home.musicEyebrow}
+              title={t.home.musicTitle}
               action={
                 <ButtonLink to="/music" variant="quiet">
-                  Все релизы
+                  {t.home.musicAll}
                 </ButtonLink>
               }
             />
@@ -178,18 +181,18 @@ export default function Home({ loaderData }: Route.ComponentProps) {
           <div className="container">
             <SectionHeading
               id="video-heading"
-              eyebrow="Видео"
-              title="Клипы и живые записи"
+              eyebrow={t.home.videoEyebrow}
+              title={t.home.videoTitle}
               action={
                 <ButtonLink to="/media" variant="quiet">
-                  Вся галерея
+                  {t.home.videoAll}
                 </ButtonLink>
               }
             />
 
             <div className={styles.videoGrid}>
               {videos.map((video) => (
-                <Link key={video.id} to="/media" className={styles.videoTile}>
+                <Link key={video.id} to={lp("/media")} className={styles.videoTile}>
                   <span className={styles.videoThumbWrap}>
                     <ResponsiveImage
                       src={video.previewImageUrl ?? video.fileUrl}
@@ -204,7 +207,7 @@ export default function Home({ loaderData }: Route.ComponentProps) {
                       </span>
                     </span>
                   </span>
-                  <h3 className={styles.videoTitle}>{video.title ?? "Видео"}</h3>
+                  <h3 className={styles.videoTitle}>{video.title ?? t.home.videoFallback}</h3>
                 </Link>
               ))}
             </div>
@@ -219,14 +222,14 @@ export default function Home({ loaderData }: Route.ComponentProps) {
           <div className={`container ${styles.linksStack}`}>
             {socialLinks.length > 0 ? (
               <section aria-labelledby="social-heading">
-                <SectionHeading id="social-heading" eyebrow="Связь" title="Соцсети" />
+                <SectionHeading id="social-heading" eyebrow={t.home.socialEyebrow} title={t.home.socialTitle} />
                 <SocialLinks links={socialLinks} />
               </section>
             ) : null}
 
             {musicLinks.length > 0 ? (
               <section aria-labelledby="listen-heading">
-                <SectionHeading id="listen-heading" eyebrow="Площадки" title="Слушать" />
+                <SectionHeading id="listen-heading" eyebrow={t.home.listenEyebrow} title={t.home.listenTitle} />
                 <MusicPlatformLinks links={musicLinks} />
               </section>
             ) : null}

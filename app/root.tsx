@@ -6,10 +6,12 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useLocation,
 } from "react-router";
 
 import type { Route } from "./+types/root";
 import { BlurBackground } from "~/components/common/BlurBackground";
+import { langFromPath, useLocalPath, useT } from "~/i18n";
 import "./styles/global.css";
 
 export const meta: Route.MetaFunction = () => [
@@ -26,8 +28,12 @@ export const meta: Route.MetaFunction = () => [
 const BASE = import.meta.env.BASE_URL;
 
 export function Layout({ children }: { children: React.ReactNode }) {
+  // Язык страницы объявляется в разметке: от него зависят переносы, озвучка
+  // скринридером и то, как её индексирует поисковик.
+  const lang = langFromPath(useLocation().pathname);
+
   return (
-    <html lang="ru">
+    <html lang={lang}>
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
@@ -73,23 +79,25 @@ export default function App() {
 
 export function ErrorBoundary({ error }: Route.ErrorBoundaryProps) {
   const notFound = isRouteErrorResponse(error) && error.status === 404;
+  const t = useT();
+  const lp = useLocalPath();
 
-  const title = notFound ? "Страница не найдена" : "Что-то пошло не так";
+  const title = notFound ? t.error.notFoundTitle : t.error.title;
   const details = notFound
-    ? "Возможно, страница была перемещена или ссылка устарела."
+    ? t.error.notFoundText
     : isRouteErrorResponse(error)
-      ? error.statusText || "Непредвиденная ошибка."
-      : "Непредвиденная ошибка. Попробуйте обновить страницу.";
+      ? error.statusText || t.error.unexpected
+      : t.error.text;
 
   return (
     <main className="error-page">
       <div className="container error-page__inner">
-        <p className="caps error-page__code">{notFound ? "404" : "Ошибка"}</p>
+        <p className="caps error-page__code">{notFound ? "404" : t.error.code}</p>
         <h1 className="display error-page__title">{title}</h1>
         <p className="error-page__text">{details}</p>
         <p>
-          <Link to="/" className="error-page__action">
-            На главную
+          <Link to={lp("/")} className="error-page__action">
+            {t.error.toHome}
           </Link>
         </p>
       </div>

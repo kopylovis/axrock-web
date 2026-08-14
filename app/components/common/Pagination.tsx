@@ -1,4 +1,5 @@
 import { Link, useSearchParams } from "react-router";
+import { useT } from "~/i18n";
 import styles from "~/components/news/news.module.css";
 
 interface PaginationProps {
@@ -7,8 +8,9 @@ interface PaginationProps {
   label?: string;
 }
 
-export function Pagination({ page, totalPages, label = "Постраничная навигация" }: PaginationProps) {
+export function Pagination({ page, totalPages, label }: PaginationProps) {
   const [searchParams] = useSearchParams();
+  const t = useT();
 
   if (totalPages <= 1) return null;
 
@@ -21,10 +23,10 @@ export function Pagination({ page, totalPages, label = "Постраничная
   };
 
   return (
-    <nav className={styles.pagination} aria-label={label}>
+    <nav className={styles.pagination} aria-label={label ?? t.common.pagination}>
       {page > 1 ? (
         <Link to={buildHref(page - 1)} className={styles.filter} rel="prev">
-          ← Назад
+          {t.common.prev}
         </Link>
       ) : null}
 
@@ -34,7 +36,7 @@ export function Pagination({ page, totalPages, label = "Постраничная
 
       {page < totalPages ? (
         <Link to={buildHref(page + 1)} className={styles.filter} rel="next">
-          Вперёд →
+          {t.common.next}
         </Link>
       ) : null}
     </nav>

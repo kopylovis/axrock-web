@@ -13,31 +13,33 @@ import { absoluteImageUrl } from "~/utils/images";
 import { breadcrumbs, buildMeta, jsonLd, ogImageFrom } from "~/lib/seo";
 import { isPrerenderPlaceholder } from "~/lib/prerender";
 import { formatDate } from "~/utils/format";
+import { langFromPath, strings, useLang, useLocalPath, useT } from "~/i18n";
 import detailStyles from "~/components/news/NewsDetail.module.css";
 import newsStyles from "~/components/news/news.module.css";
 import styles from "~/styles/page.module.css";
 
-async function load(slug: string) {
+async function load(slug: string, request: Request) {
   // Раздел пуст: страница собирается только чтобы пройти проверку пререндера
   // и удаляется из результата сборки.
   if (isPrerenderPlaceholder(slug)) return { article: null };
 
+  const lang = langFromPath(new URL(request.url).pathname);
   try {
-    return { article: await fetchNewsBySlug(slug) };
+    return { article: await fetchNewsBySlug(slug, lang) };
   } catch (error) {
     if (error instanceof ApiError && error.isNotFound) {
-      throw data("Новость не найдена", { status: 404 });
+      throw data("Post not found", { status: 404 });
     }
     throw error;
   }
 }
 
-export async function loader({ params }: Route.LoaderArgs) {
-  return load(params.slug);
+export async function loader({ params, request }: Route.LoaderArgs) {
+  return load(params.slug, request);
 }
 
-export async function clientLoader({ params }: Route.ClientLoaderArgs) {
-  return load(params.slug);
+export async function clientLoader({ params, request }: Route.ClientLoaderArgs) {
+  return load(params.slug, request);
 }
 
 export function HydrateFallback() {
@@ -45,8 +47,11 @@ export function HydrateFallback() {
 }
 
 export function meta({ loaderData, location, matches }: Route.MetaArgs) {
+  const lang = langFromPath(location.pathname);
+  const t = strings(lang);
+
   if (!loaderData?.article) {
-    return buildMeta({ title: "Новость не найдена", pathname: location.pathname, noindex: true });
+    return buildMeta({ title: t.news.notFound, pathname: location.pathname, noindex: true });
   }
 
   const { article } = loaderData;
@@ -75,11 +80,14 @@ export function meta({ loaderData, location, matches }: Route.MetaArgs) {
       publisher: { "@type": "MusicGroup", name: "Ангел-Хранитель" },
     }),
     jsonLd(
-      breadcrumbs([
-        { name: "Главная", path: "/" },
-        { name: "Новости", path: "/news" },
-        { name: article.title, path: location.pathname },
-      ]),
+      breadcrumbs(
+        [
+          { name: t.breadcrumbs.home, path: "/" },
+          { name: t.nav.news, path: "/news" },
+          { name: article.title, path: location.pathname },
+        ],
+        lang,
+      ),
     ),
   ];
 }
@@ -87,6 +95,9 @@ export function meta({ loaderData, location, matches }: Route.MetaArgs) {
 export default function NewsDetail({ loaderData }: Route.ComponentProps) {
   const { article } = loaderData;
   const location = useLocation();
+  const t = useT();
+  const lang = useLang();
+  const lp = useLocalPath();
   const shareUrl = canonicalUrl(location.pathname);
 
   if (!article) return null;
@@ -100,22 +111,22 @@ export default function NewsDetail({ loaderData }: Route.ComponentProps) {
   return (
     <div className={styles.page}>
       <div className="container">
-        <Link to="/news" className={styles.back}>
-          ← Все новости
+        <Link to={lp("/news")} className={styles.back}>
+          {t.news.backToNews}
         </Link>
 
         <article className={detailStyles.article}>
           <div className={detailStyles.meta}>
             {article.publishedAt ? (
               <time dateTime={article.publishedAt.toISOString()}>
-                {formatDate(article.publishedAt)}
+                {formatDate(article.publishedAt, undefined, lang)}
               </time>
             ) : null}
             {article.category ? (
               <span className={detailStyles.category}>{article.category.name}</span>
             ) : null}
             {showUpdated && article.updatedAt ? (
-              <span>обновлено {formatDate(article.updatedAt)}</span>
+              <span>{t.news.updated(formatDate(article.updatedAt, undefined, lang))}</span>
             ) : null}
           </div>
 
@@ -140,7 +151,7 @@ export default function NewsDetail({ loaderData }: Route.ComponentProps) {
           </div>
 
           <div className={detailStyles.share}>
-            <span className={detailStyles.shareLabel}>Поделиться</span>
+            <span className={detailStyles.shareLabel}>{t.news.share}</span>
             <a
               className={detailStyles.shareLink}
               href={`https://vk.com/share.php?url=${encodeURIComponent(shareUrl)}`}
@@ -168,11 +179,11 @@ export default function NewsDetail({ loaderData }: Route.ComponentProps) {
           </div>
 
           {article.previous || article.next ? (
-            <nav className={detailStyles.neighbours} aria-label="Соседние публикации">
+            <nav className={detailStyles.neighbours} aria-label={t.news.relatedTitle}>
               {article.previous ? (
                 <div className={detailStyles.neighbour}>
-                  <span className={detailStyles.neighbourLabel}>Предыдущая</span>
-                  <Link to={`/news/${article.previous.slug}`} className={detailStyles.neighbourTitle}>
+                  <span className={detailStyles.neighbourLabel}>{t.news.previous}</span>
+                  <Link to={lp(`/news/${article.previous.slug}`)} className={detailStyles.neighbourTitle}>
                     {article.previous.title}
                   </Link>
                 </div>
@@ -181,8 +192,8 @@ export default function NewsDetail({ loaderData }: Route.ComponentProps) {
               )}
               {article.next ? (
                 <div className={`${detailStyles.neighbour} ${detailStyles.neighbourNext}`}>
-                  <span className={detailStyles.neighbourLabel}>Следующая</span>
-                  <Link to={`/news/${article.next.slug}`} className={detailStyles.neighbourTitle}>
+                  <span className={detailStyles.neighbourLabel}>{t.news.next}</span>
+                  <Link to={lp(`/news/${article.next.slug}`)} className={detailStyles.neighbourTitle}>
                     {article.next.title}
                   </Link>
                 </div>
@@ -193,7 +204,7 @@ export default function NewsDetail({ loaderData }: Route.ComponentProps) {
 
         {article.related.length > 0 ? (
           <AnimatedSection className={detailStyles.related}>
-            <SectionHeading title="Похожие публикации" eyebrow="Читайте также" />
+            <SectionHeading title={t.news.relatedTitle} eyebrow={t.news.relatedEyebrow} />
             <div className={newsStyles.grid}>
               {article.related.map((item) => (
                 <NewsCard key={item.id} item={item} />

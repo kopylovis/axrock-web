@@ -6,7 +6,7 @@ import { createConcert, updateConcert } from "~/api/admin-api";
 import type { ConcertDetailDto } from "~/api/dto";
 import type { ConcertEventStatus, PublicationStatus, RichTextDoc } from "~/types/content";
 import { fromDateTimeLocalValue, slugify, toDateTimeLocalValue } from "~/utils/admin-format";
-import { CheckboxField, FormSection, ImageField, SelectField, StatusChip, TextAreaField, TextField, focusFirstInvalidField } from "./fields";
+import { BilingualField, BilingualTextField, CheckboxField, FormSection, ImageField, SelectField, StatusChip, TextField, focusFirstInvalidField } from "./fields";
 import { CONCERT_STATUS_LABELS } from "~/utils/format";
 import { SetlistPanel } from "./SetlistPanel";
 import { RichTextEditor } from "./RichTextEditor";
@@ -59,6 +59,13 @@ export function ConcertForm({ concert }: ConcertFormProps) {
     cancellationReason: concert?.cancellationReason ?? "",
     seoTitle: concert?.seoTitle ?? "",
     seoDescription: concert?.seoDescription ?? "",
+    titleEn: concert?.titleEn ?? "",
+    shortDescriptionEn: concert?.shortDescriptionEn ?? "",
+    cityEn: concert?.cityEn ?? "",
+    countryEn: concert?.countryEn ?? "",
+    venueNameEn: concert?.venueNameEn ?? "",
+    seoTitleEn: concert?.seoTitleEn ?? "",
+    seoDescriptionEn: concert?.seoDescriptionEn ?? "",
     timezone,
   });
 
@@ -66,6 +73,7 @@ export function ConcertForm({ concert }: ConcertFormProps) {
   const [doorsOpenAt, setDoorsOpenAt] = useState(toDateTimeLocalValue(concert?.doorsOpenAt, timezone));
   const [newStartsAt, setNewStartsAt] = useState(toDateTimeLocalValue(concert?.newStartsAt, timezone));
   const [description, setDescription] = useState<RichTextDoc | null>(concert?.description ?? null);
+  const [descriptionEn, setDescriptionEn] = useState<RichTextDoc | null>(concert?.descriptionEn ?? null);
   const [posterImage, setPosterImage] = useState<string | null>(concert?.posterImage ?? null);
   const [publicationStatus, setPublicationStatus] = useState<PublicationStatus>(
     (concert?.publicationStatus as PublicationStatus | undefined) ?? "DRAFT",
@@ -141,6 +149,14 @@ export function ConcertForm({ concert }: ConcertFormProps) {
       featured,
       seoTitle: form.seoTitle.trim() || null,
       seoDescription: form.seoDescription.trim() || null,
+      titleEn: form.titleEn.trim() || null,
+      shortDescriptionEn: form.shortDescriptionEn.trim() || null,
+      descriptionEn,
+      cityEn: form.cityEn.trim() || null,
+      countryEn: form.countryEn.trim() || null,
+      venueNameEn: form.venueNameEn.trim() || null,
+      seoTitleEn: form.seoTitleEn.trim() || null,
+      seoDescriptionEn: form.seoDescriptionEn.trim() || null,
       participants: participants
         .filter((item) => item.name.trim())
         .map((item, index) => ({
@@ -215,16 +231,34 @@ export function ConcertForm({ concert }: ConcertFormProps) {
       <div className={styles.form}>
         <FormSection title="Основное" openOnMobile>
           <div className={`${styles.formGrid} ${styles.formGridTwo}`}>
-            <TextField
-              label="Название события"
-              required
-              value={form.title}
-              error={errors.title}
-              onChange={(event) => {
-                update("title")(event.target.value);
-                if (!concert) update("slug")(slugify(event.target.value));
-              }}
-            />
+            <BilingualField label="Название события *" filledEn={form.titleEn.trim().length > 0}>
+              {(lang) =>
+                lang === "ru" ? (
+                  <>
+                    <input
+                      className={`${styles.input} ${errors.title ? styles.inputInvalid : ""}`}
+                      value={form.title}
+                      aria-invalid={errors.title ? true : undefined}
+                      onChange={(event) => {
+                        update("title")(event.target.value);
+                        if (!concert) update("slug")(slugify(event.target.value));
+                      }}
+                    />
+                    {errors.title ? (
+                      <span className={styles.error} role="alert">
+                        {errors.title}
+                      </span>
+                    ) : null}
+                  </>
+                ) : (
+                  <input
+                    className={styles.input}
+                    value={form.titleEn}
+                    onChange={(event) => update("titleEn")(event.target.value)}
+                  />
+                )
+              }
+            </BilingualField>
             <TextField
               label="Slug"
               required
@@ -235,15 +269,26 @@ export function ConcertForm({ concert }: ConcertFormProps) {
             />
           </div>
 
-          <TextAreaField
+          <BilingualTextField
             label="Краткое описание"
+            multiline
             value={form.shortDescription}
-            onChange={(event) => update("shortDescription")(event.target.value)}
+            valueEn={form.shortDescriptionEn}
+            onChange={update("shortDescription")}
+            onChangeEn={update("shortDescriptionEn")}
           />
 
           <ImageField label="Афиша" spec="concertPoster" value={posterImage} onChange={setPosterImage} />
 
-          <RichTextEditor label="Полное описание" value={description} onChange={setDescription} />
+          <BilingualField label="Полное описание" filledEn={Boolean(descriptionEn)}>
+            {(lang) =>
+              lang === "ru" ? (
+                <RichTextEditor label="" value={description} onChange={setDescription} />
+              ) : (
+                <RichTextEditor label="" value={descriptionEn} onChange={setDescriptionEn} />
+              )
+            }
+          </BilingualField>
         </FormSection>
 
         <FormSection title="Дата и место">
@@ -281,28 +326,66 @@ export function ConcertForm({ concert }: ConcertFormProps) {
           </div>
 
           <div className={`${styles.formGrid} ${styles.formGridTwo}`}>
-            <TextField
-              label="Город"
-              required
-              value={form.city}
-              error={errors.city}
-              onChange={(event) => update("city")(event.target.value)}
-            />
-            <TextField
+            <BilingualField label="Город *" filledEn={form.cityEn.trim().length > 0}>
+              {(lang) =>
+                lang === "ru" ? (
+                  <>
+                    <input
+                      className={`${styles.input} ${errors.city ? styles.inputInvalid : ""}`}
+                      value={form.city}
+                      aria-invalid={errors.city ? true : undefined}
+                      onChange={(event) => update("city")(event.target.value)}
+                    />
+                    {errors.city ? (
+                      <span className={styles.error} role="alert">
+                        {errors.city}
+                      </span>
+                    ) : null}
+                  </>
+                ) : (
+                  <input
+                    className={styles.input}
+                    value={form.cityEn}
+                    onChange={(event) => update("cityEn")(event.target.value)}
+                  />
+                )
+              }
+            </BilingualField>
+            <BilingualTextField
               label="Страна"
               value={form.country}
-              onChange={(event) => update("country")(event.target.value)}
+              valueEn={form.countryEn}
+              onChange={update("country")}
+              onChangeEn={update("countryEn")}
             />
           </div>
 
           <div className={`${styles.formGrid} ${styles.formGridTwo}`}>
-            <TextField
-              label="Площадка"
-              required
-              value={form.venueName}
-              error={errors.venueName}
-              onChange={(event) => update("venueName")(event.target.value)}
-            />
+            <BilingualField label="Площадка *" filledEn={form.venueNameEn.trim().length > 0}>
+              {(lang) =>
+                lang === "ru" ? (
+                  <>
+                    <input
+                      className={`${styles.input} ${errors.venueName ? styles.inputInvalid : ""}`}
+                      value={form.venueName}
+                      aria-invalid={errors.venueName ? true : undefined}
+                      onChange={(event) => update("venueName")(event.target.value)}
+                    />
+                    {errors.venueName ? (
+                      <span className={styles.error} role="alert">
+                        {errors.venueName}
+                      </span>
+                    ) : null}
+                  </>
+                ) : (
+                  <input
+                    className={styles.input}
+                    value={form.venueNameEn}
+                    onChange={(event) => update("venueNameEn")(event.target.value)}
+                  />
+                )
+              }
+            </BilingualField>
             <TextField
               label="Адрес"
               value={form.venueAddress}
@@ -454,17 +537,21 @@ export function ConcertForm({ concert }: ConcertFormProps) {
 
         <FormSection title="SEO">
           <div className={`${styles.formGrid} ${styles.formGridTwo}`}>
-            <TextField
+            <BilingualTextField
               label="SEO-заголовок"
               hint="Заголовок вкладки браузера и синяя ссылка в результатах поиска. Пусто — берётся обычный заголовок. До 60 символов."
               value={form.seoTitle}
-              onChange={(event) => update("seoTitle")(event.target.value)}
+              valueEn={form.seoTitleEn}
+              onChange={update("seoTitle")}
+              onChangeEn={update("seoTitleEn")}
             />
-            <TextField
+            <BilingualTextField
               label="SEO-описание"
               hint="Серый текст под ссылкой в выдаче Яндекса и Google. Пусто — берётся описание из настроек сайта. 120–160 символов."
               value={form.seoDescription}
-              onChange={(event) => update("seoDescription")(event.target.value)}
+              valueEn={form.seoDescriptionEn}
+              onChange={update("seoDescription")}
+              onChangeEn={update("seoDescriptionEn")}
             />
           </div>
         </FormSection>

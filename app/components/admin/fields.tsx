@@ -89,6 +89,102 @@ export function Field({ label, hint, error, required, children }: BaseFieldProps
   );
 }
 
+/**
+ * Оболочка двуязычного поля: над вводом стоит переключатель RU/EN. Английский
+ * перевод необязателен — где его нет, сайт показывает русский текст, поэтому
+ * заполненность EN помечается точкой, чтобы не открывать вкладку ради проверки.
+ */
+export function BilingualField({
+  label,
+  hint,
+  filledEn,
+  children,
+}: {
+  label: string;
+  hint?: string;
+  filledEn: boolean;
+  children: (lang: "ru" | "en") => ReactNode;
+}) {
+  const [lang, setLang] = useState<"ru" | "en">("ru");
+
+  return (
+    <div className={styles.field}>
+      <div className={styles.langRow}>
+        <span className={styles.label}>{label}</span>
+        <div className={styles.langTabs}>
+          {(["ru", "en"] as const).map((value) => (
+            <button
+              key={value}
+              type="button"
+              className={[styles.langTab, lang === value ? styles.langTabActive : null]
+                .filter(Boolean)
+                .join(" ")}
+              aria-pressed={lang === value}
+              onClick={() => setLang(value)}
+            >
+              {value.toUpperCase()}
+              {value === "en" && filledEn ? (
+                <span className={styles.langDot} aria-label="перевод заполнен" />
+              ) : null}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {children(lang)}
+      {hint ? <span className={styles.hint}>{hint}</span> : null}
+    </div>
+  );
+}
+
+export function BilingualTextField({
+  label,
+  hint,
+  value,
+  valueEn,
+  onChange,
+  onChangeEn,
+  multiline = false,
+  rows,
+  placeholder,
+}: {
+  label: string;
+  hint?: string;
+  value: string;
+  valueEn: string;
+  onChange: (value: string) => void;
+  onChangeEn: (value: string) => void;
+  multiline?: boolean;
+  rows?: number;
+  placeholder?: string;
+}) {
+  return (
+    <BilingualField label={label} hint={hint} filledEn={valueEn.trim().length > 0}>
+      {(lang) => {
+        const current = lang === "ru" ? value : valueEn;
+        const update = lang === "ru" ? onChange : onChangeEn;
+
+        return multiline ? (
+          <textarea
+            className={styles.textarea}
+            value={current}
+            rows={rows}
+            placeholder={placeholder}
+            onChange={(event) => update(event.target.value)}
+          />
+        ) : (
+          <input
+            className={styles.input}
+            value={current}
+            placeholder={placeholder}
+            onChange={(event) => update(event.target.value)}
+          />
+        );
+      }}
+    </BilingualField>
+  );
+}
+
 type InputProps = React.InputHTMLAttributes<HTMLInputElement>;
 
 export function TextField({

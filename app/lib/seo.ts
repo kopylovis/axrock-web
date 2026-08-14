@@ -1,5 +1,6 @@
 import { SITE_URL, canonicalUrl } from "./config";
 import { BAND_NAME } from "./site-defaults";
+import { DEFAULT_LANG, LANGS, OG_LOCALES, langFromPath, withLang, type Lang } from "~/i18n/config";
 
 export interface SeoInput {
   title: string;
@@ -10,11 +11,14 @@ export interface SeoInput {
   noindex?: boolean;
   publishedTime?: string;
   modifiedTime?: string;
+  /** По умолчанию берётся из адреса — он и определяет язык страницы. */
+  lang?: Lang;
 }
 
 type MetaDescriptor = Record<string, unknown>;
 
 export function buildMeta(input: SeoInput): MetaDescriptor[] {
+  const lang = input.lang ?? langFromPath(input.pathname);
   const url = canonicalUrl(input.pathname);
   const title = input.title.includes(BAND_NAME) ? input.title : `${input.title} — ${BAND_NAME}`;
   const description = input.description ?? undefined;
@@ -31,9 +35,25 @@ export function buildMeta(input: SeoInput): MetaDescriptor[] {
     { property: "og:url", content: url },
     { property: "og:type", content: input.type ?? "website" },
     { property: "og:site_name", content: `${BAND_NAME} — официальный сайт` },
-    { property: "og:locale", content: "ru_RU" },
+    { property: "og:locale", content: OG_LOCALES[lang] },
     { name: "twitter:card", content: image ? "summary_large_image" : "summary" },
     { name: "twitter:title", content: title },
+    // Языковые версии одной страницы: поисковик должен знать про обе и не
+    // считать их дублями. Ключ именно hrefLang — React ругается на строчное
+    // написание, а в HTML имена атрибутов регистронезависимы, и краулер
+    // прочитает выведенный hrefLang как hreflang.
+    ...LANGS.map((alternate) => ({
+      tagName: "link",
+      rel: "alternate",
+      hrefLang: alternate,
+      href: canonicalUrl(withLang(input.pathname, alternate)),
+    })),
+    {
+      tagName: "link",
+      rel: "alternate",
+      hrefLang: "x-default",
+      href: canonicalUrl(withLang(input.pathname, DEFAULT_LANG)),
+    },
   ];
 
   if (description) {
@@ -85,7 +105,10 @@ export function jsonLd(data: Record<string, unknown>): MetaDescriptor {
   return { "script:ld+json": data };
 }
 
-export function breadcrumbs(items: Array<{ name: string; path: string }>): Record<string, unknown> {
+export function breadcrumbs(
+  items: Array<{ name: string; path: string }>,
+  lang: Lang = DEFAULT_LANG,
+): Record<string, unknown> {
   return {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
@@ -93,7 +116,7 @@ export function breadcrumbs(items: Array<{ name: string; path: string }>): Recor
       "@type": "ListItem",
       position: index + 1,
       name: item.name,
-      item: canonicalUrl(item.path),
+      item: canonicalUrl(withLang(item.path, lang)),
     })),
   };
 }

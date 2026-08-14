@@ -5,7 +5,7 @@ import type { SiteSettingsDto } from "~/api/dto";
 import { GlassPanel } from "~/components/common/GlassPanel";
 import { PageSkeleton } from "~/components/common/PageSkeleton";
 import { ErrorState } from "~/components/common/States";
-import { TextAreaField } from "~/components/admin/fields";
+import { BilingualField, BilingualTextField } from "~/components/admin/fields";
 import { RichTextEditor } from "~/components/admin/RichTextEditor";
 import type { RichTextDoc } from "~/types/content";
 import { publicSiteUrl } from "~/utils/site-url";
@@ -37,6 +37,10 @@ export default function AdminAbout({ loaderData }: Route.ComponentProps) {
 function AboutForm({ initial }: { initial: SiteSettingsDto }) {
   const [shortBiography, setShortBiography] = useState(initial.shortBiography ?? "");
   const [fullBiography, setFullBiography] = useState<RichTextDoc | null>(initial.fullBiography);
+  const [shortBiographyEn, setShortBiographyEn] = useState(initial.shortBiographyEn ?? "");
+  const [fullBiographyEn, setFullBiographyEn] = useState<RichTextDoc | null>(
+    initial.fullBiographyEn ?? null,
+  );
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -53,6 +57,8 @@ function AboutForm({ initial }: { initial: SiteSettingsDto }) {
         ...initial,
         shortBiography: shortBiography.trim() || null,
         fullBiography,
+        shortBiographyEn: shortBiographyEn.trim() || null,
+        fullBiographyEn,
       });
       setSaved(true);
     } catch (cause) {
@@ -97,19 +103,26 @@ function AboutForm({ initial }: { initial: SiteSettingsDto }) {
         <h2 className={styles.panelTitle}>Тексты страницы</h2>
 
         <div className={styles.form}>
-          <TextAreaField
+          <BilingualTextField
             label="Краткое описание группы"
-            value={shortBiography}
+            multiline
             rows={3}
+            value={shortBiography}
+            valueEn={shortBiographyEn}
             hint="Два-три предложения. Показываются крупным шрифтом в начале страницы «О группе» и в подвале сайта на всех страницах."
-            onChange={(event) => setShortBiography(event.target.value)}
+            onChange={setShortBiography}
+            onChangeEn={setShortBiographyEn}
           />
 
-          <RichTextEditor
-            label="Полная биография"
-            value={fullBiography}
-            onChange={setFullBiography}
-          />
+          <BilingualField label="Полная биография" filledEn={Boolean(fullBiographyEn)}>
+            {(lang) =>
+              lang === "ru" ? (
+                <RichTextEditor label="" value={fullBiography} onChange={setFullBiography} />
+              ) : (
+                <RichTextEditor label="" value={fullBiographyEn} onChange={setFullBiographyEn} />
+              )
+            }
+          </BilingualField>
           <p className={styles.hint}>
             Основной текст страницы «О группе»: история, состав по годам, о чём песни. Можно
             разбивать подзаголовками, ставить ссылки и вставлять фотографии.

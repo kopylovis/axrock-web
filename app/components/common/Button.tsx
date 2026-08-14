@@ -1,6 +1,7 @@
 import { Link } from "react-router";
 import type { ReactNode } from "react";
 import { isSafeExternalUrl } from "~/utils/url";
+import { useLocalPath, useT } from "~/i18n";
 import styles from "./ui.module.css";
 
 type Variant = "primary" | "ghost" | "quiet";
@@ -26,8 +27,11 @@ interface ButtonLinkProps {
 }
 
 export function ButtonLink({ to, children, variant = "primary", fullWidth, className }: ButtonLinkProps) {
+  // Внутренние переходы остаются в текущем языке — префикс подставляется сам.
+  const lp = useLocalPath();
+
   return (
-    <Link to={to} className={classes(variant, fullWidth, className)}>
+    <Link to={lp(to)} className={classes(variant, fullWidth, className)}>
       {children}
     </Link>
   );
@@ -100,10 +104,12 @@ export function ExternalLinkButton({
   children,
   variant = "primary",
   fullWidth,
-  hint = "Ссылка откроется на стороннем сайте в новой вкладке",
+  hint,
   onNavigate,
   className,
 }: ExternalLinkButtonProps) {
+  const t = useT();
+
   if (!isSafeExternalUrl(href)) return null;
 
   return (
@@ -116,7 +122,7 @@ export function ExternalLinkButton({
     >
       {children}
       <ExternalIcon />
-      <span className="visually-hidden">{hint}</span>
+      <span className="visually-hidden">{hint ?? t.common.externalHint}</span>
     </a>
   );
 }

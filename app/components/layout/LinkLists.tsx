@@ -1,6 +1,7 @@
 import type { ReleaseLink, SocialLink } from "~/types/content";
 import { hasSocialIcon, platformLabel, SocialIcon } from "~/components/common/SocialIcon";
 import { isSafeExternalUrl } from "~/utils/url";
+import { useT } from "~/i18n";
 import styles from "./LinkLists.module.css";
 
 function ArrowIcon() {
@@ -35,6 +36,7 @@ interface ExternalListProps {
 }
 
 function ExternalList({ items, label, accent }: ExternalListProps) {
+  const t = useT();
   const safe = items.filter((item) => isSafeExternalUrl(item.url));
   if (safe.length === 0) return null;
 
@@ -62,7 +64,7 @@ function ExternalList({ items, label, accent }: ExternalListProps) {
               <SocialIcon platform={item.platform} className={styles.brand} />
               {compact ? <span className="visually-hidden">{item.title}</span> : item.title}
               {compact ? null : <ArrowIcon />}
-              <span className="visually-hidden">— откроется на стороннем сайте</span>
+              <span className="visually-hidden">{t.common.externalNote}</span>
             </a>
           </li>
         );
@@ -72,9 +74,11 @@ function ExternalList({ items, label, accent }: ExternalListProps) {
 }
 
 export function SocialLinks({ links }: { links: SocialLink[] }) {
+  const t = useT();
+
   return (
     <ExternalList
-      label="Социальные сети"
+      label={t.common.socialLinks}
       items={links.map((link) => ({
         id: link.id,
         title: link.title || platformLabel(link.platform),
@@ -87,10 +91,12 @@ export function SocialLinks({ links }: { links: SocialLink[] }) {
 }
 
 export function MusicPlatformLinks({ links }: { links: ReleaseLink[] }) {
+  const t = useT();
+
   return (
     <ExternalList
       accent
-      label="Музыкальные площадки"
+      label={t.common.musicLinks}
       items={links.map((link) => ({
         id: link.id,
         title: platformLabel(link.platform),

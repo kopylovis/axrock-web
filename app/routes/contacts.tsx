@@ -4,22 +4,28 @@ import { AnimatedSection } from "~/components/common/AnimatedSection";
 import { EmptyState } from "~/components/common/States";
 import { MusicPlatformLinks, SocialLinks } from "~/components/layout/LinkLists";
 import { breadcrumbs, buildMeta, jsonLd, ogImageFrom } from "~/lib/seo";
+import { langFromPath, strings, useT } from "~/i18n";
 import styles from "~/styles/page.module.css";
 
 export function meta({ location, matches }: Route.MetaArgs) {
+  const lang = langFromPath(location.pathname);
+  const t = strings(lang);
+
   return [
     ...buildMeta({
-      title: "Контакты",
+      title: t.contacts.metaTitle,
       image: ogImageFrom(matches),
-      description:
-        "Контакты группы «Ангел-Хранитель»: менеджмент и организация концертов, телефон, Telegram и почта, соцсети и музыкальные площадки.",
+      description: t.contacts.metaDescription,
       pathname: location.pathname,
     }),
     jsonLd(
-      breadcrumbs([
-        { name: "Главная", path: "/" },
-        { name: "Контакты", path: "/contacts" },
-      ]),
+      breadcrumbs(
+        [
+          { name: t.breadcrumbs.home, path: "/" },
+          { name: t.nav.contacts, path: "/contacts" },
+        ],
+        lang,
+      ),
     ),
   ];
 }
@@ -40,27 +46,28 @@ function vkHref(value: string): string {
 
 export default function Contacts() {
   const { settings, socialLinks, musicLinks } = useSiteData();
+  const t = useT();
 
   const rows = [
     settings.contactPhone
-      ? { label: "Tel.:", value: settings.contactPhone, href: telHref(settings.contactPhone) }
+      ? { label: t.contacts.phone, value: settings.contactPhone, href: telHref(settings.contactPhone) }
       : null,
     settings.managerTelegram
       ? {
-          label: "Telegram:",
+          label: t.contacts.telegram,
           value: settings.managerTelegram,
           href: telegramHref(settings.managerTelegram),
         }
       : null,
     settings.managerMaxPhone
-      ? { label: "Max:", value: settings.managerMaxPhone, href: telHref(settings.managerMaxPhone) }
+      ? { label: t.contacts.max, value: settings.managerMaxPhone, href: telHref(settings.managerMaxPhone) }
       : null,
     settings.bookingEmail
-      ? { label: "E-mail:", value: settings.bookingEmail, href: `mailto:${settings.bookingEmail}` }
+      ? { label: t.contacts.email, value: settings.bookingEmail, href: `mailto:${settings.bookingEmail}` }
       : null,
     settings.managerVkUrl
       ? {
-          label: "VK:",
+          label: t.contacts.vk,
           value: settings.managerVkUrl.replace(/^https?:\/\//, ""),
           href: vkHref(settings.managerVkUrl),
         }
@@ -71,15 +78,15 @@ export default function Contacts() {
     <div className={styles.page}>
       <div className="container">
         <header className={styles.header}>
-          <span className={styles.eyebrow}>Связаться</span>
-          <h1 className={styles.title}>Контакты</h1>
+          <span className={styles.eyebrow}>{t.contacts.eyebrow}</span>
+          <h1 className={styles.title}>{t.contacts.title}</h1>
         </header>
 
         {settings.managerName || rows.length > 0 ? (
           <AnimatedSection className={styles.block}>
             {settings.managerName ? (
               <p className={styles.contactLead}>
-                <span className={styles.contactKey}>Менеджмент/Организация концертов:</span>
+                <span className={styles.contactKey}>{t.contacts.manager}</span>
                 {settings.managerName}
               </p>
             ) : null}
@@ -103,15 +110,15 @@ export default function Contacts() {
           </AnimatedSection>
         ) : (
           <EmptyState
-            title="Контакты скоро появятся"
-            description="Раздел заполняется через административную панель сайта."
+            title={t.contacts.emptyTitle}
+            description={t.contacts.emptyDescription}
           />
         )}
 
         {socialLinks.length > 0 ? (
           <AnimatedSection className={styles.block} ariaLabelledby="social-heading">
             <h2 id="social-heading" className={styles.blockTitle}>
-              Соцсети
+              {t.contacts.social}
             </h2>
             <SocialLinks links={socialLinks} />
           </AnimatedSection>
@@ -120,7 +127,7 @@ export default function Contacts() {
         {musicLinks.length > 0 ? (
           <AnimatedSection className={styles.block} ariaLabelledby="listen-heading">
             <h2 id="listen-heading" className={styles.blockTitle}>
-              Слушать
+              {t.contacts.listen}
             </h2>
             <MusicPlatformLinks links={musicLinks} />
           </AnimatedSection>

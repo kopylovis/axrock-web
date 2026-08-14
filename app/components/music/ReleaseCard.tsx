@@ -2,29 +2,33 @@ import { ResponsiveImage } from "~/components/common/ResponsiveImage";
 import { MusicPlatformLinks } from "~/components/layout/LinkLists";
 import type { ReleaseDetail } from "~/types/content";
 import { formatDate } from "~/utils/format";
-import { RELEASE_TYPE_LABELS, releaseAnchor } from "~/utils/release-categories";
+import { releaseAnchor } from "~/utils/release-categories";
+import { useLang, useT } from "~/i18n";
 import styles from "./ReleaseCard.module.css";
 
 export function ReleaseCard({ release }: { release: ReleaseDetail }) {
+  const t = useT();
+  const lang = useLang();
+
   return (
     <article className={styles.card} id={releaseAnchor(release.slug)}>
       <ResponsiveImage
         src={release.coverImage}
         spec="releaseCover"
-        alt={`Обложка: ${release.title}`}
+        alt={t.music.coverAlt(release.title)}
         className={styles.cover}
         sizes="(max-width: 820px) 100vw, 280px"
       />
 
       <div className={styles.body}>
         <div className={styles.meta}>
-          <span className={styles.type}>{RELEASE_TYPE_LABELS[release.type]}</span>
+          <span className={styles.type}>{t.releaseTypes[release.type]}</span>
           {release.releaseDate ? (
             <time dateTime={release.releaseDate.toISOString()}>
-              {formatDate(release.releaseDate)}
+              {formatDate(release.releaseDate, undefined, lang)}
             </time>
           ) : null}
-          {release.tracks.length > 0 ? <span>{release.tracks.length} треков</span> : null}
+          {release.tracks.length > 0 ? <span>{t.music.tracks(release.tracks.length)}</span> : null}
         </div>
 
         <h3 className={styles.title}>{release.title}</h3>

@@ -4,7 +4,7 @@ import { getSettings, updateSettings } from "~/api/admin-api";
 import type { SiteSettingsDto } from "~/api/dto";
 import { PageSkeleton } from "~/components/common/PageSkeleton";
 import { ErrorState } from "~/components/common/States";
-import { ImageField, TextField, VectorField } from "~/components/admin/fields";
+import { BilingualTextField, ImageField, TextField, VectorField } from "~/components/admin/fields";
 import styles from "~/components/admin/admin.module.css";
 
 export async function clientLoader() {
@@ -38,6 +38,9 @@ function SettingsForm({ initial }: { initial: SiteSettingsDto }) {
     pressEmail: initial.pressEmail ?? "",
     defaultSeoTitle: initial.defaultSeoTitle ?? "",
     defaultSeoDescription: initial.defaultSeoDescription ?? "",
+    heroTitleEn: initial.heroTitleEn ?? "",
+    defaultSeoTitleEn: initial.defaultSeoTitleEn ?? "",
+    defaultSeoDescriptionEn: initial.defaultSeoDescriptionEn ?? "",
   });
 
   const [heroImage, setHeroImage] = useState<string | null>(initial.heroImage);
@@ -72,6 +75,9 @@ function SettingsForm({ initial }: { initial: SiteSettingsDto }) {
         pressEmail: form.pressEmail.trim() || null,
         defaultSeoTitle: form.defaultSeoTitle.trim() || null,
         defaultSeoDescription: form.defaultSeoDescription.trim() || null,
+        heroTitleEn: form.heroTitleEn.trim() || null,
+        defaultSeoTitleEn: form.defaultSeoTitleEn.trim() || null,
+        defaultSeoDescriptionEn: form.defaultSeoDescriptionEn.trim() || null,
         defaultOgImage: ogImage,
       });
       setSaved(true);
@@ -109,11 +115,13 @@ function SettingsForm({ initial }: { initial: SiteSettingsDto }) {
           />
         </div>
 
-        <TextField
+        <BilingualTextField
           label="Заголовок первого экрана"
           value={form.heroTitle}
+          valueEn={form.heroTitleEn}
           hint="Крупная надпись на главной поверх фотографии. Если загружен логотип, вместо неё показывается он, а этот текст остаётся альтернативным описанием картинки для незрячих и поисковиков."
-          onChange={(event) => update("heroTitle")(event.target.value)}
+          onChange={update("heroTitle")}
+          onChangeEn={update("heroTitleEn")}
         />
 
         <VectorField label="Логотип группы" value={logo} onChange={setLogo} />
@@ -121,17 +129,21 @@ function SettingsForm({ initial }: { initial: SiteSettingsDto }) {
         <ImageField label="Главная фотография" spec="hero" value={heroImage} onChange={setHeroImage} />
 
         <div className={`${styles.formGrid} ${styles.formGridTwo}`}>
-          <TextField
+          <BilingualTextField
             label="SEO-заголовок по умолчанию"
             value={form.defaultSeoTitle}
+            valueEn={form.defaultSeoTitleEn}
             hint="Подставляется в заголовок вкладки браузера и в синюю ссылку выдачи Яндекса и Google на тех страницах, где свой заголовок не задан. До 60 символов."
-            onChange={(event) => update("defaultSeoTitle")(event.target.value)}
+            onChange={update("defaultSeoTitle")}
+            onChangeEn={update("defaultSeoTitleEn")}
           />
-          <TextField
+          <BilingualTextField
             label="SEO-описание по умолчанию"
             value={form.defaultSeoDescription}
+            valueEn={form.defaultSeoDescriptionEn}
             hint="Серый текст под ссылкой в результатах поиска — используется, когда у страницы нет своего описания. 120–160 символов."
-            onChange={(event) => update("defaultSeoDescription")(event.target.value)}
+            onChange={update("defaultSeoDescription")}
+            onChangeEn={update("defaultSeoDescriptionEn")}
           />
         </div>
 

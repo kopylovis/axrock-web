@@ -38,6 +38,18 @@ async function collectRoutes(dir, base = dir) {
   return routes;
 }
 
+/** Путь без языкового префикса — им связываются языковые версии между собой. */
+function neutralPath(path) {
+  if (path === "/en") return "/";
+  return path.startsWith("/en/") ? path.slice(3) : path;
+}
+
+function withLang(path, lang) {
+  const base = neutralPath(path);
+  if (lang === "ru") return base;
+  return base === "/" ? "/en" : `/en${base}`;
+}
+
 function describe(path) {
   for (const [pattern, priority, changefreq] of PRIORITIES) {
     if (pattern.test(path)) return { priority, changefreq };
@@ -81,13 +93,25 @@ const routes = allRoutes
   .filter((route) => !route.path.endsWith(`/${PLACEHOLDER}`))
   .sort((a, b) => a.path.localeCompare(b.path));
 
+// Английская версия страницы в выдаче не дубль, а альтернатива: у каждой записи
+// перечислены обе, иначе поисковик выберет одну и вторую скроет.
+const available = new Set(routes.map((route) => route.path));
+
 const entries = await Promise.all(
   routes.map(async (route) => {
-    const { priority, changefreq } = describe(route.path);
+    const { priority, changefreq } = describe(neutralPath(route.path));
     const info = await stat(route.file);
+    const alternates = ["ru", "en"]
+      .map((lang) => ({ lang, path: withLang(route.path, lang) }))
+      .filter((entry) => available.has(entry.path));
+
     return [
       "  <url>",
       `    <loc>${escapeXml(`${SITE_URL}${route.path === "/" ? "/" : route.path}`)}</loc>`,
+      ...alternates.map(
+        (entry) =>
+          `    <xhtml:link rel="alternate" hreflang="${entry.lang}" href="${escapeXml(`${SITE_URL}${entry.path}`)}"/>`,
+      ),
       `    <lastmod>${info.mtime.toISOString().slice(0, 10)}</lastmod>`,
       `    <changefreq>${changefreq}</changefreq>`,
       `    <priority>${priority}</priority>`,
@@ -100,7 +124,7 @@ await writeFile(
   join(OUT_DIR, "sitemap.xml"),
   [
     '<?xml version="1.0" encoding="UTF-8"?>',
-    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+    '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">',
     ...entries,
     "</urlset>",
     "",

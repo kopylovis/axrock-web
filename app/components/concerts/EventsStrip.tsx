@@ -1,12 +1,17 @@
 import { Link } from "react-router";
 import type { ConcertSummary } from "~/types/content";
 import { formatDayNumber, formatMonthShort } from "~/utils/format";
+import { useLang, useLocalPath, useT } from "~/i18n";
 import { ConcertStatusBadge } from "./ConcertStatusBadge";
 import { TicketButton } from "./TicketButton";
 import styles from "./EventsStrip.module.css";
 
 /** Компактная лента дат: дата — город — площадка — билеты. */
 export function EventsStrip({ concerts }: { concerts: ConcertSummary[] }) {
+  const t = useT();
+  const lang = useLang();
+  const lp = useLocalPath();
+
   return (
     <div className={styles.list}>
       {concerts.map((concert) => {
@@ -18,10 +23,10 @@ export function EventsStrip({ concerts }: { concerts: ConcertSummary[] }) {
               <p className={styles.date}>
                 <time dateTime={displayDate.toISOString()}>
                   <span className={styles.day}>
-                    {formatDayNumber(displayDate, concert.timezone)}
+                    {formatDayNumber(displayDate, concert.timezone, lang)}
                   </span>{" "}
                   <span className={styles.month}>
-                    {formatMonthShort(displayDate, concert.timezone)}
+                    {formatMonthShort(displayDate, concert.timezone, lang)}
                   </span>
                 </time>
                 <span className={styles.year}>{displayDate.getUTCFullYear()}</span>
@@ -31,7 +36,7 @@ export function EventsStrip({ concerts }: { concerts: ConcertSummary[] }) {
 
             <div className={styles.place}>
               <h3 className={styles.city}>
-                <Link to={`/concerts/${concert.slug}`} className={styles.cityLink}>
+                <Link to={lp(`/concerts/${concert.slug}`)} className={styles.cityLink}>
                   {concert.city}
                 </Link>
               </h3>
@@ -39,7 +44,7 @@ export function EventsStrip({ concerts }: { concerts: ConcertSummary[] }) {
                 {concert.venueName}
                 {concert.ageRestriction ? ` · ${concert.ageRestriction}` : ""}
               </p>
-              {concert.featured ? <p className={styles.headline}>Главный концерт</p> : null}
+              {concert.featured ? <p className={styles.headline}>{t.concerts.headliner}</p> : null}
             </div>
 
             <div className={styles.actions}>

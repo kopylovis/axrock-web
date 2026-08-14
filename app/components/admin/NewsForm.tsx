@@ -6,7 +6,7 @@ import { createNews, updateNews } from "~/api/admin-api";
 import type { NewsCategoryDto, NewsDetailDto } from "~/api/dto";
 import type { PublicationStatus, RichTextDoc } from "~/types/content";
 import { fromDateTimeLocalValue, slugify, toDateTimeLocalValue } from "~/utils/admin-format";
-import { CheckboxField, FormSection, ImageField, SelectField, StatusChip, TextAreaField, TextField, focusFirstInvalidField } from "./fields";
+import { BilingualField, BilingualTextField, CheckboxField, FormSection, ImageField, SelectField, StatusChip, TextField, focusFirstInvalidField } from "./fields";
 import { RichTextEditor } from "./RichTextEditor";
 import { publicSiteUrl } from "~/utils/site-url";
 import styles from "./admin.module.css";
@@ -41,6 +41,11 @@ export function NewsForm({ article, categories }: NewsFormProps) {
   const [featured, setFeatured] = useState(article?.featured ?? false);
   const [seoTitle, setSeoTitle] = useState(article?.seoTitle ?? "");
   const [seoDescription, setSeoDescription] = useState(article?.seoDescription ?? "");
+  const [titleEn, setTitleEn] = useState(article?.titleEn ?? "");
+  const [excerptEn, setExcerptEn] = useState(article?.excerptEn ?? "");
+  const [contentEn, setContentEn] = useState<RichTextDoc | null>(article?.contentEn ?? null);
+  const [seoTitleEn, setSeoTitleEn] = useState(article?.seoTitleEn ?? "");
+  const [seoDescriptionEn, setSeoDescriptionEn] = useState(article?.seoDescriptionEn ?? "");
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
@@ -84,6 +89,11 @@ export function NewsForm({ article, categories }: NewsFormProps) {
       featured,
       seoTitle: seoTitle.trim() || null,
       seoDescription: seoDescription.trim() || null,
+      titleEn: titleEn.trim() || null,
+      excerptEn: excerptEn.trim() || null,
+      contentEn,
+      seoTitleEn: seoTitleEn.trim() || null,
+      seoDescriptionEn: seoDescriptionEn.trim() || null,
     };
 
     try {
@@ -140,13 +150,31 @@ export function NewsForm({ article, categories }: NewsFormProps) {
       <div className={styles.form}>
         <FormSection title="Основное" openOnMobile>
           <div className={`${styles.formGrid} ${styles.formGridTwo}`}>
-            <TextField
-              label="Заголовок"
-              required
-              value={title}
-              error={errors.title}
-              onChange={(event) => handleTitle(event.target.value)}
-            />
+            <BilingualField label="Заголовок *" filledEn={titleEn.trim().length > 0}>
+              {(lang) =>
+                lang === "ru" ? (
+                  <>
+                    <input
+                      className={`${styles.input} ${errors.title ? styles.inputInvalid : ""}`}
+                      value={title}
+                      aria-invalid={errors.title ? true : undefined}
+                      onChange={(event) => handleTitle(event.target.value)}
+                    />
+                    {errors.title ? (
+                      <span className={styles.error} role="alert">
+                        {errors.title}
+                      </span>
+                    ) : null}
+                  </>
+                ) : (
+                  <input
+                    className={styles.input}
+                    value={titleEn}
+                    onChange={(event) => setTitleEn(event.target.value)}
+                  />
+                )
+              }
+            </BilingualField>
             <TextField
               label="Slug"
               required
@@ -160,16 +188,27 @@ export function NewsForm({ article, categories }: NewsFormProps) {
             />
           </div>
 
-          <TextAreaField
+          <BilingualTextField
             label="Краткое описание"
+            multiline
             value={excerpt}
+            valueEn={excerptEn}
             hint="Показывается в карточке и в превью ссылки. Если пусто — возьмётся начало текста."
-            onChange={(event) => setExcerpt(event.target.value)}
+            onChange={setExcerpt}
+            onChangeEn={setExcerptEn}
           />
 
           <ImageField label="Обложка" spec="newsCover" value={coverImage} onChange={setCoverImage} />
 
-          <RichTextEditor label="Текст новости" value={content} onChange={setContent} />
+          <BilingualField label="Текст новости" filledEn={Boolean(contentEn)}>
+            {(lang) =>
+              lang === "ru" ? (
+                <RichTextEditor label="" value={content} onChange={setContent} />
+              ) : (
+                <RichTextEditor label="" value={contentEn} onChange={setContentEn} />
+              )
+            }
+          </BilingualField>
         </FormSection>
 
         <FormSection title="Публикация">
@@ -217,17 +256,21 @@ export function NewsForm({ article, categories }: NewsFormProps) {
 
         <FormSection title="SEO">
           <div className={`${styles.formGrid} ${styles.formGridTwo}`}>
-            <TextField
+            <BilingualTextField
               label="SEO-заголовок"
               hint="Заголовок вкладки браузера и синяя ссылка в результатах поиска. Пусто — берётся обычный заголовок. До 60 символов."
               value={seoTitle}
-              onChange={(event) => setSeoTitle(event.target.value)}
+              valueEn={seoTitleEn}
+              onChange={setSeoTitle}
+              onChangeEn={setSeoTitleEn}
             />
-            <TextField
+            <BilingualTextField
               label="SEO-описание"
               hint="Серый текст под ссылкой в выдаче Яндекса и Google. Пусто — берётся описание из настроек сайта. 120–160 символов."
               value={seoDescription}
-              onChange={(event) => setSeoDescription(event.target.value)}
+              valueEn={seoDescriptionEn}
+              onChange={setSeoDescription}
+              onChangeEn={setSeoDescriptionEn}
             />
           </div>
         </FormSection>

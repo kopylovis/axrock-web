@@ -791,6 +791,55 @@
   align-content: start;
 }
 
+/* Двуязычное поле: подпись слева, переключатель языка справа. */
+.langRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-3);
+}
+
+.langTabs {
+  display: flex;
+  gap: 2px;
+}
+
+.langTab {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-height: 26px;
+  padding-inline: var(--space-3);
+  border: 1px solid var(--line);
+  border-radius: var(--r-xs);
+  color: var(--ink-faint);
+  font-family: var(--font-mono);
+  font-size: var(--fs-xs);
+  letter-spacing: 0.06em;
+  transition:
+    color var(--t-fast),
+    border-color var(--t-fast),
+    background var(--t-fast);
+}
+
+.langTab:hover {
+  color: var(--ink);
+}
+
+.langTabActive {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-bright);
+}
+
+/* Точка означает, что перевод уже введён. */
+.langDot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--ok);
+}
+
 .label {
   font-family: var(--font-accent);
   font-size: var(--fs-xs);
@@ -1180,6 +1229,11 @@
 
   .repeaterRowFour {
     grid-template-columns: 80px 1fr 120px auto;
+  }
+
+  /* Трек: номер, название, английское название, длительность, кнопка. */
+  .repeaterRowFive {
+    grid-template-columns: 80px 1fr 1fr 120px auto;
   }
 }
 

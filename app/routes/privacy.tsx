@@ -1,90 +1,69 @@
 import type { Route } from "./+types/privacy";
 import { useSiteData } from "~/layouts/PublicLayout";
 import { buildMeta } from "~/lib/seo";
+import { langFromPath, strings, useT } from "~/i18n";
 import styles from "~/styles/page.module.css";
 
 export function meta({ location }: Route.MetaArgs) {
+  const t = strings(langFromPath(location.pathname));
+
   return buildMeta({
-    title: "Политика конфиденциальности",
-    description: "Политика конфиденциальности официального сайта группы «Ангел-Хранитель».",
+    title: t.privacy.metaTitle,
+    description: t.privacy.metaDescription,
     pathname: location.pathname,
   });
 }
 
 export default function Privacy() {
   const { settings } = useSiteData();
+  const t = useT();
   const contact = settings.contactEmail ?? settings.bookingEmail;
 
   return (
     <div className={styles.page}>
       <div className="container">
         <header className={styles.header}>
-          <span className={styles.eyebrow}>Правовая информация</span>
-          <h1 className={styles.title}>Политика конфиденциальности</h1>
+          <span className={styles.eyebrow}>{t.legal.eyebrow}</span>
+          <h1 className={styles.title}>{t.privacy.title}</h1>
         </header>
 
         <div className={styles.prose}>
-          <h2>Общие положения</h2>
-          <p>
-            Настоящая политика описывает, какие данные обрабатывает официальный сайт группы «
-            {settings.bandName}» и с какой целью. Пользуясь сайтом, вы соглашаетесь с условиями,
-            изложенными ниже.
-          </p>
+          <h2>{t.privacy.generalTitle}</h2>
+          <p>{t.privacy.generalText(settings.bandName)}</p>
 
-          <h2>Какие данные обрабатываются</h2>
-          <p>Сайт носит информационный характер и не требует регистрации пользователей. Мы можем обрабатывать:</p>
+          <h2>{t.privacy.dataTitle}</h2>
+          <p>{t.privacy.dataIntro}</p>
           <ul>
-            <li>технические данные запроса: IP-адрес, тип браузера и устройства, страницы посещения;</li>
-            <li>данные систем веб-аналитики в обезличенном виде;</li>
-            <li>содержимое письма, если вы самостоятельно написали нам на указанный адрес.</li>
+            {t.privacy.dataItems.map((item) => (
+              <li key={item}>{item}</li>
+            ))}
           </ul>
 
-          <h2>Что сайт не собирает</h2>
-          <p>
-            Сайт не продаёт билеты и не принимает оплату. Мы не запрашиваем и не храним данные
-            банковских карт, платёжные реквизиты и сведения о заказах. Переход к покупке билетов
-            выполняется по внешней ссылке на сайт организатора, где действует его собственная
-            политика обработки данных.
-          </p>
+          <h2>{t.privacy.notCollectedTitle}</h2>
+          <p>{t.privacy.notCollectedText}</p>
 
-          <h2>Файлы cookie</h2>
-          <p>
-            Cookie используются для корректной работы сайта и, при наличии, для веб-аналитики.
-            Административная часть сайта использует технический cookie сессии, доступный только
-            авторизованному администратору. Вы можете отключить cookie в настройках браузера, но это
-            может повлиять на работу отдельных разделов.
-          </p>
+          <h2>{t.privacy.cookiesTitle}</h2>
+          <p>{t.privacy.cookiesText}</p>
 
-          <h2>Передача данных третьим лицам</h2>
-          <p>
-            Мы не передаём персональные данные третьим лицам, за исключением случаев, предусмотренных
-            законодательством. При переходе по внешним ссылкам на сайты музыкальных площадок,
-            социальных сетей и билетных операторов персональные данные им не передаются со стороны
-            нашего сайта.
-          </p>
+          <h2>{t.privacy.thirdPartiesTitle}</h2>
+          <p>{t.privacy.thirdPartiesText}</p>
 
-          <h2>Сроки хранения</h2>
-          <p>
-            Технические журналы хранятся не дольше, чем это необходимо для обеспечения работы и
-            безопасности сайта. Переписка хранится в течение времени, необходимого для решения
-            вопроса, по которому вы обратились.
-          </p>
+          <h2>{t.privacy.retentionTitle}</h2>
+          <p>{t.privacy.retentionText}</p>
 
-          <h2>Ваши права</h2>
+          <h2>{t.privacy.rightsTitle}</h2>
           <p>
-            Вы вправе запросить информацию об обработке ваших данных, их уточнение или удаление.
+            {t.privacy.rightsText}
             {contact ? (
               <>
                 {" "}
-                Для этого напишите на <a href={`mailto:${contact}`}>{contact}</a>.
+                {t.privacy.rightsContact} <a href={`mailto:${contact}`}>{contact}</a>.
               </>
             ) : null}
           </p>
 
-          <h2>Изменения политики</h2>
-          <p>
-            Мы можем обновлять эту политику. Актуальная версия всегда публикуется на этой странице.
-          </p>
+          <h2>{t.privacy.changesTitle}</h2>
+          <p>{t.privacy.changesText}</p>
         </div>
       </div>
     </div>

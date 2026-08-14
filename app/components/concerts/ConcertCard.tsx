@@ -2,6 +2,7 @@ import { Link } from "react-router";
 import { ResponsiveImage } from "~/components/common/ResponsiveImage";
 import type { ConcertSummary } from "~/types/content";
 import { formatDate, formatTime } from "~/utils/format";
+import { useLang, useLocalPath } from "~/i18n";
 import { ConcertStatusBadge } from "./ConcertStatusBadge";
 import { TicketButton } from "./TicketButton";
 import styles from "./concerts.module.css";
@@ -12,7 +13,8 @@ interface ConcertCardProps {
 }
 
 export function ConcertCard({ concert, showTickets = true }: ConcertCardProps) {
-  const href = `/concerts/${concert.slug}`;
+  const lang = useLang();
+  const href = useLocalPath()(`/concerts/${concert.slug}`);
   const displayDate = concert.newStartsAt ?? concert.startsAt;
 
   return (
@@ -32,10 +34,10 @@ export function ConcertCard({ concert, showTickets = true }: ConcertCardProps) {
         <div className={styles.meta}>
           <span className={styles.date}>
             <time dateTime={displayDate.toISOString()}>
-              {formatDate(displayDate, concert.timezone)}
+              {formatDate(displayDate, concert.timezone, lang)}
             </time>
             {" · "}
-            {formatTime(displayDate, concert.timezone)}
+            {formatTime(displayDate, concert.timezone, lang)}
           </span>
           <ConcertStatusBadge status={concert.eventStatus} />
         </div>

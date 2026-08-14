@@ -13,6 +13,7 @@ import { absoluteImageUrl } from "~/utils/images";
 import { breadcrumbs, buildMeta, jsonLd, ogImageFrom } from "~/lib/seo";
 import { isPrerenderPlaceholder } from "~/lib/prerender";
 import { formatDate, formatDateTime, formatTime } from "~/utils/format";
+import { langFromPath, strings, useLang, useLocalPath, useT } from "~/i18n";
 import { isSafeExternalUrl } from "~/utils/url";
 import detailStyles from "~/components/concerts/ConcertDetail.module.css";
 import concertStyles from "~/components/concerts/concerts.module.css";
@@ -26,27 +27,28 @@ const SCHEMA_STATUS: Record<string, string> = {
   POSTPONED: "https://schema.org/EventPostponed",
 };
 
-async function load(slug: string) {
+async function load(slug: string, request: Request) {
   // Раздел пуст: страница собирается только чтобы пройти проверку пререндера
   // и удаляется из результата сборки.
   if (isPrerenderPlaceholder(slug)) return { concert: null };
 
+  const lang = langFromPath(new URL(request.url).pathname);
   try {
-    return { concert: await fetchConcertBySlug(slug) };
+    return { concert: await fetchConcertBySlug(slug, lang) };
   } catch (error) {
     if (error instanceof ApiError && error.isNotFound) {
-      throw data("Концерт не найден", { status: 404 });
+      throw data("Show not found", { status: 404 });
     }
     throw error;
   }
 }
 
-export async function loader({ params }: Route.LoaderArgs) {
-  return load(params.slug);
+export async function loader({ params, request }: Route.LoaderArgs) {
+  return load(params.slug, request);
 }
 
-export async function clientLoader({ params }: Route.ClientLoaderArgs) {
-  return load(params.slug);
+export async function clientLoader({ params, request }: Route.ClientLoaderArgs) {
+  return load(params.slug, request);
 }
 
 export function HydrateFallback() {
@@ -54,8 +56,11 @@ export function HydrateFallback() {
 }
 
 export function meta({ loaderData, location, matches }: Route.MetaArgs) {
+  const lang = langFromPath(location.pathname);
+  const t = strings(lang);
+
   if (!loaderData?.concert) {
-    return buildMeta({ title: "Концерт не найден", pathname: location.pathname, noindex: true });
+    return buildMeta({ title: t.concerts.notFound, pathname: location.pathname, noindex: true });
   }
 
   const { concert } = loaderData;
@@ -63,7 +68,7 @@ export function meta({ loaderData, location, matches }: Route.MetaArgs) {
   const description =
     concert.seoDescription ??
     concert.shortDescription ??
-    `${formatDate(displayDate, concert.timezone)}, ${concert.city}, ${concert.venueName}.`;
+    `${formatDate(displayDate, concert.timezone, lang)}, ${concert.city}, ${concert.venueName}.`;
 
   return [
     ...buildMeta({
@@ -116,17 +121,24 @@ export function meta({ loaderData, location, matches }: Route.MetaArgs) {
         : undefined,
     }),
     jsonLd(
-      breadcrumbs([
-        { name: "Главная", path: "/" },
-        { name: "Концерты", path: "/concerts" },
-        { name: concert.title, path: location.pathname },
-      ]),
+      breadcrumbs(
+        [
+          { name: t.breadcrumbs.home, path: "/" },
+          { name: t.nav.concerts, path: "/concerts" },
+          { name: concert.title, path: location.pathname },
+        ],
+        lang,
+      ),
     ),
   ];
 }
 
 export default function ConcertDetailRoute({ loaderData }: Route.ComponentProps) {
   const { concert } = loaderData;
+  const t = useT();
+  const lang = useLang();
+  const lp = useLocalPath();
+
   if (!concert) return null;
 
   const displayDate = concert.newStartsAt ?? concert.startsAt;
@@ -134,8 +146,8 @@ export default function ConcertDetailRoute({ loaderData }: Route.ComponentProps)
   return (
     <div className={styles.page}>
       <div className="container">
-        <Link to="/concerts" className={styles.back}>
-          ← Все концерты
+        <Link to={lp("/concerts")} className={styles.back}>
+          {t.concerts.backToConcerts}
         </Link>
 
         <div className={detailStyles.layout}>
@@ -154,24 +166,26 @@ export default function ConcertDetailRoute({ loaderData }: Route.ComponentProps)
 
             {concert.eventStatus === "CANCELLED" ? (
               <div className={`${concertStyles.alert} ${concertStyles.alertCancelled}`} role="status">
-                <span className={concertStyles.alertTitle}>Концерт отменён</span>
+                <span className={concertStyles.alertTitle}>{t.concerts.cancelled}</span>
                 {concert.cancellationReason ? <span>{concert.cancellationReason}</span> : null}
               </div>
             ) : null}
 
             {concert.eventStatus === "POSTPONED" ? (
               <div className={`${concertStyles.alert} ${concertStyles.alertPostponed}`} role="status">
-                <span className={concertStyles.alertTitle}>Концерт перенесён</span>
+                <span className={concertStyles.alertTitle}>{t.concerts.postponed}</span>
                 <span>
-                  Прежняя дата:{" "}
+                  {t.concerts.oldDate}{" "}
                   <span className={concertStyles.oldDate}>
-                    {formatDateTime(concert.startsAt, concert.timezone)}
+                    {formatDateTime(concert.startsAt, concert.timezone, lang)}
                   </span>
                 </span>
                 {concert.newStartsAt ? (
-                  <span>Новая дата: {formatDateTime(concert.newStartsAt, concert.timezone)}</span>
+                  <span>
+                    {t.concerts.newDate} {formatDateTime(concert.newStartsAt, concert.timezone, lang)}
+                  </span>
                 ) : (
-                  <span>Новая дата будет объявлена дополнительно.</span>
+                  <span>{t.concerts.newDateSoon}</span>
                 )}
                 {concert.cancellationReason ? <span>{concert.cancellationReason}</span> : null}
               </div>
@@ -179,10 +193,10 @@ export default function ConcertDetailRoute({ loaderData }: Route.ComponentProps)
 
             <div className={detailStyles.facts}>
               <div className={detailStyles.fact}>
-                <span className={detailStyles.factLabel}>Дата и время</span>
+                <span className={detailStyles.factLabel}>{t.concerts.dateAndTime}</span>
                 <span className={detailStyles.factValue}>
                   <time dateTime={displayDate.toISOString()}>
-                    {formatDateTime(displayDate, concert.timezone)}
+                    {formatDateTime(displayDate, concert.timezone, lang)}
                   </time>{" "}
                   ({concert.timezone})
                 </span>
@@ -190,15 +204,15 @@ export default function ConcertDetailRoute({ loaderData }: Route.ComponentProps)
 
               {concert.doorsOpenAt ? (
                 <div className={detailStyles.fact}>
-                  <span className={detailStyles.factLabel}>Открытие дверей</span>
+                  <span className={detailStyles.factLabel}>{t.concerts.doorsOpen}</span>
                   <span className={detailStyles.factValue}>
-                    {formatTime(concert.doorsOpenAt, concert.timezone)}
+                    {formatTime(concert.doorsOpenAt, concert.timezone, lang)}
                   </span>
                 </div>
               ) : null}
 
               <div className={detailStyles.fact}>
-                <span className={detailStyles.factLabel}>Площадка</span>
+                <span className={detailStyles.factLabel}>{t.concerts.venue}</span>
                 <span className={detailStyles.factValue}>
                   {concert.venueName}
                   <br />
@@ -213,7 +227,7 @@ export default function ConcertDetailRoute({ loaderData }: Route.ComponentProps)
                     <>
                       <br />
                       <a href={concert.mapUrl} target="_blank" rel="noopener noreferrer">
-                        Открыть на карте →
+                        {t.concerts.openMap}
                       </a>
                     </>
                   ) : null}
@@ -222,7 +236,7 @@ export default function ConcertDetailRoute({ loaderData }: Route.ComponentProps)
 
               {concert.organizerName ? (
                 <div className={detailStyles.fact}>
-                  <span className={detailStyles.factLabel}>Организатор</span>
+                  <span className={detailStyles.factLabel}>{t.concerts.organizer}</span>
                   <span className={detailStyles.factValue}>
                     {isSafeExternalUrl(concert.organizerUrl) ? (
                       <a href={concert.organizerUrl} target="_blank" rel="noopener noreferrer">
@@ -237,7 +251,7 @@ export default function ConcertDetailRoute({ loaderData }: Route.ComponentProps)
 
               {concert.participants.length > 0 ? (
                 <div className={detailStyles.fact}>
-                  <span className={detailStyles.factLabel}>Участники</span>
+                  <span className={detailStyles.factLabel}>{t.concerts.participants}</span>
                   <ul className={detailStyles.participants}>
                     {concert.participants.map((participant) => (
                       <li key={participant.id}>
@@ -262,7 +276,7 @@ export default function ConcertDetailRoute({ loaderData }: Route.ComponentProps)
             <ResponsiveImage
               src={concert.posterImage}
               spec="concertPoster"
-              alt={`Афиша: ${concert.title}`}
+              alt={t.concerts.posterAlt(concert.title)}
               className={detailStyles.poster}
               priority
               sizes="(max-width: 960px) 100vw, 360px"
@@ -271,8 +285,7 @@ export default function ConcertDetailRoute({ loaderData }: Route.ComponentProps)
             <div className={detailStyles.ticketBox}>
               <TicketButton concert={concert} fullWidth />
               <p className={detailStyles.ticketNote}>
-                Продажа билетов ведётся на стороннем сайте организатора. Мы не принимаем оплату и не
-                храним платёжные данные.
+                {t.concerts.ticketNote}
               </p>
             </div>
           </aside>

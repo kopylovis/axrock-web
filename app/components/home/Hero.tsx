@@ -3,6 +3,7 @@ import { ImagePlaceholder } from "~/components/common/ImagePlaceholder";
 import { imageSrcSet } from "~/utils/images";
 import type { ConcertSummary, SiteSettings } from "~/types/content";
 import { formatDate } from "~/utils/format";
+import { useLang, useT } from "~/i18n";
 import styles from "./Hero.module.css";
 
 interface HeroProps {
@@ -11,6 +12,9 @@ interface HeroProps {
 }
 
 export function Hero({ settings, nextConcert }: HeroProps) {
+  const lang = useLang();
+  const t = useT();
+
   return (
     <section className={styles.hero} aria-labelledby="hero-title">
       <div className={styles.media} aria-hidden="true">
@@ -34,7 +38,7 @@ export function Hero({ settings, nextConcert }: HeroProps) {
         {nextConcert ? (
           <p className={styles.announce}>
             <span className={styles.announceDot} aria-hidden="true" />
-            {formatDate(nextConcert.startsAt, nextConcert.timezone)} · {nextConcert.city}
+            {formatDate(nextConcert.startsAt, nextConcert.timezone, lang)} · {nextConcert.city}
           </p>
         ) : null}
 
@@ -65,9 +69,9 @@ export function Hero({ settings, nextConcert }: HeroProps) {
         </h1>
 
         <div className={styles.actions}>
-          <ButtonLink to="/concerts">Афиша</ButtonLink>
+          <ButtonLink to="/concerts">{t.home.heroShows}</ButtonLink>
           <ButtonLink to="/music" variant="ghost">
-            Слушать
+            {t.home.heroListen}
           </ButtonLink>
         </div>
       </div>

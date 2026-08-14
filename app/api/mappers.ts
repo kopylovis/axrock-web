@@ -1,3 +1,4 @@
+import { DEFAULT_LANG, pick, pickText, type Lang } from "~/i18n/config";
 import type {
   BandMember,
   ConcertDetail,
@@ -67,50 +68,55 @@ export function mapPage<D, M>(dto: PageDto<D>, map: (item: D) => M): Page<M> {
   };
 }
 
-export function mapNewsCategory(dto: NewsCategoryDto): NewsCategory {
-  return { id: dto.id, name: dto.name, slug: dto.slug, sortOrder: dto.sortOrder };
-}
-
-export function mapNewsSummary(dto: NewsSummaryDto): NewsSummary {
+export function mapNewsCategory(dto: NewsCategoryDto, lang: Lang = DEFAULT_LANG): NewsCategory {
   return {
     id: dto.id,
-    title: dto.title,
+    name: pickText(lang, dto.name, dto.nameEn),
     slug: dto.slug,
-    excerpt: dto.excerpt,
+    sortOrder: dto.sortOrder,
+  };
+}
+
+export function mapNewsSummary(dto: NewsSummaryDto, lang: Lang = DEFAULT_LANG): NewsSummary {
+  return {
+    id: dto.id,
+    title: pickText(lang, dto.title, dto.titleEn),
+    slug: dto.slug,
+    excerpt: pick(lang, dto.excerpt, dto.excerptEn),
     coverImage: dto.coverImage,
-    category: dto.category ? mapNewsCategory(dto.category) : null,
+    category: dto.category ? mapNewsCategory(dto.category, lang) : null,
     publishedAt: parseUtcDate(dto.publishedAt),
     featured: dto.featured,
   };
 }
 
-export function mapNewsDetail(dto: NewsDetailDto): NewsDetail {
+export function mapNewsDetail(dto: NewsDetailDto, lang: Lang = DEFAULT_LANG): NewsDetail {
   return {
-    ...mapNewsSummary(dto),
-    content: toRichText(dto.content),
+    ...mapNewsSummary(dto, lang),
+    content: toRichText(pick(lang, dto.content, dto.contentEn)),
     updatedAt: parseUtcDate(dto.updatedAt),
-    seoTitle: dto.seoTitle,
-    seoDescription: dto.seoDescription,
+    seoTitle: pick(lang, dto.seoTitle, dto.seoTitleEn),
+    seoDescription: pick(lang, dto.seoDescription, dto.seoDescriptionEn),
     previous: dto.previous,
     next: dto.next,
-    related: (dto.related ?? []).map(mapNewsSummary),
+    related: (dto.related ?? []).map((item) => mapNewsSummary(item, lang)),
   };
 }
 
-export function mapConcertSummary(dto: ConcertSummaryDto): ConcertSummary {
+export function mapConcertSummary(dto: ConcertSummaryDto, lang: Lang = DEFAULT_LANG): ConcertSummary {
   return {
     id: dto.id,
-    title: dto.title,
+    title: pickText(lang, dto.title, dto.titleEn),
     slug: dto.slug,
-    shortDescription: dto.shortDescription,
+    shortDescription: pick(lang, dto.shortDescription, dto.shortDescriptionEn),
     posterImage: dto.posterImage,
     eventStatus: dto.eventStatus,
     startsAt: parseRequiredUtcDate(dto.startsAt),
     timezone: dto.timezone,
     newStartsAt: parseUtcDate(dto.newStartsAt),
-    city: dto.city,
-    country: dto.country,
-    venueName: dto.venueName,
+    city: pickText(lang, dto.city, dto.cityEn),
+    country: pickText(lang, dto.country, dto.countryEn),
+    venueName: pickText(lang, dto.venueName, dto.venueNameEn),
     ageRestriction: dto.ageRestriction,
     ticketUrl: dto.ticketUrl,
     featured: dto.featured,
@@ -121,10 +127,10 @@ function mapConcertParticipant(dto: ConcertParticipantDto): ConcertParticipant {
   return { id: dto.id, name: dto.name, url: dto.url, sortOrder: dto.sortOrder };
 }
 
-export function mapConcertDetail(dto: ConcertDetailDto): ConcertDetail {
+export function mapConcertDetail(dto: ConcertDetailDto, lang: Lang = DEFAULT_LANG): ConcertDetail {
   return {
-    ...mapConcertSummary(dto),
-    description: toRichText(dto.description),
+    ...mapConcertSummary(dto, lang),
+    description: toRichText(pick(lang, dto.description, dto.descriptionEn)),
     doorsOpenAt: parseUtcDate(dto.doorsOpenAt),
     venueAddress: dto.venueAddress,
     mapUrl: dto.mapUrl,
@@ -132,8 +138,8 @@ export function mapConcertDetail(dto: ConcertDetailDto): ConcertDetail {
     organizerName: dto.organizerName,
     organizerUrl: dto.organizerUrl,
     cancellationReason: dto.cancellationReason,
-    seoTitle: dto.seoTitle,
-    seoDescription: dto.seoDescription,
+    seoTitle: pick(lang, dto.seoTitle, dto.seoTitleEn),
+    seoDescription: pick(lang, dto.seoDescription, dto.seoDescriptionEn),
     participants: (dto.participants ?? []).map(mapConcertParticipant),
   };
 }
@@ -149,14 +155,14 @@ export function mapSocialLink(dto: SocialLinkDto): SocialLink {
   };
 }
 
-export function mapBandMember(dto: BandMemberDto): BandMember {
+export function mapBandMember(dto: BandMemberDto, lang: Lang = DEFAULT_LANG): BandMember {
   return {
     id: dto.id,
-    name: dto.name,
+    name: pickText(lang, dto.name, dto.nameEn),
     stageName: dto.stageName,
-    role: dto.role,
-    instrument: dto.instrument,
-    biography: dto.biography,
+    role: pickText(lang, dto.role, dto.roleEn),
+    instrument: pick(lang, dto.instrument, dto.instrumentEn),
+    biography: pick(lang, dto.biography, dto.biographyEn),
     photo: dto.photo,
     currentMember: dto.currentMember,
     sortOrder: dto.sortOrder,
@@ -164,10 +170,10 @@ export function mapBandMember(dto: BandMemberDto): BandMember {
   };
 }
 
-function mapReleaseTrack(dto: ReleaseTrackDto): ReleaseTrack {
+function mapReleaseTrack(dto: ReleaseTrackDto, lang: Lang): ReleaseTrack {
   return {
     id: dto.id,
-    title: dto.title,
+    title: pickText(lang, dto.title, dto.titleEn),
     duration: dto.duration,
     trackNumber: dto.trackNumber,
   };
@@ -183,10 +189,10 @@ export function mapReleaseLink(dto: ReleaseLinkDto): ReleaseLink {
   };
 }
 
-export function mapReleaseSummary(dto: ReleaseSummaryDto): ReleaseSummary {
+export function mapReleaseSummary(dto: ReleaseSummaryDto, lang: Lang = DEFAULT_LANG): ReleaseSummary {
   return {
     id: dto.id,
-    title: dto.title,
+    title: pickText(lang, dto.title, dto.titleEn),
     slug: dto.slug,
     type: dto.type,
     coverImage: dto.coverImage,
@@ -195,23 +201,23 @@ export function mapReleaseSummary(dto: ReleaseSummaryDto): ReleaseSummary {
   };
 }
 
-export function mapReleaseDetail(dto: ReleaseDetailDto): ReleaseDetail {
+export function mapReleaseDetail(dto: ReleaseDetailDto, lang: Lang = DEFAULT_LANG): ReleaseDetail {
   return {
-    ...mapReleaseSummary(dto),
-    description: dto.description,
-    seoTitle: dto.seoTitle,
-    seoDescription: dto.seoDescription,
-    tracks: (dto.tracks ?? []).map(mapReleaseTrack),
+    ...mapReleaseSummary(dto, lang),
+    description: pick(lang, dto.description, dto.descriptionEn),
+    seoTitle: pick(lang, dto.seoTitle, dto.seoTitleEn),
+    seoDescription: pick(lang, dto.seoDescription, dto.seoDescriptionEn),
+    tracks: (dto.tracks ?? []).map((track) => mapReleaseTrack(track, lang)),
     links: (dto.links ?? []).map(mapReleaseLink),
   };
 }
 
-export function mapMediaItem(dto: MediaItemDto): MediaItem {
+export function mapMediaItem(dto: MediaItemDto, lang: Lang = DEFAULT_LANG): MediaItem {
   return {
     id: dto.id,
     type: dto.type,
-    title: dto.title,
-    description: dto.description,
+    title: pick(lang, dto.title, dto.titleEn),
+    description: pick(lang, dto.description, dto.descriptionEn),
     fileUrl: dto.fileUrl,
     previewImageUrl: dto.previewImageUrl,
     externalUrl: dto.externalUrl,
@@ -221,16 +227,16 @@ export function mapMediaItem(dto: MediaItemDto): MediaItem {
   };
 }
 
-export function mapSiteSettings(dto: SiteSettingsDto): SiteSettings {
+export function mapSiteSettings(dto: SiteSettingsDto, lang: Lang = DEFAULT_LANG): SiteSettings {
   return {
     siteName: dto.siteName,
     bandName: dto.bandName,
-    heroTitle: dto.heroTitle,
-    heroSubtitle: dto.heroSubtitle,
+    heroTitle: pickText(lang, dto.heroTitle, dto.heroTitleEn),
+    heroSubtitle: pickText(lang, dto.heroSubtitle, dto.heroSubtitleEn),
     heroImage: dto.heroImage,
     logo: dto.logo ?? null,
-    shortBiography: dto.shortBiography,
-    fullBiography: toRichText(dto.fullBiography),
+    shortBiography: pick(lang, dto.shortBiography, dto.shortBiographyEn),
+    fullBiography: toRichText(pick(lang, dto.fullBiography, dto.fullBiographyEn)),
     contactEmail: dto.contactEmail,
     contactPhone: dto.contactPhone,
     bookingEmail: dto.bookingEmail,
@@ -239,15 +245,15 @@ export function mapSiteSettings(dto: SiteSettingsDto): SiteSettings {
     managerTelegram: dto.managerTelegram ?? null,
     managerMaxPhone: dto.managerMaxPhone ?? null,
     managerVkUrl: dto.managerVkUrl ?? null,
-    defaultSeoTitle: dto.defaultSeoTitle,
-    defaultSeoDescription: dto.defaultSeoDescription,
+    defaultSeoTitle: pick(lang, dto.defaultSeoTitle, dto.defaultSeoTitleEn),
+    defaultSeoDescription: pick(lang, dto.defaultSeoDescription, dto.defaultSeoDescriptionEn),
     defaultOgImage: dto.defaultOgImage,
   };
 }
 
-export function mapSiteData(dto: SiteDataDto): SiteData {
+export function mapSiteData(dto: SiteDataDto, lang: Lang = DEFAULT_LANG): SiteData {
   return {
-    settings: mapSiteSettings(dto.settings),
+    settings: mapSiteSettings(dto.settings, lang),
     socialLinks: (dto.socialLinks ?? []).map(mapSocialLink),
     musicLinks: (dto.musicLinks ?? []).map(mapReleaseLink),
   };

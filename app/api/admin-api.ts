@@ -103,6 +103,12 @@ export interface NewsInput {
   featured: boolean;
   seoTitle: string | null;
   seoDescription: string | null;
+  /** Английские версии. Пусто — сайт показывает русский текст. */
+  titleEn: string | null;
+  excerptEn: string | null;
+  contentEn: RichTextDoc | null;
+  seoTitleEn: string | null;
+  seoDescriptionEn: string | null;
 }
 
 export interface ConcertInput {
@@ -131,6 +137,14 @@ export interface ConcertInput {
   featured: boolean;
   seoTitle: string | null;
   seoDescription: string | null;
+  titleEn: string | null;
+  shortDescriptionEn: string | null;
+  descriptionEn: RichTextDoc | null;
+  cityEn: string | null;
+  countryEn: string | null;
+  venueNameEn: string | null;
+  seoTitleEn: string | null;
+  seoDescriptionEn: string | null;
   participants: Array<{ name: string; url: string | null; sortOrder: number }>;
 }
 
@@ -144,6 +158,10 @@ export interface MemberInput {
   currentMember: boolean;
   visible: boolean;
   sortOrder: number;
+  nameEn: string | null;
+  roleEn: string | null;
+  instrumentEn: string | null;
+  biographyEn: string | null;
 }
 
 export interface ReleaseInput {
@@ -157,7 +175,11 @@ export interface ReleaseInput {
   sortOrder: number;
   seoTitle: string | null;
   seoDescription: string | null;
-  tracks: Array<{ title: string; duration: string | null; trackNumber: number }>;
+  titleEn: string | null;
+  descriptionEn: string | null;
+  seoTitleEn: string | null;
+  seoDescriptionEn: string | null;
+  tracks: Array<{ title: string; duration: string | null; trackNumber: number; titleEn: string | null }>;
   links: Array<{ platform: string; url: string; sortOrder: number; iconOnly: boolean }>;
 }
 
@@ -181,6 +203,8 @@ export interface MediaInput {
   concertId: number | null;
   status: PublicationStatus;
   sortOrder: number;
+  titleEn: string | null;
+  descriptionEn: string | null;
 }
 
 export interface UploadResult {
@@ -354,6 +378,11 @@ export async function duplicateNews(id: number): Promise<NewsDetailDto> {
     featured: false,
     seoTitle: source.seoTitle,
     seoDescription: source.seoDescription,
+    titleEn: source.titleEn ? `${source.titleEn} (copy)` : null,
+    excerptEn: source.excerptEn ?? null,
+    contentEn: source.contentEn ?? null,
+    seoTitleEn: source.seoTitleEn ?? null,
+    seoDescriptionEn: source.seoDescriptionEn ?? null,
   });
 }
 
@@ -386,6 +415,14 @@ export async function duplicateConcert(id: number): Promise<ConcertDetailDto> {
     featured: false,
     seoTitle: source.seoTitle,
     seoDescription: source.seoDescription,
+    titleEn: source.titleEn ? `${source.titleEn} (copy)` : null,
+    shortDescriptionEn: source.shortDescriptionEn ?? null,
+    descriptionEn: source.descriptionEn ?? null,
+    cityEn: source.cityEn ?? null,
+    countryEn: source.countryEn ?? null,
+    venueNameEn: source.venueNameEn ?? null,
+    seoTitleEn: source.seoTitleEn ?? null,
+    seoDescriptionEn: source.seoDescriptionEn ?? null,
     participants: source.participants.map((participant, index) => ({
       name: participant.name,
       url: participant.url,

@@ -3,7 +3,7 @@ import { Link, useNavigate } from "react-router";
 import type { MemberInput } from "~/api/admin-api";
 import { createMember, updateMember } from "~/api/admin-api";
 import type { BandMemberDto } from "~/api/dto";
-import { CheckboxField, ImageField, TextAreaField, TextField, focusFirstInvalidField } from "./fields";
+import { BilingualField, BilingualTextField, CheckboxField, ImageField, TextField, focusFirstInvalidField } from "./fields";
 import styles from "./admin.module.css";
 
 export function MemberForm({ member }: { member: BandMemberDto | null }) {
@@ -18,6 +18,10 @@ export function MemberForm({ member }: { member: BandMemberDto | null }) {
   const [currentMember, setCurrentMember] = useState(member?.currentMember ?? true);
   const [visible, setVisible] = useState(member?.visible ?? true);
   const [sortOrder, setSortOrder] = useState(String(member?.sortOrder ?? 0));
+  const [nameEn, setNameEn] = useState(member?.nameEn ?? "");
+  const [roleEn, setRoleEn] = useState(member?.roleEn ?? "");
+  const [instrumentEn, setInstrumentEn] = useState(member?.instrumentEn ?? "");
+  const [biographyEn, setBiographyEn] = useState(member?.biographyEn ?? "");
 
   const [errors, setErrors] = useState<Record<string, string>>({});
   const [saving, setSaving] = useState(false);
@@ -46,6 +50,10 @@ export function MemberForm({ member }: { member: BandMemberDto | null }) {
       currentMember,
       visible,
       sortOrder: Number(sortOrder) || 0,
+      nameEn: nameEn.trim() || null,
+      roleEn: roleEn.trim() || null,
+      instrumentEn: instrumentEn.trim() || null,
+      biographyEn: biographyEn.trim() || null,
     };
 
     try {
@@ -77,13 +85,31 @@ export function MemberForm({ member }: { member: BandMemberDto | null }) {
 
       <div className={styles.form}>
         <div className={`${styles.formGrid} ${styles.formGridTwo}`}>
-          <TextField
-            label="Имя"
-            required
-            value={name}
-            error={errors.name}
-            onChange={(event) => setName(event.target.value)}
-          />
+          <BilingualField label="Имя *" filledEn={nameEn.trim().length > 0}>
+            {(lang) =>
+              lang === "ru" ? (
+                <>
+                  <input
+                    className={`${styles.input} ${errors.name ? styles.inputInvalid : ""}`}
+                    value={name}
+                    aria-invalid={errors.name ? true : undefined}
+                    onChange={(event) => setName(event.target.value)}
+                  />
+                  {errors.name ? (
+                    <span className={styles.error} role="alert">
+                      {errors.name}
+                    </span>
+                  ) : null}
+                </>
+              ) : (
+                <input
+                  className={styles.input}
+                  value={nameEn}
+                  onChange={(event) => setNameEn(event.target.value)}
+                />
+              )
+            }
+          </BilingualField>
           <TextField
             label="Сценическое имя"
             value={stageName}
@@ -92,27 +118,53 @@ export function MemberForm({ member }: { member: BandMemberDto | null }) {
         </div>
 
         <div className={`${styles.formGrid} ${styles.formGridTwo}`}>
-          <TextField
-            label="Роль в группе"
-            required
-            value={role}
-            error={errors.role}
+          <BilingualField
+            label="Роль в группе *"
             hint="Например «Вокал» или «Барабаны»"
-            onChange={(event) => setRole(event.target.value)}
-          />
-          <TextField
+            filledEn={roleEn.trim().length > 0}
+          >
+            {(lang) =>
+              lang === "ru" ? (
+                <>
+                  <input
+                    className={`${styles.input} ${errors.role ? styles.inputInvalid : ""}`}
+                    value={role}
+                    aria-invalid={errors.role ? true : undefined}
+                    onChange={(event) => setRole(event.target.value)}
+                  />
+                  {errors.role ? (
+                    <span className={styles.error} role="alert">
+                      {errors.role}
+                    </span>
+                  ) : null}
+                </>
+              ) : (
+                <input
+                  className={styles.input}
+                  value={roleEn}
+                  onChange={(event) => setRoleEn(event.target.value)}
+                />
+              )
+            }
+          </BilingualField>
+          <BilingualTextField
             label="Инструмент"
             value={instrument}
-            onChange={(event) => setInstrument(event.target.value)}
+            valueEn={instrumentEn}
+            onChange={setInstrument}
+            onChangeEn={setInstrumentEn}
           />
         </div>
 
         <ImageField label="Фотография" spec="memberPhoto" value={photo} onChange={setPhoto} />
 
-        <TextAreaField
+        <BilingualTextField
           label="Краткая биография"
+          multiline
           value={biography}
-          onChange={(event) => setBiography(event.target.value)}
+          valueEn={biographyEn}
+          onChange={setBiography}
+          onChangeEn={setBiographyEn}
         />
 
         <div className={`${styles.formGrid} ${styles.formGridTwo}`}>

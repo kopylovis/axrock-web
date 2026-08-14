@@ -1,5 +1,5 @@
 import type { ConcertEventStatus } from "~/types/content";
-import { CONCERT_STATUS_LABELS } from "~/utils/format";
+import { useT } from "~/i18n";
 import styles from "./concerts.module.css";
 
 const STATUS_CLASS: Record<ConcertEventStatus, string | undefined> = {
@@ -10,15 +10,6 @@ const STATUS_CLASS: Record<ConcertEventStatus, string | undefined> = {
   COMPLETED: styles.badgeCompleted,
 };
 
-/** В узкой колонке даты слово «концерт» лишнее — оно и так очевидно из контекста. */
-const SHORT_LABELS: Record<ConcertEventStatus, string> = {
-  ANNOUNCED: "Анонсирован",
-  SOLD_OUT: "Продано",
-  CANCELLED: "Отменён",
-  POSTPONED: "Перенесён",
-  COMPLETED: "Состоялся",
-};
-
 export function ConcertStatusBadge({
   status,
   compact = false,
@@ -26,10 +17,13 @@ export function ConcertStatusBadge({
   status: ConcertEventStatus;
   compact?: boolean;
 }) {
+  const t = useT();
+
   return (
     <span className={`${styles.badge} ${STATUS_CLASS[status]}`}>
       <span className={styles.badgeDot} aria-hidden="true" />
-      {compact ? SHORT_LABELS[status] : CONCERT_STATUS_LABELS[status]}
+      {/* В узкой колонке даты слово «концерт» лишнее — оно очевидно из контекста. */}
+      {compact ? t.concertStatusShort[status] : t.concertStatus[status]}
     </span>
   );
 }

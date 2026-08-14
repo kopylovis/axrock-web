@@ -4,22 +4,24 @@ import { PageSkeleton } from "~/components/common/PageSkeleton";
 import { MediaGallery } from "~/components/media/MediaGallery";
 import { fetchMedia } from "~/api/public-api";
 import { breadcrumbs, buildMeta, jsonLd, ogImageFrom } from "~/lib/seo";
+import { langFromPath, strings, useT } from "~/i18n";
 import styles from "~/styles/page.module.css";
 
-async function load() {
+async function load(request: Request) {
+  const lang = langFromPath(new URL(request.url).pathname);
   try {
-    return { items: await fetchMedia(null), failed: false };
+    return { items: await fetchMedia(null, lang), failed: false };
   } catch {
     return { items: [], failed: true };
   }
 }
 
-export async function loader() {
-  return load();
+export async function loader({ request }: Route.LoaderArgs) {
+  return load(request);
 }
 
-export async function clientLoader() {
-  return load();
+export async function clientLoader({ request }: Route.ClientLoaderArgs) {
+  return load(request);
 }
 
 export function HydrateFallback() {
@@ -27,33 +29,39 @@ export function HydrateFallback() {
 }
 
 export function meta({ location, matches }: Route.MetaArgs) {
+  const lang = langFromPath(location.pathname);
+  const t = strings(lang);
+
   return [
     ...buildMeta({
-      title: "Фото и видео",
+      title: t.media.metaTitle,
       image: ogImageFrom(matches),
-      description:
-        "Фотографии и видео группы «Ангел-Хранитель»: концерты, backstage, афиши и обложки релизов.",
+      description: t.media.metaDescription,
       pathname: location.pathname,
     }),
     jsonLd(
-      breadcrumbs([
-        { name: "Главная", path: "/" },
-        { name: "Медиа", path: "/media" },
-      ]),
+      breadcrumbs(
+        [
+          { name: t.breadcrumbs.home, path: "/" },
+          { name: t.nav.media, path: "/media" },
+        ],
+        lang,
+      ),
     ),
   ];
 }
 
 export default function Media({ loaderData }: Route.ComponentProps) {
   const { items, failed } = loaderData;
+  const t = useT();
 
   return (
     <div className={styles.page}>
       <div className="container">
         <header className={`${styles.header} ${styles.headerWide}`}>
-          <span className={styles.eyebrow}>Галерея</span>
-          <h1 className={styles.title}>Фото и видео</h1>
-          <p className={styles.lead}>Кадры с концертов, backstage и официальные материалы.</p>
+          <span className={styles.eyebrow}>{t.media.eyebrow}</span>
+          <h1 className={styles.title}>{t.media.title}</h1>
+          <p className={styles.lead}>{t.media.lead}</p>
         </header>
 
         {failed ? <ErrorState /> : <MediaGallery items={items} />}

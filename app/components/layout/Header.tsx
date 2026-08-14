@@ -2,15 +2,16 @@ import { useEffect, useRef, useState } from "react";
 import { NavLink, useLocation } from "react-router";
 import { SocialLinks } from "./LinkLists";
 import type { SocialLink } from "~/types/content";
+import { useLang, useLocalPath, useT, withLang, type Strings } from "~/i18n";
 import styles from "./Header.module.css";
 
-const NAV_ITEMS = [
-  { to: "/about", label: "О группе" },
-  { to: "/news", label: "Новости" },
-  { to: "/concerts", label: "Концерты" },
-  { to: "/music", label: "Музыка" },
-  { to: "/media", label: "Медиа" },
-  { to: "/contacts", label: "Контакты" },
+const NAV_ITEMS: Array<{ to: string; key: keyof Strings["nav"] }> = [
+  { to: "/about", key: "about" },
+  { to: "/news", key: "news" },
+  { to: "/concerts", key: "concerts" },
+  { to: "/music", key: "music" },
+  { to: "/media", key: "media" },
+  { to: "/contacts", key: "contacts" },
 ];
 
 export function Header({
@@ -26,7 +27,12 @@ export function Header({
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
   const toggleRef = useRef<HTMLButtonElement>(null);
-  const isHome = location.pathname === "/";
+  const t = useT();
+  const lang = useLang();
+  const lp = useLocalPath();
+  const isHome = location.pathname === "/" || location.pathname === "/en";
+  // Ссылка ведёт на ту же страницу на другом языке, а не на главную.
+  const otherLang = lang === "ru" ? "en" : "ru";
 
   useEffect(() => {
     setOpen(false);
@@ -74,7 +80,7 @@ export function Header({
           .join(" ")}
       >
         <div className={`container ${styles.inner}`}>
-          <NavLink to="/" className={styles.logo} aria-label={`${bandName} — на главную`}>
+          <NavLink to={lp("/")} className={styles.logo} aria-label={`${bandName} — ${t.header.toHome}`}>
             {logo ? (
               <span className={styles.logoBox}>
                 {/* Изображение задаёт размер и несёт alt, цвет даёт слой по маске.
@@ -105,13 +111,26 @@ export function Header({
             )}
           </NavLink>
 
-          <nav className={styles.nav} aria-label="Основная навигация">
+          <nav className={styles.nav} aria-label={t.header.mainNav}>
             {NAV_ITEMS.map((item) => (
-              <NavLink key={item.to} to={item.to} className={linkClass}>
-                {item.label}
+              <NavLink key={item.to} to={lp(item.to)} className={linkClass}>
+                {t.nav[item.key]}
               </NavLink>
             ))}
           </nav>
+
+          {/* viewTransition просит браузер сделать кросс-фейд между версиями
+              страницы: смена языка меняет почти весь текст сразу. */}
+          <NavLink
+            to={withLang(location.pathname, otherLang)}
+            className={styles.langSwitch}
+            hrefLang={otherLang}
+            aria-label={t.header.switchTo}
+            viewTransition
+            preventScrollReset
+          >
+            {t.header.langShort}
+          </NavLink>
 
           <button
             ref={toggleRef}
@@ -119,7 +138,7 @@ export function Header({
             className={styles.toggle}
             aria-expanded={open}
             aria-controls="mobile-nav"
-            aria-label={open ? "Закрыть меню" : "Открыть меню"}
+            aria-label={open ? t.header.closeMenu : t.header.openMenu}
             onClick={() => setOpen((value) => !value)}
           >
             {/* Полосы складываются в крест: три отдельных элемента, чтобы
@@ -144,11 +163,11 @@ export function Header({
         className={[styles.drawer, open ? styles.drawerOpen : null].filter(Boolean).join(" ")}
         id="mobile-nav"
       >
-        <nav className={styles.drawerNav} aria-label="Мобильная навигация">
+        <nav className={styles.drawerNav} aria-label={t.header.mobileNav}>
           {NAV_ITEMS.map((item, index) => (
             <NavLink
               key={item.to}
-              to={item.to}
+              to={lp(item.to)}
               className={drawerLinkClass}
               /* Пункты проявляются по очереди — задержка своя у каждого. */
               style={{ "--stagger": `${index * 45}ms` } as React.CSSProperties}
@@ -156,14 +175,14 @@ export function Header({
               <span className={styles.drawerIndex} aria-hidden="true">
                 {String(index + 1).padStart(2, "0")}
               </span>
-              {item.label}
+              {t.nav[item.key]}
             </NavLink>
           ))}
         </nav>
 
         {socialLinks.length > 0 ? (
           <div className={styles.drawerFooter}>
-            <span className={styles.drawerFooterLabel}>Мы в сети</span>
+            <span className={styles.drawerFooterLabel}>{t.header.online}</span>
             <SocialLinks links={socialLinks} />
           </div>
         ) : null}

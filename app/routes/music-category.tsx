@@ -14,11 +14,12 @@ import { isPrerenderPlaceholder } from "~/lib/prerender";
 import { SITE_URL, canonicalUrl } from "~/lib/config";
 import { absoluteImageUrl } from "~/utils/images";
 import { categoryBySlug, type ReleaseCategory } from "~/utils/release-categories";
+import { langFromPath, strings, useT } from "~/i18n";
 import homeStyles from "~/components/home/home.module.css";
 import releaseStyles from "~/components/music/ReleaseCard.module.css";
 import styles from "~/styles/page.module.css";
 
-async function load(slug: string) {
+async function load(slug: string, request: Request) {
   // Раздел пуст: страница собирается только чтобы пройти проверку пререндера
   // и удаляется из результата сборки.
   if (isPrerenderPlaceholder(slug)) {
@@ -26,22 +27,23 @@ async function load(slug: string) {
   }
 
   const category = categoryBySlug(slug);
-  if (!category) throw data("Раздел не найден", { status: 404 });
+  if (!category) throw data("Section not found", { status: 404 });
 
+  const lang = langFromPath(new URL(request.url).pathname);
   try {
-    const releases = await fetchReleases();
+    const releases = await fetchReleases(lang);
     return { category, releases: releases.filter((release) => release.type === category.type) };
   } catch {
     return { category, releases: [] };
   }
 }
 
-export async function loader({ params }: Route.LoaderArgs) {
-  return load(params.category);
+export async function loader({ params, request }: Route.LoaderArgs) {
+  return load(params.category, request);
 }
 
-export async function clientLoader({ params }: Route.ClientLoaderArgs) {
-  return load(params.category);
+export async function clientLoader({ params, request }: Route.ClientLoaderArgs) {
+  return load(params.category, request);
 }
 
 export function HydrateFallback() {
@@ -49,8 +51,12 @@ export function HydrateFallback() {
 }
 
 export function meta({ loaderData, location, matches }: Route.MetaArgs) {
+  const lang = langFromPath(location.pathname);
+  const t = strings(lang);
   const category = loaderData?.category;
-  if (!category) return buildMeta({ title: "Музыка", pathname: location.pathname });
+  if (!category) return buildMeta({ title: t.music.title, pathname: location.pathname });
+
+  const section = t.releaseCategories[category.slug];
 
   const albums = (loaderData?.releases ?? []).map((release) => ({
     "@context": "https://schema.org",
@@ -64,17 +70,20 @@ export function meta({ loaderData, location, matches }: Route.MetaArgs) {
 
   return [
     ...buildMeta({
-      title: `${category.title} — дискография`,
+      title: t.music.categoryMetaTitle(section.title),
       image: ogImageFrom(matches),
-      description: `${category.description} Группа «Ангел-Хранитель»: треклисты и ссылки на площадки.`,
+      description: t.music.categoryMetaDescription(section.description),
       pathname: location.pathname,
     }),
     jsonLd(
-      breadcrumbs([
-        { name: "Главная", path: "/" },
-        { name: "Музыка", path: "/music" },
-        { name: category.title, path: `/music/${category.slug}` },
-      ]),
+      breadcrumbs(
+        [
+          { name: t.breadcrumbs.home, path: "/" },
+          { name: t.nav.music, path: "/music" },
+          { name: section.title, path: `/music/${category.slug}` },
+        ],
+        lang,
+      ),
     ),
     ...albums.map((album) => jsonLd(album)),
   ];
@@ -83,6 +92,7 @@ export function meta({ loaderData, location, matches }: Route.MetaArgs) {
 export default function MusicCategory({ loaderData }: Route.ComponentProps) {
   const { category, releases } = loaderData;
   const { musicLinks } = useSiteData();
+  const t = useT();
   const { hash } = useLocation();
 
   // При заходе прямо по ссылке карточек ещё нет в DOM, и браузер сам к якорю
@@ -94,13 +104,15 @@ export default function MusicCategory({ loaderData }: Route.ComponentProps) {
 
   if (!category) return null;
 
+  const section = t.releaseCategories[category.slug];
+
   return (
     <div className={styles.page}>
       <div className="container">
         <header className={`${styles.header} ${styles.headerWide}`}>
-          <span className={styles.eyebrow}>Дискография</span>
-          <h1 className={styles.title}>{category.title}</h1>
-          <p className={styles.lead}>{category.description}</p>
+          <span className={styles.eyebrow}>{t.music.eyebrow}</span>
+          <h1 className={styles.title}>{section.title}</h1>
+          <p className={styles.lead}>{section.description}</p>
         </header>
 
         {musicLinks.length > 0 ? (
@@ -111,8 +123,8 @@ export default function MusicCategory({ loaderData }: Route.ComponentProps) {
 
         {releases.length === 0 ? (
           <EmptyState
-            title="Пока пусто"
-            description="В этом разделе ещё нет релизов."
+            title={t.music.categoryEmptyTitle}
+            description={t.music.categoryEmptyDescription}
           />
         ) : (
           <AnimatedSection className={releaseStyles.grid}>
@@ -124,7 +136,7 @@ export default function MusicCategory({ loaderData }: Route.ComponentProps) {
 
         <div className={homeStyles.sectionFooter}>
           <ButtonLink to="/music" variant="ghost">
-            Все разделы
+            {t.music.allSections}
           </ButtonLink>
         </div>
       </div>

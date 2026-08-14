@@ -1,7 +1,10 @@
 import type { ReleaseType } from "~/types/content";
 
+/** Слаги фиксированы: по ним же названия разделов ищутся в словаре. */
+export type ReleaseCategorySlug = "albums" | "ep" | "singles" | "live" | "compilations";
+
 export interface ReleaseCategory {
-  slug: string;
+  slug: ReleaseCategorySlug;
   type: ReleaseType;
   title: string;
   description: string;

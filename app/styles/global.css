@@ -268,3 +268,36 @@ a {
     transform: none;
   }
 }
+
+/* Переход между языковыми версиями. Запускается только со ссылок, помеченных
+   viewTransition, — то есть с переключателя языка. Где View Transitions нет
+   (Firefox), страница просто меняется мгновенно, как и раньше.
+
+   Только прозрачность: сдвиг по вертикали читался как рывок вёрстки, ведь
+   меняется не страница, а язык той же самой. */
+@keyframes langFadeOut {
+  to {
+    opacity: 0;
+  }
+}
+
+@keyframes langFadeIn {
+  from {
+    opacity: 0;
+  }
+}
+
+::view-transition-old(root) {
+  animation: 240ms var(--ease) both langFadeOut;
+}
+
+::view-transition-new(root) {
+  animation: 240ms var(--ease) both langFadeIn;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none;
+  }
+}

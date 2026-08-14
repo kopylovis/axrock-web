@@ -6,7 +6,7 @@ import { createMedia, deleteMedia, listMedia } from "~/api/admin-api";
 import { GlassPanel } from "~/components/common/GlassPanel";
 import { PageSkeleton } from "~/components/common/PageSkeleton";
 import { EmptyState, ErrorState } from "~/components/common/States";
-import { ImageField, SelectField, TextField } from "~/components/admin/fields";
+import { BilingualTextField, ImageField, SelectField, TextField } from "~/components/admin/fields";
 import type { MediaType, PublicationStatus } from "~/types/content";
 import { SortableTh, compareValues, useTableSort } from "~/components/admin/sortable-table";
 import styles from "~/components/admin/admin.module.css";
@@ -47,6 +47,7 @@ export default function AdminMedia({ loaderData }: Route.ComponentProps) {
   const [fileUrl, setFileUrl] = useState<string | null>(null);
   const [externalUrl, setExternalUrl] = useState("");
   const [status, setStatus] = useState<PublicationStatus>("PUBLISHED");
+  const [titleEn, setTitleEn] = useState("");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -69,6 +70,8 @@ export default function AdminMedia({ loaderData }: Route.ComponentProps) {
       concertId: null,
       status,
       sortOrder: 0,
+      titleEn: titleEn.trim() || null,
+      descriptionEn: null,
     };
 
     try {
@@ -124,10 +127,12 @@ export default function AdminMedia({ loaderData }: Route.ComponentProps) {
             />
           </div>
 
-          <TextField
+          <BilingualTextField
             label="Подпись"
             value={title}
-            onChange={(event) => setTitle(event.target.value)}
+            valueEn={titleEn}
+            onChange={setTitle}
+            onChangeEn={setTitleEn}
           />
 
           <ImageField label="Файл" spec="gallery" value={fileUrl} onChange={setFileUrl} />

@@ -6,7 +6,7 @@ import { createRelease, updateRelease } from "~/api/admin-api";
 import type { ReleaseDetailDto } from "~/api/dto";
 import type { ReleaseType } from "~/types/content";
 import { fromDateInputValue, slugify, toDateInputValue } from "~/utils/admin-format";
-import { CheckboxField, FormSection, ImageField, SelectField, StatusChip, TextAreaField, TextField, focusFirstInvalidField } from "./fields";
+import { BilingualField, BilingualTextField, CheckboxField, FormSection, ImageField, SelectField, StatusChip, TextField, focusFirstInvalidField } from "./fields";
 import { SOCIAL_PLATFORMS, SocialIcon, hasSocialIcon } from "~/components/common/SocialIcon";
 import styles from "./admin.module.css";
 
@@ -20,6 +20,7 @@ const schema = z.object({
 
 interface Track {
   title: string;
+  titleEn: string;
   duration: string;
   trackNumber: number;
 }
@@ -54,9 +55,12 @@ export function ReleaseForm({ release }: { release: ReleaseDetailDto | null }) {
   const [releaseDate, setReleaseDate] = useState(toDateInputValue(release?.releaseDate));
   const [published, setPublished] = useState(release?.published ?? false);
   const [sortOrder, setSortOrder] = useState(String(release?.sortOrder ?? 0));
+  const [titleEn, setTitleEn] = useState(release?.titleEn ?? "");
+  const [descriptionEn, setDescriptionEn] = useState(release?.descriptionEn ?? "");
   const [tracks, setTracks] = useState<Track[]>(
     (release?.tracks ?? []).map((track) => ({
       title: track.title,
+      titleEn: track.titleEn ?? "",
       duration: track.duration ?? "",
       trackNumber: track.trackNumber,
     })),
@@ -107,10 +111,15 @@ export function ReleaseForm({ release }: { release: ReleaseDetailDto | null }) {
       sortOrder: Number(sortOrder) || 0,
       seoTitle: null,
       seoDescription: null,
+      titleEn: titleEn.trim() || null,
+      descriptionEn: descriptionEn.trim() || null,
+      seoTitleEn: null,
+      seoDescriptionEn: null,
       tracks: tracks
         .filter((track) => track.title.trim())
         .map((track, index) => ({
           title: track.title.trim(),
+          titleEn: track.titleEn.trim() || null,
           duration: track.duration.trim() || null,
           trackNumber: track.trackNumber || index + 1,
         })),
@@ -162,16 +171,34 @@ export function ReleaseForm({ release }: { release: ReleaseDetailDto | null }) {
       <div className={styles.form}>
         <FormSection title="Основное" openOnMobile>
           <div className={`${styles.formGrid} ${styles.formGridTwo}`}>
-            <TextField
-              label="Название"
-              required
-              value={title}
-              error={errors.title}
-              onChange={(event) => {
-                setTitle(event.target.value);
-                if (!release) setSlug(slugify(event.target.value));
-              }}
-            />
+            <BilingualField label="Название *" filledEn={titleEn.trim().length > 0}>
+              {(lang) =>
+                lang === "ru" ? (
+                  <>
+                    <input
+                      className={`${styles.input} ${errors.title ? styles.inputInvalid : ""}`}
+                      value={title}
+                      aria-invalid={errors.title ? true : undefined}
+                      onChange={(event) => {
+                        setTitle(event.target.value);
+                        if (!release) setSlug(slugify(event.target.value));
+                      }}
+                    />
+                    {errors.title ? (
+                      <span className={styles.error} role="alert">
+                        {errors.title}
+                      </span>
+                    ) : null}
+                  </>
+                ) : (
+                  <input
+                    className={styles.input}
+                    value={titleEn}
+                    onChange={(event) => setTitleEn(event.target.value)}
+                  />
+                )
+              }
+            </BilingualField>
             <TextField
               label="Slug"
               required
@@ -204,10 +231,13 @@ export function ReleaseForm({ release }: { release: ReleaseDetailDto | null }) {
 
           <ImageField label="Обложка" spec="releaseCover" value={coverImage} onChange={setCoverImage} />
 
-          <TextAreaField
+          <BilingualTextField
             label="Описание"
+            multiline
             value={description}
-            onChange={(event) => setDescription(event.target.value)}
+            valueEn={descriptionEn}
+            onChange={setDescription}
+            onChangeEn={setDescriptionEn}
           />
         </FormSection>
 
@@ -216,7 +246,7 @@ export function ReleaseForm({ release }: { release: ReleaseDetailDto | null }) {
             <span className={styles.label}>Треклист</span>
             <div className={styles.repeater}>
               {tracks.map((track, index) => (
-                <div key={index} className={`${styles.repeaterRow} ${styles.repeaterRowFour}`}>
+                <div key={index} className={`${styles.repeaterRow} ${styles.repeaterRowFive}`}>
                   <TextField
                     label="№"
                     type="number"
@@ -235,6 +265,15 @@ export function ReleaseForm({ release }: { release: ReleaseDetailDto | null }) {
                     onChange={(event) =>
                       setTracks((prev) =>
                         prev.map((item, i) => (i === index ? { ...item, title: event.target.value } : item)),
+                      )
+                    }
+                  />
+                  <TextField
+                    label="Название (EN)"
+                    value={track.titleEn}
+                    onChange={(event) =>
+                      setTracks((prev) =>
+                        prev.map((item, i) => (i === index ? { ...item, titleEn: event.target.value } : item)),
                       )
                     }
                   />
@@ -261,7 +300,10 @@ export function ReleaseForm({ release }: { release: ReleaseDetailDto | null }) {
                 type="button"
                 className={`${styles.btn} ${styles.btnSecondary} ${styles.btnSm}`}
                 onClick={() =>
-                  setTracks((prev) => [...prev, { title: "", duration: "", trackNumber: prev.length + 1 }])
+                  setTracks((prev) => [
+                    ...prev,
+                    { title: "", titleEn: "", duration: "", trackNumber: prev.length + 1 },
+                  ])
                 }
               >
                 + Трек

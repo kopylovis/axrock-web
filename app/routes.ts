@@ -6,20 +6,34 @@ import {
   route,
 } from "@react-router/dev/routes";
 
+/**
+ * Публичные страницы объявляются дважды: в корне — русская версия, под /en —
+ * английская. Модули те же, язык они берут из адреса; при повторном объявлении
+ * нужны собственные id, иначе маршруты столкнутся.
+ */
+function publicRoutes(suffix = "") {
+  const id = (name: string) => (suffix ? { id: `${name}${suffix}` } : {});
+
+  return [
+    index("routes/home.tsx", id("home")),
+    route("about", "routes/about.tsx", id("about")),
+    route("news", "routes/news.tsx", id("news")),
+    route("news/:slug", "routes/news-detail.tsx", id("news-detail")),
+    route("concerts", "routes/concerts.tsx", id("concerts")),
+    route("concerts/:slug", "routes/concert-detail.tsx", id("concert-detail")),
+    route("music", "routes/music.tsx", id("music")),
+    route("music/:category", "routes/music-category.tsx", id("music-category")),
+    route("media", "routes/media.tsx", id("media")),
+    route("contacts", "routes/contacts.tsx", id("contacts")),
+    route("privacy", "routes/privacy.tsx", id("privacy")),
+    route("personal-data-consent", "routes/personal-data-consent.tsx", id("consent")),
+  ];
+}
+
 export default [
   layout("layouts/PublicLayout.tsx", [
-    index("routes/home.tsx"),
-    route("about", "routes/about.tsx"),
-    route("news", "routes/news.tsx"),
-    route("news/:slug", "routes/news-detail.tsx"),
-    route("concerts", "routes/concerts.tsx"),
-    route("concerts/:slug", "routes/concert-detail.tsx"),
-    route("music", "routes/music.tsx"),
-    route("music/:category", "routes/music-category.tsx"),
-    route("media", "routes/media.tsx"),
-    route("contacts", "routes/contacts.tsx"),
-    route("privacy", "routes/privacy.tsx"),
-    route("personal-data-consent", "routes/personal-data-consent.tsx"),
+    ...publicRoutes(),
+    ...prefix("en", publicRoutes("-en")),
   ]),
 
   route("admin/login", "routes/admin/login.tsx"),
