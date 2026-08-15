@@ -22,7 +22,7 @@ export default function Privacy() {
   return (
     <div className={styles.page}>
       <div className="container">
-        <header className={styles.header}>
+        <header className={`${styles.header} ${styles.headerLegal}`}>
           <span className={styles.eyebrow}>{t.legal.eyebrow}</span>
           <h1 className={styles.title}>{t.privacy.title}</h1>
         </header>

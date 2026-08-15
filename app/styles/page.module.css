@@ -13,6 +13,12 @@
   border-bottom: 1px solid var(--line);
 }
 
+/* Без этого элемент сетки растягивается по самому длинному слову заголовка
+   и уносит за собой ширину всей страницы. */
+.header > * {
+  min-width: 0;
+}
+
 @media (min-width: 900px) {
   .headerWide {
     grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr);
@@ -75,6 +81,22 @@
 
 .titleFit {
   container-type: inline-size;
+}
+
+/* Юридические разделы: «конфиденциальности» и «персональных» длиннее строки
+   телефона и переносу не поддаются. Кегль считаем от ширины колонки. */
+.headerLegal {
+  container-type: inline-size;
+}
+
+.headerLegal:lang(ru) .title {
+  font-size: min(var(--fs-h1), 5.6cqi);
+}
+
+/* Страховка для остальных языков: там заголовки короче, но если однажды
+   попадётся длинное слово, оно перенесётся, а не вылезет за край. */
+.headerLegal .title {
+  overflow-wrap: break-word;
 }
 
 .lead {
