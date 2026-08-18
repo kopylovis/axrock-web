@@ -5,7 +5,7 @@ on:
     branches: [main]
   schedule:
     # Ежечасная пересборка подтягивает контент, опубликованный в админке.
-    - cron: "17 * * * *"
+    - cron: "17 3 * * *"
   workflow_dispatch:
   repository_dispatch:
     types: [rebuild-site]
