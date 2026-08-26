@@ -50,6 +50,11 @@ function withLang(path, lang) {
   return base === "/" ? "/en" : `/en${base}`;
 }
 
+/** Адрес страницы так, как его отдаёт Pages: без слеша прилетает 301. */
+function absUrl(path) {
+  return path === "/" ? `${SITE_URL}/` : `${SITE_URL}${path.replace(/\/+$/, "")}/`;
+}
+
 function describe(path) {
   for (const [pattern, priority, changefreq] of PRIORITIES) {
     if (pattern.test(path)) return { priority, changefreq };
@@ -107,10 +112,10 @@ const entries = await Promise.all(
 
     return [
       "  <url>",
-      `    <loc>${escapeXml(`${SITE_URL}${route.path === "/" ? "/" : route.path}`)}</loc>`,
+      `    <loc>${escapeXml(absUrl(route.path))}</loc>`,
       ...alternates.map(
         (entry) =>
-          `    <xhtml:link rel="alternate" hreflang="${entry.lang}" href="${escapeXml(`${SITE_URL}${entry.path}`)}"/>`,
+          `    <xhtml:link rel="alternate" hreflang="${entry.lang}" href="${escapeXml(absUrl(entry.path))}"/>`,
       ),
       `    <lastmod>${info.mtime.toISOString().slice(0, 10)}</lastmod>`,
       `    <changefreq>${changefreq}</changefreq>`,

@@ -27,7 +27,12 @@ export function isLocalHost(): boolean {
   return host === "localhost" || host === "127.0.0.1" || host.endsWith(".local");
 }
 
+/**
+ * Pages отдаёт каждый маршрут файлом `<путь>/index.html`, поэтому адрес без
+ * слеша на конце ловит 301 на адрес со слешем. Канониклы и sitemap указывают
+ * сразу на конечную форму, иначе поисковик ходит через редирект.
+ */
 export function canonicalUrl(pathname: string): string {
   if (pathname === "/") return `${SITE_URL}/`;
-  return `${SITE_URL}${pathname.replace(/\/$/, "")}`;
+  return `${SITE_URL}${pathname.replace(/\/+$/, "")}/`;
 }
