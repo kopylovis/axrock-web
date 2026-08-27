@@ -26,8 +26,15 @@ export function Footer({ site }: { site: SiteData }) {
       <div className={`container ${styles.inner}`}>
         <div className={styles.top}>
           <div className={styles.brand}>
+            {/* crossOrigin тот же, что в шапке и герое: маска там требует CORS-ответа,
+                а иначе в кеш ляжет копия без CORS-заголовков и знак пропадёт наверху. */}
             {settings.logo ? (
-              <img src={settings.logo} alt={settings.bandName} className={styles.brandLogo} />
+              <img
+                src={settings.logo}
+                alt={settings.bandName}
+                className={styles.brandLogo}
+                crossOrigin="anonymous"
+              />
             ) : (
               <p className={styles.brandName}>{settings.bandName}</p>
             )}

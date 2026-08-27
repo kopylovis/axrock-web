@@ -1,6 +1,7 @@
+import { useState } from "react";
 import { ButtonLink } from "~/components/common/Button";
 import { ImagePlaceholder } from "~/components/common/ImagePlaceholder";
-import { imageSrcSet } from "~/utils/images";
+import { imageSrcSet, isBrokenImage } from "~/utils/images";
 import type { ConcertSummary, SiteSettings } from "~/types/content";
 import { formatDate } from "~/utils/format";
 import { useLang, useT } from "~/i18n";
@@ -14,6 +15,8 @@ interface HeroProps {
 export function Hero({ settings, nextConcert }: HeroProps) {
   const lang = useLang();
   const t = useT();
+  const [logoBroken, setLogoBroken] = useState(false);
+  const showLogo = Boolean(settings.logo) && !logoBroken;
 
   return (
     <section className={styles.hero} aria-labelledby="hero-title">
@@ -42,8 +45,8 @@ export function Hero({ settings, nextConcert }: HeroProps) {
           </p>
         ) : null}
 
-        <h1 id="hero-title" className={settings.logo ? styles.titleWithLogo : styles.title}>
-          {settings.logo ? (
+        <h1 id="hero-title" className={showLogo ? styles.titleWithLogo : styles.title}>
+          {settings.logo && !logoBroken ? (
             <span className={styles.logoWrap}>
               {/* Изображение задаёт размер и несёт alt, свечение рисует слой поверх.
                   crossOrigin нужен, чтобы блик по маске получил CORS-чистый кеш. */}
@@ -53,6 +56,10 @@ export function Hero({ settings, nextConcert }: HeroProps) {
                 className={styles.titleLogo}
                 fetchPriority="high"
                 crossOrigin="anonymous"
+                onError={() => setLogoBroken(true)}
+                ref={(el) => {
+                  if (isBrokenImage(el)) setLogoBroken(true);
+                }}
               />
               <span
                 className={styles.logoSheen}

@@ -14,3 +14,9 @@ export function absoluteImageUrl(url: string | null | undefined, siteUrl: string
   if (/^https?:\/\//i.test(url)) return url;
   return `${siteUrl}${url.startsWith("/") ? url : `/${url}`}`;
 }
+
+/** Разметка приходит уже отрендеренной, и картинка успевает сломаться до гидратации —
+    onError к этому моменту уже не сработает, поэтому проверяем состояние узла. */
+export function isBrokenImage(el: HTMLImageElement | null): boolean {
+  return Boolean(el && el.complete && el.naturalWidth === 0);
+}

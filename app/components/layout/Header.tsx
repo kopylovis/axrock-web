@@ -4,6 +4,7 @@ import { SocialLinks } from "./LinkLists";
 import type { SocialLink } from "~/types/content";
 import { useLang, useLocalPath, useT, withLang, type Strings } from "~/i18n";
 import { trackLanguageSwitch } from "~/utils/analytics";
+import { isBrokenImage } from "~/utils/images";
 import styles from "./Header.module.css";
 
 const NAV_ITEMS: Array<{ to: string; key: keyof Strings["nav"] }> = [
@@ -25,6 +26,7 @@ export function Header({
   socialLinks?: SocialLink[];
 }) {
   const [open, setOpen] = useState(false);
+  const [logoBroken, setLogoBroken] = useState(false);
   const [scrolled, setScrolled] = useState(false);
   const location = useLocation();
   const toggleRef = useRef<HTMLButtonElement>(null);
@@ -82,7 +84,7 @@ export function Header({
       >
         <div className={`container ${styles.inner}`}>
           <NavLink to={lp("/")} className={styles.logo} aria-label={`${bandName} — ${t.header.toHome}`}>
-            {logo ? (
+            {logo && !logoBroken ? (
               <span className={styles.logoBox}>
                 {/* Изображение задаёт размер и несёт alt, цвет даёт слой по маске.
                     crossOrigin обязателен: без него картинка грузится в режиме no-cors
@@ -92,6 +94,10 @@ export function Header({
                   alt={bandName}
                   className={styles.logoImage}
                   crossOrigin="anonymous"
+                  onError={() => setLogoBroken(true)}
+                  ref={(el) => {
+                    if (isBrokenImage(el)) setLogoBroken(true);
+                  }}
                 />
                 <span
                   className={styles.logoTint}
