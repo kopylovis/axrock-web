@@ -38,7 +38,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         <meta name="theme-color" content="#0b0d14" />
+        <link rel="icon" href={`${BASE}favicon-32.png`} sizes="32x32" type="image/png" />
         <link rel="icon" href={`${BASE}favicon.svg`} type="image/svg+xml" />
+        <link rel="apple-touch-icon" href={`${BASE}apple-touch-icon.png`} />
         <link
           rel="preload"
           href={`${BASE}fonts/benzin-regular.woff2`}
